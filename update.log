@@ -1,0 +1,28 @@
+﻿Version: 1.0.0
+Finished time: 17:10 2022/9/9
+Implemented function:
+- 实现了对MessageBoxA、MessageBoxW、HeapCreate、HeapDestroy、HeapAlloc、HeapFree函数的截获
+- 实现了对四个堆API调用的堆结构基本监测功能
+Todo:
+- 优化查找算法为二分法查找
+- 实现其他更多API的截获与分析
+
+Version 1.0.1
+Finished time: 11:09 2022/9/12
+Update:
+- 实现了CreateFile的钩子，能够对属性进行高亮显示
+Todo:
+- 优化查找算法为二分法查找
+- 实现其他更多API的截获与分析
+- 解决文件读写的并发处理问题
+
+Version 1.1.0
+Finished time: 19:32 2022/9/12
+Update:
+- 解决了线程互斥问题，能够完整获取到所有的钩子记录
+- 实现了ReadFile和WriteFile的钩子截获
+Todo:
+- 优化查找算法为二分法查找
+- 实现其他更多API的截获与分析
+- 对Deprecated的函数进行清理
+- 处理好标准输入输出句柄的问题

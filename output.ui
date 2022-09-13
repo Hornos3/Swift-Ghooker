@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Output</class>
+ <widget class="QWidget" name="Output">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1500</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1500</width>
+     <height>800</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="pixmap">
+    <pixmap resource="background.qrc">:/background/back.png</pixmap>
+   </property>
+   <property name="scaledContents">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="logInfo">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>130</y>
+     <width>410</width>
+     <height>470</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Source Code Pro</family>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="plainText">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="title">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>20</y>
+     <width>1220</width>
+     <height>60</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>120</red>
+         <green>120</green>
+         <blue>120</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="font">
+    <font>
+     <family>汉仪瑞虎宋W</family>
+     <pointsize>20</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>钩子截获信息</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QTableView" name="processInfo">
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>130</y>
+     <width>410</width>
+     <height>60</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="saveLog">
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>610</y>
+     <width>92</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>保存日志</string>
+   </property>
+  </widget>
+  <widget class="QTreeView" name="heapView">
+   <property name="geometry">
+    <rect>
+     <x>1020</x>
+     <y>130</y>
+     <width>410</width>
+     <height>400</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Source Code Pro</family>
+    </font>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>1190</x>
+     <y>100</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>汉仪唐美人 95W</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>堆监控</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>710</x>
+     <y>100</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>汉仪唐美人 95W</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>文件信息</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>100</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>汉仪唐美人 95W</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>日志</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>710</x>
+     <y>190</y>
+     <width>81</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>汉仪唐美人 95W</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>异常信息</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QTableView" name="exceptionWindow">
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>220</y>
+     <width>410</width>
+     <height>310</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>890</x>
+     <y>530</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>汉仪唐美人 95W</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>文件监控</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QTreeView" name="fileView">
+   <property name="geometry">
+    <rect>
+     <x>540</x>
+     <y>560</y>
+     <width>400</width>
+     <height>200</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListView" name="fileAccess">
+   <property name="geometry">
+    <rect>
+     <x>939</x>
+     <y>560</y>
+     <width>70</width>
+     <height>200</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListView" name="fileShareMode">
+   <property name="geometry">
+    <rect>
+     <x>1010</x>
+     <y>560</y>
+     <width>100</width>
+     <height>200</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListView" name="fileCreationDisposition">
+   <property name="geometry">
+    <rect>
+     <x>1110</x>
+     <y>560</y>
+     <width>150</width>
+     <height>200</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListView" name="fileFlagsAndAttributes">
+   <property name="geometry">
+    <rect>
+     <x>1260</x>
+     <y>560</y>
+     <width>170</width>
+     <height>200</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="background.qrc"/>
+ </resources>
+ <connections/>
+</ui>

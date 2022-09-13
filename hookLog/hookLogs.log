@@ -1,0 +1,1848 @@
+ID: 0
+DLL log output: 2022-09-13 09:02:22:512
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 1
+DLL log output: 2022-09-13 09:02:22:514
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 59 / 0x3b
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 59 / 0x3b
+----------------------------------------------------
+ID: 2
+DLL log output: 2022-09-13 09:02:22:525
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 3
+DLL log output: 2022-09-13 09:02:22:586
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 4
+DLL log output: 2022-09-13 09:02:22:622
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 35 / 0x23
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 35 / 0x23
+----------------------------------------------------
+ID: 5
+DLL log output: 2022-09-13 09:02:22:655
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 6
+DLL log output: 2022-09-13 09:02:22:689
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 7
+DLL log output: 2022-09-13 09:02:22:721
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 22 / 0x16
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 22 / 0x16
+----------------------------------------------------
+ID: 8
+DLL log output: 2022-09-13 09:02:22:753
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 9
+DLL log output: 2022-09-13 09:02:22:786
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 10
+DLL log output: 2022-09-13 09:02:22:818
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 22 / 0x16
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 22 / 0x16
+----------------------------------------------------
+ID: 11
+DLL log output: 2022-09-13 09:02:22:851
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 12
+DLL log output: 2022-09-13 09:02:22:884
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 13
+DLL log output: 2022-09-13 09:02:22:915
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 21 / 0x15
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 21 / 0x15
+----------------------------------------------------
+ID: 14
+DLL log output: 2022-09-13 09:02:22:948
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 15
+DLL log output: 2022-09-13 09:02:22:979
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 16
+DLL log output: 2022-09-13 09:02:23:013
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 22 / 0x16
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 22 / 0x16
+----------------------------------------------------
+ID: 17
+DLL log output: 2022-09-13 09:02:23:044
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 18
+DLL log output: 2022-09-13 09:02:23:074
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 19
+DLL log output: 2022-09-13 09:02:23:105
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 20 / 0x14
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 20 / 0x14
+----------------------------------------------------
+ID: 20
+DLL log output: 2022-09-13 09:02:23:111
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 21
+DLL log output: 2022-09-13 09:02:23:142
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 22
+DLL log output: 2022-09-13 09:02:23:173
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 19 / 0x13
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 19 / 0x13
+----------------------------------------------------
+ID: 23
+DLL log output: 2022-09-13 09:02:23:206
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 24
+DLL log output: 2022-09-13 09:02:23:237
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 25
+DLL log output: 2022-09-13 09:02:23:268
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 17 / 0x11
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 17 / 0x11
+----------------------------------------------------
+ID: 26
+DLL log output: 2022-09-13 09:02:23:301
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 27
+DLL log output: 2022-09-13 09:02:23:332
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 28
+DLL log output: 2022-09-13 09:02:23:363
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 16 / 0x10
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 16 / 0x10
+----------------------------------------------------
+ID: 29
+DLL log output: 2022-09-13 09:02:23:395
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 30
+DLL log output: 2022-09-13 09:02:23:427
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 31
+DLL log output: 2022-09-13 09:02:23:458
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 21 / 0x15
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 21 / 0x15
+----------------------------------------------------
+ID: 32
+DLL log output: 2022-09-13 09:02:23:490
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 33
+DLL log output: 2022-09-13 09:02:23:522
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 34
+DLL log output: 2022-09-13 09:02:23:553
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 20 / 0x14
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 20 / 0x14
+----------------------------------------------------
+ID: 35
+DLL log output: 2022-09-13 09:02:23:586
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 36
+DLL log output: 2022-09-13 09:02:23:618
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 37
+DLL log output: 2022-09-13 09:02:23:651
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 21 / 0x15
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 21 / 0x15
+----------------------------------------------------
+ID: 38
+DLL log output: 2022-09-13 09:02:23:683
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 39
+DLL log output: 2022-09-13 09:02:23:714
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 40
+DLL log output: 2022-09-13 09:02:23:746
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 20 / 0x14
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 20 / 0x14
+----------------------------------------------------
+ID: 41
+DLL log output: 2022-09-13 09:02:23:778
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 42
+DLL log output: 2022-09-13 09:02:23:810
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 43
+DLL log output: 2022-09-13 09:02:23:841
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 44
+DLL log output: 2022-09-13 09:02:23:872
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 45
+DLL log output: 2022-09-13 09:02:23:903
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 46
+DLL log output: 2022-09-13 09:02:23:933
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 47
+DLL log output: 2022-09-13 09:02:23:965
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 48
+DLL log output: 2022-09-13 09:02:23:997
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 49
+DLL log output: 2022-09-13 09:02:24:028
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 50
+DLL log output: 2022-09-13 09:02:24:058
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 51
+DLL log output: 2022-09-13 09:02:24:090
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 52
+DLL log output: 2022-09-13 09:02:24:120
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 53
+DLL log output: 2022-09-13 09:02:24:152
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 54
+DLL log output: 2022-09-13 09:02:24:183
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 55
+DLL log output: 2022-09-13 09:02:24:217
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 56
+DLL log output: 2022-09-13 09:02:24:248
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 57
+DLL log output: 2022-09-13 09:02:24:280
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071DF50
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071DF08
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 58
+DLL log output: 2022-09-13 09:02:24:311
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 59
+DLL log output: 2022-09-13 09:02:24:342
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 12 / 0xc
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 12 / 0xc
+----------------------------------------------------
+ID: 60
+DLL log output: 2022-09-13 09:02:24:374
+ReadFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000054
+	LPVOID lpBuffer = 0x00007FFA203A5B80
+	DWORD nNumberOfBytesToRead = 4096 / 0x1000
+	LPDWORD lpNumberOfBytesRead = 0x000000000071FAF0
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesRead => 3 / 0x3
+----------------------------------------------------
+ID: 61
+DLL log output: 2022-09-13 09:02:28:600
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 62
+DLL log output: 2022-09-13 09:02:28:605
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 30 / 0x1e
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 30 / 0x1e
+----------------------------------------------------
+ID: 63
+DLL log output: 2022-09-13 09:02:28:638
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 64
+DLL log output: 2022-09-13 09:02:28:669
+CreateFile Hooked.
+Arguments:
+	LPCWSTR lpFileName = 0x000000000048C440 / "./exampleFile.txt"
+	DWORD dwDesiredAccess = 268435456 / 0x10000000
+	DWORD dwShareMode = 0 / 0
+	LPSECURITY_ATTRIBUTES lpSecurityAttributes = 0000000000000000
+	DWORD dwCreationDisposition = 5 / 0x5
+	DWORD dwFlagsAndAttributes = 32 / 0x20
+	HANDLE hTemplateFile = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return value: (HANDLE) 0xFFFFFFFFFFFFFFFF
+----------------------------------------------------
+ID: 65
+DLL log output: 2022-09-13 09:02:28:699
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 66
+DLL log output: 2022-09-13 09:02:28:733
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 12 / 0xc
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 12 / 0xc
+----------------------------------------------------
+ID: 67
+DLL log output: 2022-09-13 09:02:28:776
+ReadFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000054
+	LPVOID lpBuffer = 0x00007FFA203A5B80
+	DWORD nNumberOfBytesToRead = 4096 / 0x1000
+	LPDWORD lpNumberOfBytesRead = 0x000000000071FAF0
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesRead => 4 / 0x4
+----------------------------------------------------
+ID: 68
+DLL log output: 2022-09-13 09:02:34:144
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 69
+DLL log output: 2022-09-13 09:02:34:149
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 25 / 0x19
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 25 / 0x19
+----------------------------------------------------
+ID: 70
+DLL log output: 2022-09-13 09:02:34:180
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
+ID: 71
+DLL log output: 2022-09-13 09:02:34:211
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 72
+DLL log output: 2022-09-13 09:02:34:243
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 12 / 0xc
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 12 / 0xc
+----------------------------------------------------
+ID: 73
+DLL log output: 2022-09-13 09:02:34:274
+ReadFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000054
+	LPVOID lpBuffer = 0x00007FFA203A5B80
+	DWORD nNumberOfBytesToRead = 4096 / 0x1000
+	LPDWORD lpNumberOfBytesRead = 0x000000000071FAF0
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesRead => 3 / 0x3
+----------------------------------------------------
+ID: 74
+DLL log output: 2022-09-13 09:02:59:844
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E080
+	DWORD nNumberOfBytesToWrite = 1 / 0x1
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E038
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 1 / 0x1
+----------------------------------------------------
+ID: 75
+DLL log output: 2022-09-13 09:02:59:849
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E0B0
+	DWORD nNumberOfBytesToWrite = 3 / 0x3
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E068
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 3 / 0x3
+----------------------------------------------------
+ID: 76
+DLL log output: 2022-09-13 09:02:59:882
+WriteFile Hooked.
+Arguments:
+	HANDLE hFile = 0x0000000000000058
+	LPVOID lpBuffer = 0x000000000071E120
+	DWORD nNumberOfBytesToWrite = 2 / 0x2
+	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
+	LPOVERLAPPED lpOverlapped = 0x0000000000000000
+Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
+STDIN handle: 0x54
+STDOUT handle: 0x58
+STDERR handle: 0x5c
+File Description: Developed using the Dev-C++ IDE
+File Version: 1.0.0.0
+Internal Name: testSeries
+Company Name: HUSTCSE
+Legal Copyright: CopyRight
+Original File Name: mytest_1.exe
+Product Version: 1.0.0.0
+Return Value: (BOOL) 1 / true
+After execution:
+	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+----------------------------------------------------
