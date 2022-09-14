@@ -14,6 +14,11 @@ extern void (*InjOpenFileFunc)(bool);
 extern void (*InjCreateFileFunc)(bool);
 extern void (*InjReadFileFunc)(bool);
 extern void (*InjWriteFileFunc)(bool);
+extern void (*InjRegCreateKeyExFunc)(bool);
+extern void (*InjRegSetValueExFunc)(bool);
+extern void (*InjRegDeleteValueFunc)(bool);
+extern void (*InjRegCloseKeyFunc)(bool);
+extern void (*InjRegOpenKeyExFunc)(bool);
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -31,8 +36,11 @@ Widget::Widget(QWidget *parent)
     connect(ui->InjCreateFile, &QCheckBox::stateChanged, this, &Widget::setCreateFileInj);
     connect(ui->InjReadFile, &QCheckBox::stateChanged, this, &Widget::setReadFileInj);
     connect(ui->InjWriteFile, &QCheckBox::stateChanged, this, &Widget::setWriteFileInj);
-//    connect(ui->selectFile, &QPushButton::clicked, this, &Widget::on_selectFile_clicked);
-//    connect(ui->startAnalysis, &QPushButton::clicked, this, &Widget::on_startAnalysis_clicked);
+    connect(ui->InjRegCreateKeyEx, &QCheckBox::stateChanged, this, &Widget::setRegCreateKeyExInj);
+    connect(ui->InjRegSetValueEx, &QCheckBox::stateChanged, this, &Widget::setRegSetValueExInj);
+    connect(ui->InjRegDeleteValue, &QCheckBox::stateChanged, this, &Widget::setRegDeleteValueInj);
+    connect(ui->InjRegCloseKey, &QCheckBox::stateChanged, this, &Widget::setRegCloseKeyInj);
+    connect(ui->InjRegOpenKeyEx, &QCheckBox::stateChanged, this, &Widget::setRegOpenKeyExInj);
 }
 
 Widget::~Widget()
@@ -131,4 +139,34 @@ void Widget::setWriteFileInj(){
     bool choice = ui->InjWriteFile->isChecked();
     output->analyser->injWriteFile = choice;
     InjWriteFileFunc(choice);
+}
+
+void Widget::setRegCreateKeyExInj(){
+    bool choice = ui->InjRegCreateKeyEx->isChecked();
+    output->analyser->injRegCreateKeyEx = choice;
+    InjRegCreateKeyExFunc(choice);
+}
+
+void Widget::setRegSetValueExInj(){
+    bool choice = ui->InjRegSetValueEx->isChecked();
+    output->analyser->injRegSetValueEx = choice;
+    InjRegSetValueExFunc(choice);
+}
+
+void Widget::setRegDeleteValueInj(){
+    bool choice = ui->InjRegDeleteValue->isChecked();
+    output->analyser->injRegDeleteValue = choice;
+    InjRegDeleteValueFunc(choice);
+}
+
+void Widget::setRegCloseKeyInj(){
+    bool choice = ui->InjRegCloseKey->isChecked();
+    output->analyser->injRegCloseKey = choice;
+    InjRegCloseKeyFunc(choice);
+}
+
+void Widget::setRegOpenKeyExInj(){
+    bool choice = ui->InjRegOpenKeyEx->isChecked();
+    output->analyser->injRegOpenKeyEx = choice;
+    InjRegOpenKeyExFunc(choice);
 }

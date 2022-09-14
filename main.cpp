@@ -22,11 +22,16 @@ void (*InjOpenFileFunc)(bool);
 void (*InjCreateFileFunc)(bool);
 void (*InjReadFileFunc)(bool);
 void (*InjWriteFileFunc)(bool);
+void (*InjRegCreateKeyExFunc)(bool);
+void (*InjRegSetValueExFunc)(bool);
+void (*InjRegDeleteValueFunc)(bool);
+void (*InjRegCloseKeyFunc)(bool);
+void (*InjRegOpenKeyExFunc)(bool);
+
 bool (*getMutexSignal)(void);
 void (*setMutexSignal)(void);
 QReadWriteLock* (*getLock)(void);
 
-QReadWriteLock* lock;
 //bool (*MessageBoxAInjected)(void);
 //bool (*MessageBoxWInjected)(void);
 //bool (*HeapCreateInjected)(void);
@@ -51,10 +56,14 @@ int main(int argc, char *argv[])
     InjCreateFileFunc = (void(*)(bool))injectLib.resolve("openInjectCreateFile");
     InjReadFileFunc = (void(*)(bool))injectLib.resolve("openInjectReadFile");
     InjWriteFileFunc = (void(*)(bool))injectLib.resolve("openInjectWriteFile");
+    InjRegCreateKeyExFunc = (void(*)(bool))injectLib.resolve("openInjectRegCreateKeyEx");
+    InjRegSetValueExFunc = (void(*)(bool))injectLib.resolve("openInjectRegSetValueEx");
+    InjRegDeleteValueFunc = (void(*)(bool))injectLib.resolve("openInjectRegDeleteValue");
+    InjRegCloseKeyFunc = (void(*)(bool))injectLib.resolve("openInjectRegCloseKey");
+    InjRegOpenKeyExFunc = (void(*)(bool))injectLib.resolve("openInjectRegOpenKeyEx");
+
     getMutexSignal = (bool(*)(void))injectLib.resolve("getMutexSignal");
     setMutexSignal = (void(*)(void))injectLib.resolve("setMutexSignal");
-    getLock = (QReadWriteLock*(*)(void))injectLib.resolve("getLock");
-    lock = getLock();
 //    MessageBoxAInjected = (bool(*)())injectLib.resolve("isInjectMessageBoxA");
 //    HeapCreateInjected = (bool(*)())injectLib.resolve("isInjectHeapCreate");
 

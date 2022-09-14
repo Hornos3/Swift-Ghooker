@@ -15,7 +15,6 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QListView>
 #include <QtWidgets/QPlainTextEdit>
-#include <QtWidgets/QPushButton>
 #include <QtWidgets/QTableView>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QWidget>
@@ -29,7 +28,6 @@ public:
     QPlainTextEdit *logInfo;
     QLabel *title;
     QTableView *processInfo;
-    QPushButton *saveLog;
     QTreeView *heapView;
     QLabel *label_2;
     QLabel *label_3;
@@ -42,6 +40,8 @@ public:
     QListView *fileShareMode;
     QListView *fileCreationDisposition;
     QListView *fileFlagsAndAttributes;
+    QTreeView *regeditView;
+    QLabel *label_7;
 
     void setupUi(QWidget *Output)
     {
@@ -55,7 +55,7 @@ public:
         label->setScaledContents(true);
         logInfo = new QPlainTextEdit(Output);
         logInfo->setObjectName(QString::fromUtf8("logInfo"));
-        logInfo->setGeometry(QRect(70, 130, 410, 470));
+        logInfo->setGeometry(QRect(70, 130, 410, 401));
         QFont font;
         font.setFamilies({QString::fromUtf8("Source Code Pro")});
         font.setBold(false);
@@ -81,10 +81,7 @@ public:
         title->setAlignment(Qt::AlignCenter);
         processInfo = new QTableView(Output);
         processInfo->setObjectName(QString::fromUtf8("processInfo"));
-        processInfo->setGeometry(QRect(540, 130, 410, 60));
-        saveLog = new QPushButton(Output);
-        saveLog->setObjectName(QString::fromUtf8("saveLog"));
-        saveLog->setGeometry(QRect(70, 610, 92, 29));
+        processInfo->setGeometry(QRect(529, 130, 440, 60));
         heapView = new QTreeView(Output);
         heapView->setObjectName(QString::fromUtf8("heapView"));
         heapView->setGeometry(QRect(1020, 130, 410, 400));
@@ -94,6 +91,15 @@ public:
         label_2 = new QLabel(Output);
         label_2->setObjectName(QString::fromUtf8("label_2"));
         label_2->setGeometry(QRect(1190, 100, 81, 31));
+        QPalette palette1;
+        palette1.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        QBrush brush3(QColor(231, 231, 231, 255));
+        brush3.setStyle(Qt::SolidPattern);
+        palette1.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        QBrush brush4(QColor(255, 255, 255, 127));
+        brush4.setStyle(Qt::SolidPattern);
+        palette1.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        label_2->setPalette(palette1);
         QFont font3;
         font3.setFamilies({QString::fromUtf8("\346\261\211\344\273\252\345\224\220\347\276\216\344\272\272 95W")});
         label_2->setFont(font3);
@@ -101,29 +107,49 @@ public:
         label_3 = new QLabel(Output);
         label_3->setObjectName(QString::fromUtf8("label_3"));
         label_3->setGeometry(QRect(710, 100, 81, 31));
+        QPalette palette2;
+        palette2.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette2.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette2.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        label_3->setPalette(palette2);
         label_3->setFont(font3);
         label_3->setAlignment(Qt::AlignCenter);
         label_4 = new QLabel(Output);
         label_4->setObjectName(QString::fromUtf8("label_4"));
-        label_4->setGeometry(QRect(240, 100, 81, 31));
+        label_4->setGeometry(QRect(230, 100, 81, 31));
+        QPalette palette3;
+        palette3.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette3.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette3.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        label_4->setPalette(palette3);
         label_4->setFont(font3);
         label_4->setAlignment(Qt::AlignCenter);
         label_5 = new QLabel(Output);
         label_5->setObjectName(QString::fromUtf8("label_5"));
         label_5->setGeometry(QRect(710, 190, 81, 31));
+        QPalette palette4;
+        palette4.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette4.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette4.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        label_5->setPalette(palette4);
         label_5->setFont(font3);
         label_5->setAlignment(Qt::AlignCenter);
         exceptionWindow = new QTableView(Output);
         exceptionWindow->setObjectName(QString::fromUtf8("exceptionWindow"));
-        exceptionWindow->setGeometry(QRect(540, 220, 410, 310));
+        exceptionWindow->setGeometry(QRect(529, 220, 440, 310));
         label_6 = new QLabel(Output);
         label_6->setObjectName(QString::fromUtf8("label_6"));
         label_6->setGeometry(QRect(890, 530, 80, 30));
+        QPalette palette5;
+        palette5.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette5.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette5.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        label_6->setPalette(palette5);
         label_6->setFont(font3);
         label_6->setAlignment(Qt::AlignCenter);
         fileView = new QTreeView(Output);
         fileView->setObjectName(QString::fromUtf8("fileView"));
-        fileView->setGeometry(QRect(540, 560, 400, 200));
+        fileView->setGeometry(QRect(529, 560, 410, 200));
         fileAccess = new QListView(Output);
         fileAccess->setObjectName(QString::fromUtf8("fileAccess"));
         fileAccess->setGeometry(QRect(939, 560, 70, 200));
@@ -136,6 +162,19 @@ public:
         fileFlagsAndAttributes = new QListView(Output);
         fileFlagsAndAttributes->setObjectName(QString::fromUtf8("fileFlagsAndAttributes"));
         fileFlagsAndAttributes->setGeometry(QRect(1260, 560, 170, 200));
+        regeditView = new QTreeView(Output);
+        regeditView->setObjectName(QString::fromUtf8("regeditView"));
+        regeditView->setGeometry(QRect(70, 560, 410, 200));
+        label_7 = new QLabel(Output);
+        label_7->setObjectName(QString::fromUtf8("label_7"));
+        label_7->setGeometry(QRect(230, 530, 80, 30));
+        QPalette palette6;
+        palette6.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette6.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette6.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        label_7->setPalette(palette6);
+        label_7->setFont(font3);
+        label_7->setAlignment(Qt::AlignCenter);
 
         retranslateUi(Output);
 
@@ -148,12 +187,12 @@ public:
         label->setText(QString());
         logInfo->setPlainText(QString());
         title->setText(QCoreApplication::translate("Output", "\351\222\251\345\255\220\346\210\252\350\216\267\344\277\241\346\201\257", nullptr));
-        saveLog->setText(QCoreApplication::translate("Output", "\344\277\235\345\255\230\346\227\245\345\277\227", nullptr));
         label_2->setText(QCoreApplication::translate("Output", "\345\240\206\347\233\221\346\216\247", nullptr));
         label_3->setText(QCoreApplication::translate("Output", "\346\226\207\344\273\266\344\277\241\346\201\257", nullptr));
         label_4->setText(QCoreApplication::translate("Output", "\346\227\245\345\277\227", nullptr));
         label_5->setText(QCoreApplication::translate("Output", "\345\274\202\345\270\270\344\277\241\346\201\257", nullptr));
         label_6->setText(QCoreApplication::translate("Output", "\346\226\207\344\273\266\347\233\221\346\216\247", nullptr));
+        label_7->setText(QCoreApplication::translate("Output", "\346\263\250\345\206\214\350\241\250\347\233\221\346\216\247", nullptr));
     } // retranslateUi
 
 };

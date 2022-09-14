@@ -26,6 +26,11 @@ public:
     void setCreateFileInj();
     void setReadFileInj();
     void setWriteFileInj();
+    void setRegCreateKeyExInj();
+    void setRegSetValueExInj();
+    void setRegDeleteValueInj();
+    void setRegCloseKeyInj();
+    void setRegOpenKeyExInj();
 
     ~Widget();
 

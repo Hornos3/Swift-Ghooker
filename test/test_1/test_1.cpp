@@ -173,7 +173,7 @@ int main(){
 			}
 			case 9:{
 				cout << "Ready to call CreateFileW......" << endl;
-				fileHandle = CreateFileW(L"./exampleFile.txt", 0x10000000, 0, nullptr, TRUNCATE_EXISTING, FILE_ATTRIBUTE_ARCHIVE, nullptr);
+				fileHandle = CreateFileW(L"./exampleFile.txt", GENERIC_ALL, 0, nullptr, OPEN_ALWAYS, 0, nullptr);
 				break;
 			}
 			case 10:{
@@ -194,7 +194,7 @@ int main(){
 					break;
 				}
 				cout << "Ready to call WriteFile......" << endl;
-				char* buf = "0123456789ABCDE";
+				char buf[] = "000000000000000";
 				DWORD bytesWrite = 0;
 				WriteFile(fileHandle, buf, 15, &bytesWrite, nullptr);
 				break;

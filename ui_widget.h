@@ -38,6 +38,11 @@ public:
     QCheckBox *InjCreateFile;
     QCheckBox *InjReadFile;
     QCheckBox *InjWriteFile;
+    QCheckBox *InjRegCreateKeyEx;
+    QCheckBox *InjRegSetValueEx;
+    QCheckBox *InjRegDeleteValue;
+    QCheckBox *InjRegCloseKey;
+    QCheckBox *InjRegOpenKeyEx;
 
     void setupUi(QWidget *Widget)
     {
@@ -198,6 +203,46 @@ public:
         palette13.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
         palette13.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
         InjWriteFile->setPalette(palette13);
+        InjRegCreateKeyEx = new QCheckBox(Widget);
+        InjRegCreateKeyEx->setObjectName(QString::fromUtf8("InjRegCreateKeyEx"));
+        InjRegCreateKeyEx->setGeometry(QRect(250, 200, 151, 26));
+        QPalette palette14;
+        palette14.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette14.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette14.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        InjRegCreateKeyEx->setPalette(palette14);
+        InjRegSetValueEx = new QCheckBox(Widget);
+        InjRegSetValueEx->setObjectName(QString::fromUtf8("InjRegSetValueEx"));
+        InjRegSetValueEx->setGeometry(QRect(250, 230, 151, 26));
+        QPalette palette15;
+        palette15.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette15.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette15.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        InjRegSetValueEx->setPalette(palette15);
+        InjRegDeleteValue = new QCheckBox(Widget);
+        InjRegDeleteValue->setObjectName(QString::fromUtf8("InjRegDeleteValue"));
+        InjRegDeleteValue->setGeometry(QRect(250, 260, 151, 26));
+        QPalette palette16;
+        palette16.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette16.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette16.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        InjRegDeleteValue->setPalette(palette16);
+        InjRegCloseKey = new QCheckBox(Widget);
+        InjRegCloseKey->setObjectName(QString::fromUtf8("InjRegCloseKey"));
+        InjRegCloseKey->setGeometry(QRect(250, 290, 151, 26));
+        QPalette palette17;
+        palette17.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette17.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette17.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        InjRegCloseKey->setPalette(palette17);
+        InjRegOpenKeyEx = new QCheckBox(Widget);
+        InjRegOpenKeyEx->setObjectName(QString::fromUtf8("InjRegOpenKeyEx"));
+        InjRegOpenKeyEx->setGeometry(QRect(250, 320, 151, 26));
+        QPalette palette18;
+        palette18.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette18.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette18.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        InjRegOpenKeyEx->setPalette(palette18);
 
         retranslateUi(Widget);
 
@@ -224,6 +269,11 @@ public:
         InjCreateFile->setText(QCoreApplication::translate("Widget", "CreateFile", nullptr));
         InjReadFile->setText(QCoreApplication::translate("Widget", "ReadFile", nullptr));
         InjWriteFile->setText(QCoreApplication::translate("Widget", "WriteFile", nullptr));
+        InjRegCreateKeyEx->setText(QCoreApplication::translate("Widget", "RegCreateKeyEx", nullptr));
+        InjRegSetValueEx->setText(QCoreApplication::translate("Widget", "RegSetValueEx", nullptr));
+        InjRegDeleteValue->setText(QCoreApplication::translate("Widget", "RegDeleteValue", nullptr));
+        InjRegCloseKey->setText(QCoreApplication::translate("Widget", "RegCloseKey", nullptr));
+        InjRegOpenKeyEx->setText(QCoreApplication::translate("Widget", "RegOpenKeyEx", nullptr));
     } // retranslateUi
 
 };

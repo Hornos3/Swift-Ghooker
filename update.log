@@ -26,3 +26,39 @@ Todo:
 - 实现其他更多API的截获与分析
 - 对Deprecated的函数进行清理
 - 处理好标准输入输出句柄的问题
+
+Version 1.1.1
+Finished time: 11:23 2022/9/13
+Update:
+- 解决了标准输入输出问题，对于标准输入输出的ReadFile和WriteFile调用将不再被分析
+- 清理了hookAnalysis中弃用的一些方法
+Todo:
+- 优化查找算法为二分法查找
+- 实现其他更多API的截获与分析
+- 实现异常窗口输出
+
+Version 1.1.2
+Finished time: 16:08 2022/9/13
+Update:
+- 实现了5个注册表相关API的截获
+Todo:
+- 实现注册表相关API的分析
+- 优化查找算法为二分法查找
+- 实现异常窗口输出
+
+Version 1.2.0
+Finished time: 19:13 2022/9/13
+Update:
+- 实现了异常窗口的接口，但还未测试。
+Todo:
+- 实现注册表相关API的分析
+- 优化查找算法为二分法查找
+- 实现日志自动保存
+
+Version 1.2.1
+Finished time: 11:41 2022/9/14
+Update:
+- 实现了注册表项创建和设置值的跟踪
+Todo:
+- 优化查找算法为二分法查找
+- 完成注册表监控模块

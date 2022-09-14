@@ -28,11 +28,12 @@ public:
     QStandardItemModel* heapViewModel = new QStandardItemModel(this);
     QStandardItemModel* fileViewModel = new QStandardItemModel(this);
     QStandardItemModel* exceptionModel = new QStandardItemModel(this);
+    QStandardItemModel* regeditModel = new QStandardItemModel(this);
     colorfulModel* fileAccessModel;
     colorfulModel* fileShareModeModel;
     colorfulModel* fileCreateDispModel;
     colorfulModel* fileFlagAttrModel;
-    hookAnalysis* analyser = new hookAnalysis(heapViewModel, fileViewModel);
+    hookAnalysis* analyser = new hookAnalysis(heapViewModel, fileViewModel, exceptionModel, regeditModel);
 
     explicit Output(QWidget *parent = nullptr);
     void updateLog();

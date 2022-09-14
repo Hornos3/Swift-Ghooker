@@ -1,24 +1,18 @@
-ID: 76
-DLL log output: 2022-09-13 09:02:59:882
-WriteFile Hooked.
+ID: 4
+DLL log output: 2022-09-14 11:50:05:863
+RegCloseKey Hooked.
 Arguments:
-	HANDLE hFile = 0x0000000000000058
-	LPVOID lpBuffer = 0x000000000071E120
-	DWORD nNumberOfBytesToWrite = 2 / 0x2
-	LPDWORD lpNumberOfBytesWritten = 0x000000000071E0D8
-	LPOVERLAPPED lpOverlapped = 0x0000000000000000
-Current process name: D:\SSdesign\UI\designMain\test\test_1\test_1.exe
-STDIN handle: 0x54
-STDOUT handle: 0x58
-STDERR handle: 0x5c
-File Description: Developed using the Dev-C++ IDE
-File Version: 1.0.0.0
-Internal Name: testSeries
-Company Name: HUSTCSE
-Legal Copyright: CopyRight
-Original File Name: mytest_1.exe
-Product Version: 1.0.0.0
-Return Value: (BOOL) 1 / true
-After execution:
-	LPDWORD lpNumberOfBytesWrite => 2 / 0x2
+	HKEY hKey = 0x00000000000001F4
+Current process name: D:\SSdesign\UI\designMain\test\test_3\test_3\x64\Debug\test_3.exe
+STDIN handle: 0x50
+STDOUT handle: 0x54
+STDERR handle: 0x58
+File Description: <FILE VERSION NOT EXIST OR NOT ACCESSIBLE>
+File Version: 
+Internal Name: <INTERNAL NAME NOT EXIST OR NOT ACCESSIBLE>
+Company Name: <COMPANY NAME NOT EXIST OR NOT ACCESSIBLE>
+Legal Copyright: <LEGAL COPYRIGHT NOT EXIST OR NOT ACCESSIBLE>
+Original File Name: <ORIGINAL FILE NAME NOT EXIST OR NOT ACCESSIBLE>
+Product Version: <PRODUCT VERSION NOT EXIST OR NOT ACCESSIBLE>
+Return value: (LSTATUS) 0
 ----------------------------------------------------

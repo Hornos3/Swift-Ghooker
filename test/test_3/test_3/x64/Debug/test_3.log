@@ -1,0 +1,6 @@
+﻿  main.cpp
+D:\SSdesign\UI\designMain\test\test_3\main.cpp(167,74): warning C4267: “参数”: 从“size_t”转换到“DWORD”，可能丢失数据
+D:\SSdesign\UI\designMain\test\test_3\main.cpp(152,8): warning C4101: “pBuffer”: 未引用的局部变量
+D:\SSdesign\UI\designMain\test\test_3\main.cpp(214,93): warning C4267: “参数”: 从“size_t”转换到“DWORD”，可能丢失数据
+D:\SSdesign\UI\designMain\test\test_3\main.cpp(341,54): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+  test_3.vcxproj -> D:\SSdesign\UI\designMain\test\test_3\test_3\x64\Debug\test_3.exe

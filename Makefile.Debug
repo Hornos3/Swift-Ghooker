@@ -15,7 +15,7 @@ CC            = cl
 CXX           = cl
 DEFINES       = -DUNICODE -D_UNICODE -DWIN32 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -DWIN64 -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -nologo -Zc:wchar_t -FS -Zc:strictStrings -Zi -MDd -utf-8 -W3 -w44456 -w44457 -w44458 /Fddebug\designMain.vc.pdb $(DEFINES)
-CXXFLAGS      = -nologo -Zc:wchar_t -FS -Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -permissive- -Zc:__cplusplus -Zc:externConstexpr -Zi -MDd -std:c++17 -utf-8 -W3 -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 -wd4577 -wd4467 -EHsc /Fddebug\designMain.vc.pdb $(DEFINES)
+CXXFLAGS      = -nologo -Zc:wchar_t -FS -Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -permissive- -Zc:__cplusplus -Zc:externConstexpr -Zi -MDd -std:c++20 -utf-8 -W3 -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 -wd4577 -wd4467 -EHsc /Fddebug\designMain.vc.pdb $(DEFINES)
 INCPATH       = -I. -I..\..\Detours\include -I..\..\Detours\lib.X64 -I..\..\..\Qt\6.3.1\msvc2019_64\include -I..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets -I..\..\..\Qt\6.3.1\msvc2019_64\include\QtGui -I..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore -Idebug -I. -I/include -I..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\win32-msvc 
 LINKER        = link
 LFLAGS        = /NOLOGO /DYNAMICBASE /NXCOMPAT /DEBUG /SUBSYSTEM:WINDOWS "/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'"
@@ -185,7 +185,7 @@ compiler_moc_predefs_make_all: debug\moc_predefs.h
 compiler_moc_predefs_clean:
 	-$(DEL_FILE) debug\moc_predefs.h
 debug\moc_predefs.h: ..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\features\data\dummy.cpp
-	cl -BxD:\Qt\6.3.1\msvc2019_64\bin\qmake.exe -nologo -Zc:wchar_t -FS -Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -permissive- -Zc:__cplusplus -Zc:externConstexpr -Zi -MDd -std:c++17 -utf-8 -W3 -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 -wd4577 -wd4467 -E ..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\features\data\dummy.cpp 2>NUL >debug\moc_predefs.h
+	cl -BxD:\Qt\6.3.1\msvc2019_64\bin\qmake.exe -nologo -Zc:wchar_t -FS -Zc:rvalueCast -Zc:inline -Zc:strictStrings -Zc:throwingNew -permissive- -Zc:__cplusplus -Zc:externConstexpr -Zi -MDd -std:c++20 -utf-8 -W3 -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 -wd4577 -wd4467 -E ..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\features\data\dummy.cpp 2>NUL >debug\moc_predefs.h
 
 compiler_moc_header_make_all: debug\moc_output.cpp debug\moc_widget.cpp
 compiler_moc_header_clean:
@@ -1596,7 +1596,9 @@ debug\main.obj: main.cpp widget.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtGui\qguiapplication_platform.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\QDebug \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\QLibrary \
-		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qlibrary.h
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qlibrary.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\QReadWriteLock \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qreadwritelock.h
 
 debug\output.obj: output.cpp Util.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\QLabel \

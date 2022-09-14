@@ -1,5 +1,4 @@
 ﻿#include "hookanalysis.h"
-#include "qdebug.h"
 
 #define ADDRESS 0
 #define TYPE 1
@@ -9,9 +8,16 @@
 #define FILENAME 1
 #define FILEHANDLESTATUS 2
 
-hookAnalysis::hookAnalysis(QStandardItemModel* tableModel, QStandardItemModel* fileViewModel){
+#define REGHANDLE 0
+#define REGKEYVAL 1
+#define REGSTATUS 2
+
+hookAnalysis::hookAnalysis(QStandardItemModel* tableModel, QStandardItemModel* fileViewModel,
+                           QStandardItemModel* exceptionModel, QStandardItemModel* regeditModel){
     this->heapViewModel = tableModel;
     this->fileViewModel = fileViewModel;
+    this->exceptionModel = exceptionModel;
+    this->regeditModel = regeditModel;
 }
 
 /**
@@ -22,6 +28,8 @@ hookAnalysis::hookAnalysis(QStandardItemModel* tableModel, QStandardItemModel* f
 bool hookAnalysis::appendRecord(QString newRecord){
     fullLog latestLog;
     size_t idxptr;
+    QString variable;
+    bool useVar = false;
 
     // 获取该条记录的编号（此编号唯一确定一条记录，避免重复记录）
     idxptr = newRecord.indexOf("ID: ");
@@ -63,13 +71,18 @@ bool hookAnalysis::appendRecord(QString newRecord){
         // 获取参数值
         QString val = elements[3];
         if((int)thisArg.type <= 8)
-            thisArg.value.imm = val.toLongLong();
+            thisArg.value.imm = val.toULongLong();
         else
-            thisArg.value.imm = val.mid(2).toLongLong(nullptr, 16);
+            thisArg.value.imm = val.mid(2).toULongLong(nullptr, 16);
+
+        if(argName == "dwType" && (thisArg.value.imm == REG_SZ ||
+                                   thisArg.value.imm == REG_EXPAND_SZ ||
+                                   thisArg.value.imm == REG_MULTI_SZ))
+            useVar = true;
 
         // 当类型是字符串时，获取字符串的内容
         QString str;
-        if(thisArg.type == charptr || thisArg.type == wcharptr){
+        if(thisArg.type == charptr || thisArg.type == wcharptr || (useVar && argName == "lpData")){
             assert(elements.size() >= 6);
             str = line.split("\"").at(1);
         }
@@ -171,7 +184,7 @@ bool hookAnalysis::appendRecord(QString newRecord){
     if((int)retVal.type <= 8)
         retVal.value.imm = val.toLongLong();
     else
-        retVal.value.imm = val.mid(2).toLongLong(nullptr, 16);
+        retVal.value.imm = val.toULongLong(nullptr, 16);
 
     // 保存返回值的字符串内容
     QString str;
@@ -190,13 +203,14 @@ bool hookAnalysis::appendRecord(QString newRecord){
     if(newRecord[idxptr] != '-'){
         idxeptr = newRecord.indexOf("\n", idxptr);
         idxptr = idxeptr + 1;
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
         // 获取需要获取执行后结果的参数值
         while(line.startsWith("\t")){
+            line = line.mid(1);
             realArg thisArg;
 
-            idxeptr = newRecord.indexOf("\n", idxptr);
-            QString line = newRecord.mid(idxptr + 1, idxeptr - idxptr);
-            idxptr = idxeptr + 1;
             QStringList elements = line.split(" ");
 
             // 获取参数类型
@@ -208,10 +222,17 @@ bool hookAnalysis::appendRecord(QString newRecord){
 
             // 获取参数值
             QString val = elements[3];
-            thisArg.value.imm = val.toLongLong();
+            if(val.startsWith("0x"))
+                thisArg.value.imm = val.toULongLong(nullptr, 16);
+            else
+                thisArg.value.imm = val.toULongLong();
 
             // 保存参数
             latestLog.argsAfterCall.insert({argName, thisArg});
+
+            idxeptr = newRecord.indexOf("\n", idxptr);
+            line = newRecord.mid(idxptr + 1, idxeptr - idxptr);
+            idxptr = idxeptr + 1;
         }
     }
 
@@ -224,20 +245,22 @@ bool hookAnalysis::appendRecord(QString newRecord){
 
     // 如果这个函数与堆操作有关系，则进入堆分析模块进行进一步行为分析。
     // 如果这个函数与文件操作有关系，则进入文件分析模块进行进一步行为分析。
+    // 如果这个函数与注册表操作有关系，则进入注册表分析模块进行进一步行为分析。
     logList.insert(latestLog);
     if(latestLog.funcName.contains("Heap") && analyseHeap)
         analyseNewHeapInst(latestLog);
     else if(latestLog.funcName.contains("File") && analyseFile)
         analyseNewFileInst(latestLog);
-
+    else if(latestLog.funcName.contains("Reg") && analyseReg)
+        analyseNewRegInst(latestLog);
     return false;
 }
 
 argType hookAnalysis::getType(QString input){
     argType type = others;
-    if(input == "HANDLE" || input == "LPVOID")
+    if(input == "HANDLE" || input == "LPVOID" || input == "HKEY")
         type = voidptr;
-    else if(input == "DWORD" || input == "UINT")
+    else if(input == "DWORD" || input == "UINT" || input == "REGSAM")
         type = uint32;
     else if(input == "int" || input == "HFILE")
         type = int32;
@@ -288,79 +311,20 @@ void hookAnalysis::analyseNewFileInst(fullLog newFileLog){
     }
 }
 
-/**
- * @brief hookAnalysis::findHandleInspos 查找新的handle地址应该插入到树图的哪一个索引位置
- * @param newHandleAddr 新handle地址
- * @return 应该插入的位置，在插入前需要将该位置及其后所有item后移一位。如果handle已经存在且处于释放状态，则返回-1*位置，如果处于正在使用状态，则返回0xdeadbeef（错误）
- */
-int hookAnalysis::findHandleInspos(uint64_t newHandleAddr){
-    int rowCount = heapViewModel->rowCount();
-    for(int i=0; i<rowCount; i++){
-        auto head = heapViewModel->item(i);
-        uint64_t address = head->text().toULongLong(nullptr, 16);
-        if(address > newHandleAddr)
-            return i;
-        else if(address == newHandleAddr && heapViewModel->item(i, 3)->text() == "正在使用")
-            return 0xdeadbeef;
-        else if(address == newHandleAddr)
-            return -1 * i;
-    }
-    return rowCount;
-}
+// 注册表操作分析入口函数
+void hookAnalysis::analyseNewRegInst(fullLog newRegLog){
+    if(newRegLog.funcName == "RegCreateKeyEx"){
+        addRegKey(newRegLog);
+    }else if(newRegLog.funcName == "RegSetValueEx"){
+        setRegKey(newRegLog);
+    }else if(newRegLog.funcName == "RegDeleteValue"){
 
-bool hookAnalysis::insertNewHandle(fullLog newHandleLog, int insPos){
-    int rowCount = heapViewModel->rowCount();
-    if(insPos > rowCount || insPos < 0)
-        return false;
-//    newItem->appendColumn(QList<QStandardItem*>() << size << status);
+    }else if(newRegLog.funcName == "RegCloseKey"){
+        closeRegKey(newRegLog);
+    }else if(newRegLog.funcName == "RegOpenKeyEx"){
 
-    if(insPos == rowCount){
-        heapViewModel->insertRow(rowCount);
-        setRow(rowCount, QStringList() << ull2a(newHandleLog.retVal.value.imm) <<
-               "HANDLE" << ull2a(calculateHandleSize(newHandleLog.retVal.value.imm)) << "正在使用");
-    }else{
-        heapViewModel->insertRow(insPos);
-        setRow(insPos, QStringList() << ull2a(newHandleLog.retVal.value.imm) <<
-               "HANDLE" << ull2a(calculateHandleSize(newHandleLog.retVal.value.imm)) << "正在使用");
-    }
-    return true;
-}
-
-bool hookAnalysis::disableHandle(uint64_t destroyAddress){
-    int rowCount = heapViewModel->rowCount();
-    for(int i=0; i<rowCount; i++){
-        auto head = heapViewModel->item(i);
-        if(head->text().toULongLong(nullptr, 16) == destroyAddress){
-            heapViewModel->item(i, 3)->setText("已被销毁");
-            if(head->hasChildren()){
-                int j = 0;
-                QStandardItem* child = head->child(j);
-                while(child != nullptr){
-                    head->child(j, 3)->setText("无效");
-                    child = head->child(++j);
-                }
-            }
-            break;
-        }
-    }
-    return true;
-}
-
-inline size_t hookAnalysis::calculateHandleSize(uint64_t startAddr){
-    return ((startAddr & (-1 * PAGE_SIZE)) + PAGE_SIZE) - startAddr;
-}
-
-int hookAnalysis::getAffiliatedHandle(uint64_t chunkAddr){
-    int rowCount = heapViewModel->rowCount();
-    for(int i=0; i<rowCount; i++){
-        uint64_t handleAddress = heapViewModel->item(i)->text().toULongLong(nullptr, 16);
-        uint64_t handleSize = heapViewModel->item(i, 2)->text().toULongLong(nullptr, 16);
-        if(handleAddress <= chunkAddr && handleAddress + handleSize > chunkAddr && heapViewModel->item(i, 1)->text() == "HANDLE")
-            return i;
-        else if(handleAddress > chunkAddr)
-            return -i;
-    }
-    return -rowCount;
+    }else
+        exit(1);
 }
 
 /**
@@ -371,7 +335,8 @@ int hookAnalysis::getAffiliatedHandle(uint64_t chunkAddr){
 bool hookAnalysis::addHandle(fullLog newHeapLog){
     uint64_t allocatedHandle = newHeapLog.retVal.value.imm; // 获取该函数的返回值，即分配到的堆起始地址
     if(allocatedHandle == 0){       // 如果返回值为0，说明分配失败，不需要进行后续操作
-        exceptions.insert({newHeapLog.id, AllocHandleFailed});
+        handleException({newHeapLog.id, AllocHandleFailed},
+                        new exceptionInfo{.addressWithException = newHeapLog.args["dwInitialSize"].value.imm});
         return false;
     }
 
@@ -380,8 +345,10 @@ bool hookAnalysis::addHandle(fullLog newHeapLog){
         insertNewHeapHandle(allocatedHandle, -findHandleIdx - 1);
     }else{
         // 首先判断这个HANDLE目前是否正在使用，如果之前监测到明确的HeapDestroy函数将其销毁，那么再一次分配到这个HANDLE就是异常的行为。
-        if(heapViewModel->item(findHandleIdx, HEAPSTATUS)->text() == "已被销毁")
-            exceptions.insert({newHeapLog.id, AllocToDestroyedHandle});
+        if(heapViewModel->item(findHandleIdx, HEAPSTATUS)->text() == "已被销毁"){
+            handleException({newHeapLog.id, AllocSameHandle},
+                            new exceptionInfo{.addressWithException = allocatedHandle});
+        }
         else
             heapViewModel->item(findHandleIdx, HEAPSTATUS)->setText("正在使用");   // 修改HANDLE状态
     }
@@ -399,16 +366,20 @@ bool hookAnalysis::destroyHandle(fullLog newHeapLog){
     int findHandleIdx = findHandle(handleToDestroy, heapViewModel);
     if(!destroyFinished){
         // 如果返回值为false，说明销毁失败，查找销毁失败原因，如果要销毁的HANDLE在监视范围，则产生未知错误，如果不在则认定为无效参数
-        if(findHandleIdx < 0)       // 在监视列表中没有找到这个HANDLE，视为无效参数
-            exceptions.insert({newHeapLog.id, InvalidDestroyHandle});
-        else
-            exceptions.insert({newHeapLog.id, DestroyFailed});
+        if(findHandleIdx < 0){       // 在监视列表中没有找到这个HANDLE，视为无效参数
+            handleException({newHeapLog.id, InvalidDestroyHandle},
+                            new exceptionInfo{.addressWithException = handleToDestroy});
+        }else{
+            handleException({newHeapLog.id, DestroyFailed},
+                            new exceptionInfo{.addressWithException = handleToDestroy});
+        }
         return false;
     }
 
     // 如果返回值为true，而且要销毁的HANDLE不在监视范围内，则说明该HANDLE在创建时没有被跟踪到，不添加该HANDLE，且新增异常信息
     if(findHandleIdx < 0){
-        exceptions.insert({newHeapLog.id, UntrackedHandleDestroyed});
+        handleException({newHeapLog.id, UntrackedHandleDestroyed},
+                        new exceptionInfo{.addressWithException = handleToDestroy});
         return false;
     }
 
@@ -435,7 +406,13 @@ bool hookAnalysis::addChunk(fullLog newHeapLog){
 
     uint64_t allocatedChunk = newHeapLog.retVal.value.imm;      // 获取该函数的返回值，即分配到的地址
     if(allocatedChunk == 0){            // 如果返回值为0，说明分配失败，不需要进行后续操作
-        exceptions.insert({newHeapLog.id, AllocChunkFailed});
+        handleException({newHeapLog.id, AllocChunkFailed},
+                        new exceptionInfo{
+                            .allocFail = {
+                                          .handle = newHeapLog.args["hHeap"].value.imm,
+                                          .requiredSize = newHeapLog.args["dwBytes"].value.imm
+                            }
+                        });
         return false;
     }
 
@@ -446,8 +423,10 @@ bool hookAnalysis::addChunk(fullLog newHeapLog){
     else{
         // 首先判断这个HANDLE目前是否正在使用，如果之前监测到明确的HeapDestroy函数将其销毁，那么再一次分配到这个HANDLE就是异常的行为。
         // 但即使存在这种异常行为，程序依然会记录这个CHUNK，除非其返回值为nullptr。
-        if(heapViewModel->item(findHandleIdx, HEAPSTATUS)->text() == "已被销毁")
-            exceptions.insert({newHeapLog.id, AllocToDestroyedHandle});
+        if(heapViewModel->item(findHandleIdx, HEAPSTATUS)->text() == "已被销毁"){
+            handleException({newHeapLog.id, AllocToDestroyedHandle},
+                            new exceptionInfo{.addressWithException = handleAddr});
+        }
         // 下面将这个CHUNK保存到对应HANDLE的子项中。
         // 首先需要找到这个CHUNK应该插入到哪一行。
         QStandardItem* father = heapViewModel->item(findHandleIdx);
@@ -459,8 +438,10 @@ bool hookAnalysis::addChunk(fullLog newHeapLog){
             // 首先判断这个找到的CHUNK是否正在被使用，如果正在被使用，那么产生异常
             // （这种异常经常会产生，因为有的CHUNK并不是程序本身调用malloc等堆相关函数来产生的，因此有的CHUNK被释放的操作可能不能跟踪到）
             // 但这里只会对这种情况记录异常，如果size有改动还是会继续进行修改。
-            if(father->child(findChunkIdx, HEAPSTATUS)->text() == "正在使用")
-                exceptions.insert({newHeapLog.id, AllocSameChunk});
+            if(father->child(findChunkIdx, HEAPSTATUS)->text() == "正在使用"){
+                handleException({newHeapLog.id, AllocSameChunk},
+                                new exceptionInfo{.addressWithException = chunkSize});
+            }
             father->child(findChunkIdx, SIZE)->setText(ull2a(chunkSize));       // 修改size
             father->child(findChunkIdx, HEAPSTATUS)->setText("正在使用");            // 修改状态
         }
@@ -472,7 +453,8 @@ bool hookAnalysis::freeChunk(fullLog newHeapLog){
 
     bool success = newHeapLog.retVal.value.imm;     // 本次释放是否成功
     if(!success){       // 不成功，返回异常信息
-        exceptions.insert({newHeapLog.id, FreeChunkFailed});
+        handleException({newHeapLog.id, FreeChunkFailed},
+                        new exceptionInfo{.addressWithException = newHeapLog.args["lpMem"].value.imm});
         return false;
     }
 
@@ -484,7 +466,8 @@ bool hookAnalysis::freeChunk(fullLog newHeapLog){
     if(findHandleIdx < 0){      // 没有找到这个HANDLE，在表中新增，同时增加这个CHUNK，新增异常
         insertNewHeapHandle(handleAddr, -findHandleIdx - 1);
         insertUnknownSizeChunk(victim, heapViewModel->item(-findHandleIdx - 1), 0);
-        exceptions.insert({newHeapLog.id, UntrackedChunkFreed});
+        handleException({newHeapLog.id, UntrackedChunkFreed},
+                        new exceptionInfo{.addressWithException = victim});
         return true;
     }
 
@@ -493,15 +476,16 @@ bool hookAnalysis::freeChunk(fullLog newHeapLog){
     int findChunkIdx = findChunk(victim, father);
     if(findChunkIdx < 0){       // 没有找到这个CHUNK
         insertUnknownSizeChunk(victim, father, -findChunkIdx - 1);
-        exceptions.insert({newHeapLog.id, UntrackedChunkFreed});
+        handleException({newHeapLog.id, UntrackedChunkFreed},
+                        new exceptionInfo{.addressWithException = victim});
     }else{  // 找到这个CHUNK
         // 判断这个CHUNK是否正在被使用，如果已经释放，说明发现了Double Free
-        if(father->child(findChunkIdx, HEAPSTATUS)->text() == "已被释放")
-            exceptions.insert({newHeapLog.id, DoubleFree});
-        else
+        if(father->child(findChunkIdx, HEAPSTATUS)->text() == "已被释放"){
+            handleException({newHeapLog.id, DoubleFree},
+                            new exceptionInfo{.addressWithException = victim});
+        }else
             father->child(findChunkIdx, HEAPSTATUS)->setText("已被释放");
     }
-
     return true;
 }
 
@@ -513,38 +497,6 @@ void hookAnalysis::setChildRow(QStandardItem* parent, int row, QStringList eleme
 void hookAnalysis::setRow(int row, QStringList elements){
     for(int i=0; i<4; i++)
         heapViewModel->setItem(row, i, new QStandardItem(elements[i]));
-}
-
-pair<int, int> hookAnalysis::findChunk(uint64_t chunkAddr){
-    int rowCount = heapViewModel->rowCount();
-    int findRow = 0;
-    for(; findRow<rowCount; findRow++){
-        if(heapViewModel->item(findRow)->text().toULongLong(nullptr, 16) >= chunkAddr)
-            break;
-    }
-    if(findRow == rowCount){
-        return {-1, -1};
-    }else if(heapViewModel->item(findRow)->text().toULongLong(nullptr, 16) == chunkAddr){
-        if(heapViewModel->item(findRow, 1)->text() == "CHUNK")
-            return {findRow, -1};
-        else if(heapViewModel->item(findRow)->child(0) == nullptr ||
-                heapViewModel->item(findRow)->child(0)->text().toULongLong(nullptr, 16) != chunkAddr)
-            return {-1, -1};
-        else
-            return {findRow, 0};
-    }else if(findRow == 0 && heapViewModel->item(findRow)->text().toULongLong(nullptr, 16) > chunkAddr){
-        return {-1, -1};
-    }else{
-        findRow--;
-        int findChild = 0;
-        QStandardItem* parent = heapViewModel->item(findRow);
-        QStandardItem* child = parent->child(findChild);
-        while(child != nullptr){
-            if(child->text().toULongLong(nullptr, 16) == chunkAddr)
-                return {findRow, findChild};
-        }
-        return {-1, -1};
-    }
 }
 
 /**
@@ -588,6 +540,25 @@ int hookAnalysis::findChunk(uint64_t chunkAddr, QStandardItem* father){
     return -rowCount - 1;
 }
 
+/**
+ * @brief hookAnalysis::findChunk 根据参数的handle地址从列表中找到对应注册表句柄位置索引
+ * @param chunkAddr 需要查找的地址
+ * @param father HANDLE父项对象
+ * @return 索引，如果能够找到这个handle，返回这个CHUNK位于哪一行，如果找不到，返回这个handle应该插入在哪一行 * -1。
+ */
+int hookAnalysis::findRegKey(uint64_t handleAddr){
+    int rowCount = regeditModel->rowCount();
+    int rowPtr = 0;
+    for(; rowPtr < rowCount; rowPtr++){
+        uint64_t findHandle = regeditModel->item(rowPtr, REGHANDLE)->text().toULongLong(nullptr, 16);
+        if(findHandle == handleAddr)
+            return rowPtr;
+        else if(findHandle > handleAddr)
+            return -rowPtr - 1;
+    }
+    return -rowCount - 1;
+}
+
 void hookAnalysis::insertNewHeapHandle(uint64_t handleAddr, int insPos){
     heapViewModel->insertRow(insPos);
     setRow(insPos, QStringList() << ull2a(handleAddr) << "HANDLE" << "" << "正在使用");
@@ -617,14 +588,16 @@ bool hookAnalysis::addFileHandle(fullLog newFileLog){
     uint64_t returnHandle = newFileLog.retVal.value.imm;
     // 如果句柄无效
     if(returnHandle == (uint64_t)INVALID_HANDLE_VALUE){
-        exceptions.insert({newFileLog.id, CreateFileFailed});
+        handleException({newFileLog.id, CreateFileFailed},
+                        new exceptionInfo{.fileName = newFileLog.args["lpFileName"].str});
         return false;
     }
 
     // 如果句柄有效，首先查找表中是否已经存在这个句柄
     int findHandleIdx = findHandle(returnHandle, fileViewModel);
     if(findHandleIdx >= 0){      // 如果查找到了这个HANDLE，输出异常信息
-        exceptions.insert({newFileLog.id, RepeatedFileHandle});
+        handleException({newFileLog.id, RepeatedFileHandle},
+                        new exceptionInfo{.addressWithException = returnHandle});
         return false;
     }
 
@@ -649,28 +622,34 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, bool isRead){
     // 检查这个文件句柄是否正在被监控，如果没有则放弃本次添加
     int findHandleIdx = findHandle(handle, fileViewModel);
     if(findHandleIdx < 0){      // 如果没有查找到这个HANDLE，输出异常信息
-        exceptions.insert({newFileLog.id, UntrackedFileHandle});
+        handleException({newFileLog.id, UntrackedFileHandle},
+                        new exceptionInfo{.addressWithException = handle});
         return false;
     }
 
-    // 要读取的字节数
-    uint64_t requiredBytes = newFileLog.args["nNumberOfBytesToRead"].value.imm;
-    // 实际读取的字节数
-    uint64_t actualBytes = newFileLog.argsAfterCall["lpNumberOfBytesRead"].value.imm;
-
-    auto father = fileViewModel->item(handle);
-    if(isRead)
+    auto father = fileViewModel->item(findHandleIdx);
+    if(isRead){
+        // 要读取的字节数
+        uint64_t requiredBytes = newFileLog.args["nNumberOfBytesToRead"].value.imm;
+        // 实际读取的字节数
+        uint64_t actualBytes = newFileLog.argsAfterCall["lpNumberOfBytesRead"].value.imm;
         father->insertRow(father->rowCount(), QList<QStandardItem*>() <<
                           new QStandardItem("READ") <<
                           new QStandardItem(ull2a(requiredBytes)) <<
                           new QStandardItem(ull2a(actualBytes)) <<
                           new QStandardItem(success ? "SUCCESS" : "FAILED"));
-    else
+    }
+    else{
+        // 要读取的字节数
+        uint64_t requiredBytes = newFileLog.args["nNumberOfBytesToWrite"].value.imm;
+        // 实际读取的字节数
+        uint64_t actualBytes = newFileLog.argsAfterCall["lpNumberOfBytesWritten"].value.imm;
         father->insertRow(father->rowCount(), QList<QStandardItem*>() <<
                           new QStandardItem("WRITE") <<
                           new QStandardItem(ull2a(requiredBytes)) <<
                           new QStandardItem(ull2a(actualBytes)) <<
                           new QStandardItem(success ? "SUCCESS" : "FAILED"));
+    }
     return true;
 }
 
@@ -688,6 +667,60 @@ void hookAnalysis::insertNewFileHandle(fullLog log, int insPos){
 
     fileViewModel->insertRow(-insPos - 1, QList<QStandardItem*>() << new QStandardItem(ull2a(newHandleAttr.handleAddr))
                              << new QStandardItem(fileName) << new QStandardItem("正在使用"));
+}
+
+void hookAnalysis::insertNewRegHandle(fullLog log){
+    uint64_t hKeyGot = log.argsAfterCall["phkResult"].value.imm;
+    int insIdx = findRegKey(hKeyGot);
+    // 如果找到了这个句柄，且这个句柄正在使用，说明分配到了两个相同的句柄，出现异常。
+    if(insIdx > 0 && regeditModel->item(insIdx, REGSTATUS)->text() == "正在使用"){
+        handleException({log.id, SameRegHandleGot},
+                        new exceptionInfo{.addressWithException = hKeyGot});
+    }else if(insIdx > 0){
+        // 找到了这个句柄，但这个句柄已经被关闭，则重启这个句柄
+        regeditModel->item(insIdx, REGSTATUS)->setText("正在使用");
+    }else{
+        // 没有找到这个句柄，则进行插入
+        QString directory = getOpenRegKeyName(log);
+        if(directory == "*")   // 没有找到键值，无法进行插入
+            return;
+        // 正式插入这个键值
+        regeditModel->insertRow(-insIdx - 1, QList<QStandardItem*>() <<
+                                new QStandardItem(ull2a(hKeyGot)) <<
+                                new QStandardItem(directory + "\\" + *log.args["lpSubKey"].str) <<
+                                new QStandardItem("正在使用"));
+    }
+}
+
+void hookAnalysis::appendNewRegSet(fullLog log, QStandardItem* father){
+    if(log.args["dwType"].value.imm > 11){
+        handleException({log.id, InvalidRegTypeValue},
+                        new exceptionInfo{.addressWithException = log.args["dwType"].value.imm});
+        return;
+    }
+    // 获取到注册表项的类型
+    QString regType = RegTypes[log.args["dwType"].value.imm];
+
+    QString value;
+    switch(log.args["dwType"].value.imm){
+    case REG_SZ:
+    case REG_EXPAND_SZ:
+    case REG_MULTI_SZ:{
+        value = *log.args["lpData"].str;
+        break;
+    }
+    default:
+        value = ull2a(log.args["lpData"].value.imm);
+        break;
+    }
+
+    QString keyName = *log.args["lpValueName"].str;
+    QString detail = "将键" + keyName + "设置为" + regType + "类型，值为" + value;
+
+    father->insertRow(father->rowCount(), QList<QStandardItem*>() <<
+                      new QStandardItem("SET") <<
+                      new QStandardItem(detail) <<
+                      new QStandardItem(ull2a(log.retVal.value.imm)));
 }
 
 std::list<int> hookAnalysis::getGenericAccess(unsigned access){
@@ -754,4 +787,223 @@ std::list<int> hookAnalysis::getFileAttr(unsigned fileAttr){
     if(fileAttr & FILE_FLAG_DELETE_ON_CLOSE)
         ret.push_back(12);
     return ret;
+}
+
+void hookAnalysis::handleException(pair<int, APIException> latestException, exceptionInfo* info){
+    assert(info != nullptr);
+
+    exceptions.insert(latestException);
+    int row = exceptionModel->rowCount();
+
+    char detail[0x200];
+    QString exceptionType;
+
+    switch(latestException.second){
+    case DoubleFree:{
+        sprintf_s(detail, "重复释放了<%#zx>这块内存空间。", info->addressWithException);
+        exceptionType = "DoubleFree";
+        break;
+    }
+    case AllocSameChunk:{
+        sprintf_s(detail, "重复申请到<%#zx>这块内存空间。", info->addressWithException);
+        exceptionType = "AllocSameChunk";
+        break;
+    }
+    case InvalidDestroyHandle:{
+        sprintf_s(detail, "销毁无效的堆：<%#zx>。", info->addressWithException);
+        exceptionType = "InvalidDestroyHandle";
+        break;
+    }
+    case DestroyFailed:{
+        sprintf_s(detail, "销毁堆<%#zx>失败。", info->addressWithException);
+        exceptionType = "DestroyFailed";
+        break;
+    }
+    case AllocSameHandle:{
+        sprintf_s(detail, "申请到重复的堆<%#zx>。", info->addressWithException);
+        exceptionType = "AllocSameHandle";
+        break;
+    }
+    case OverlappingChunk:{
+        sprintf_s(detail, "内存块<%#zx>大小为<%#zx>，与其后一个内存块<%#zx>发生重叠。", info->overlapHandleInfo.chunk,
+                  info->overlapChunkInfo.prevSize, info->overlapChunkInfo.nextChunk);
+        exceptionType = "OverlappingChunk";
+        break;
+    }
+    case ChunkCrossHandle:{
+        sprintf_s(detail, "内存块<%#zx>大小为<%#zx>，与其后一个堆句柄<%#zx>发生重叠。", info->overlapHandleInfo.chunk,
+                  info->overlapHandleInfo.chunkSize, info->overlapHandleInfo.nextHandle);
+        exceptionType = "ChunkCrossHandle";
+        break;
+    }
+    case InvalidFree:{
+        sprintf_s(detail, "释放无效的内存块空间<%#zx>。", info->addressWithException);
+        exceptionType = "InvalidFree";
+        break;
+    }
+    case FreeChunkNotFound:{
+        sprintf_s(detail, "释放未找到的内存块空间<%#zx>。", info->addressWithException);
+        exceptionType = "FreeChunkNotFound";
+        break;
+    }
+    case AllocToDestroyedHandle:{
+        sprintf_s(detail, "尝试从已销毁的堆<%#zx>中分配空间。", info->addressWithException);
+        exceptionType = "AllocToDestroyedHandle";
+        break;
+    }
+    case AllocChunkFailed:{
+        sprintf_s(detail, "从堆<%#zx>中分配大小<%#zx>的空间失败。", info->allocFail.handle,
+                  info->allocFail.requiredSize);
+        exceptionType = "AllocChunkFailed";
+        break;
+    }
+    case AllocHandleFailed:{
+        sprintf_s(detail, "尝试分配大小为<%#zx>的堆失败。", info->addressWithException);
+        exceptionType = "AllocHandleFailed";
+        break;
+    }
+    case UntrackedHandleDestroyed:{
+        sprintf_s(detail, "销毁未被监视的堆<%#zx>。", info->addressWithException);
+        exceptionType = "UntrackedHandleDestroyed";
+        break;
+    }
+    case FreeChunkFailed:{
+        sprintf_s(detail, "释放内存块<%#zx>失败。", info->addressWithException);
+        exceptionType = "FreeChunkFailed";
+        break;
+    }
+    case UntrackedChunkFreed:{
+        sprintf_s(detail, "释放未被监视的内存块<%#zx>。", info->addressWithException);
+        exceptionType = "UntrackedChunkFreed";
+        break;
+    }
+    case CreateFileFailed:{
+        sprintf_s(detail, "打开文件<%ls>失败。", info->fileName->toStdWString().c_str());
+        exceptionType = "CreateFileFailed";
+        break;
+    }
+    case RepeatedFileHandle:{
+        sprintf_s(detail, "发现重复的文件句柄<%#zx>。", info->addressWithException);
+        exceptionType = "RepeatedFileHandle";
+        break;
+    }
+    case UntrackedFileHandle:{
+        sprintf_s(detail, "发现未被监视的文件句柄<%#zx>。", info->addressWithException);
+        exceptionType = "UntrackedFileHandle";
+        break;
+    }
+    case RegCreateFail:{
+        sprintf_s(detail, "创建注册表项失败，错误码<%ld>。", info->errorCode);
+        exceptionType = "RegCreateFail";
+        break;
+    }
+    case RegOpenFail:{
+        sprintf_s(detail, "打开注册表项失败，错误码<%ld>。", info->errorCode);
+        exceptionType = "RegOpenFail";
+        break;
+    }
+    case RegDeleteFail:{
+        sprintf_s(detail, "删除注册表项失败，错误码<%ld>。", info->errorCode);
+        exceptionType = "RegDeleteFail";
+        break;
+    }
+    case RegCloseFail:{
+        sprintf_s(detail, "关闭注册表项失败，错误码<%ld>。", info->errorCode);
+        exceptionType = "RegCloseFail";
+        break;
+    }
+    case RegSetFail:{
+        sprintf_s(detail, "设置注册表项值失败，错误码<%ld>。", info->errorCode);
+        exceptionType = "RegSetFail";
+        break;
+    }
+    case SameRegHandleGot:{
+        sprintf_s(detail, "注册表句柄<%#zx>还未关闭就被再一次成功分配。", info->addressWithException);
+        exceptionType = "SameRegHandleGot";
+        break;
+    }
+    }
+
+    exceptionModel->insertRow(row, QList<QStandardItem*>() <<
+                              new QStandardItem(to_string(latestException.first).c_str()) <<
+                              new QStandardItem(exceptionType) <<
+                              new QStandardItem(detail));
+}
+
+bool hookAnalysis::addRegKey(fullLog newRegLog){
+    // 首先获得操作的返回值
+    long retVal = (long)newRegLog.retVal.value.imm;
+    if(retVal != 0){        // 如果返回值不为0，说明操作没有正常完成。
+        handleException({newRegLog.id, RegCreateFail},
+                        new exceptionInfo{.errorCode = retVal});
+        return false;
+    }
+
+    // 进行插入，所有的判断都交给下面函数来实现
+    insertNewRegHandle(newRegLog);
+    return true;
+}
+
+bool hookAnalysis::setRegKey(fullLog newRegLog){
+    // 首先获得操作的返回值
+    long retVal = (long)newRegLog.retVal.value.imm;
+    if(retVal != 0){        // 如果返回值不为0，说明操作没有正常完成。
+        handleException({newRegLog.id, RegSetFail},
+                        new exceptionInfo{.errorCode = retVal});
+        return false;
+    }
+
+    // 查找要修改的注册表项
+    uint64_t regHandle = newRegLog.args["hKey"].value.imm;
+    int keyIdx = findRegKey(regHandle);
+    if(keyIdx < 0){ // 如果没有找到这个句柄，无法进行后续分析
+        handleException({newRegLog.id, UntrackedRegHandle},
+                        new exceptionInfo{.addressWithException = regHandle});
+        return false;
+    }
+    // 找到了这个注册表项，插入子项
+    appendNewRegSet(newRegLog, regeditModel->item(keyIdx));
+    return true;
+}
+
+bool hookAnalysis::closeRegKey(fullLog newRegLog){
+    // 首先获得操作的返回值
+    long retVal = (long)newRegLog.retVal.value.imm;
+    if(retVal != 0){        // 如果返回值不为0，说明操作没有正常完成。
+        handleException({newRegLog.id, RegCloseFail},
+                        new exceptionInfo{.errorCode = retVal});
+        return false;
+    }
+
+    // 查找要修改的注册表项
+    uint64_t regHandle = newRegLog.args["hKey"].value.imm;
+    int keyIdx = findRegKey(regHandle);
+    if(keyIdx < 0){ // 如果没有找到这个句柄，无法进行后续分析
+        handleException({newRegLog.id, UntrackedRegHandle},
+                        new exceptionInfo{.addressWithException = regHandle});
+        return false;
+    }
+    // 如果这个注册表项已经被关闭，则这个注册表项就被成功关闭了两次，产生异常，
+    if(regeditModel->item(keyIdx, REGSTATUS)->text() == "已被关闭"){
+        handleException({newRegLog.id, CloseRegKeyTwice},
+                        new exceptionInfo{.addressWithException = regHandle});
+        return false;
+    }
+    // 找到这个注册表项，关闭这个注册表项
+    regeditModel->item(keyIdx, REGSTATUS)->setText("已被关闭");
+    return true;
+}
+
+QString hookAnalysis::getOpenRegKeyName(fullLog newRegLog, int findIdx){
+    uint64_t hKey = newRegLog.args["hKey"].value.imm;
+    if(findIdx == -1)
+        findIdx = findRegKey(hKey);
+    // 如果没有找到句柄，说明这个句柄没有被监视，无法进行后续分析
+    if(findIdx < 0){
+        handleException({newRegLog.id, UntrackedRegHandle},
+                        new exceptionInfo{.addressWithException = hKey});
+        return "*";
+    }
+    // 如果找到句柄，就能够找到键值
+    return regeditModel->item(findIdx, REGKEYVAL)->text();
 }
