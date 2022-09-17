@@ -15,6 +15,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QListView>
 #include <QtWidgets/QPlainTextEdit>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QTableView>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QWidget>
@@ -42,6 +43,12 @@ public:
     QListView *fileFlagsAndAttributes;
     QTreeView *regeditView;
     QLabel *label_7;
+    QPushButton *showLogWidget;
+    QPushButton *showHeapWidget;
+    QPushButton *showFileWidget;
+    QPushButton *showRegWidget;
+    QPushButton *showExceptionWidget;
+    QPushButton *showNetWidget;
 
     void setupUi(QWidget *Output)
     {
@@ -81,7 +88,7 @@ public:
         title->setAlignment(Qt::AlignCenter);
         processInfo = new QTableView(Output);
         processInfo->setObjectName(QString::fromUtf8("processInfo"));
-        processInfo->setGeometry(QRect(529, 130, 440, 60));
+        processInfo->setGeometry(QRect(529, 130, 440, 100));
         heapView = new QTreeView(Output);
         heapView->setObjectName(QString::fromUtf8("heapView"));
         heapView->setGeometry(QRect(1020, 130, 410, 400));
@@ -126,7 +133,7 @@ public:
         label_4->setAlignment(Qt::AlignCenter);
         label_5 = new QLabel(Output);
         label_5->setObjectName(QString::fromUtf8("label_5"));
-        label_5->setGeometry(QRect(710, 190, 81, 31));
+        label_5->setGeometry(QRect(710, 230, 81, 31));
         QPalette palette4;
         palette4.setBrush(QPalette::Active, QPalette::WindowText, brush);
         palette4.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
@@ -136,10 +143,10 @@ public:
         label_5->setAlignment(Qt::AlignCenter);
         exceptionWindow = new QTableView(Output);
         exceptionWindow->setObjectName(QString::fromUtf8("exceptionWindow"));
-        exceptionWindow->setGeometry(QRect(529, 220, 440, 310));
+        exceptionWindow->setGeometry(QRect(529, 259, 440, 270));
         label_6 = new QLabel(Output);
         label_6->setObjectName(QString::fromUtf8("label_6"));
-        label_6->setGeometry(QRect(890, 530, 80, 30));
+        label_6->setGeometry(QRect(930, 530, 80, 30));
         QPalette palette5;
         palette5.setBrush(QPalette::Active, QPalette::WindowText, brush);
         palette5.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
@@ -175,6 +182,24 @@ public:
         label_7->setPalette(palette6);
         label_7->setFont(font3);
         label_7->setAlignment(Qt::AlignCenter);
+        showLogWidget = new QPushButton(Output);
+        showLogWidget->setObjectName(QString::fromUtf8("showLogWidget"));
+        showLogWidget->setGeometry(QRect(950, 20, 120, 30));
+        showHeapWidget = new QPushButton(Output);
+        showHeapWidget->setObjectName(QString::fromUtf8("showHeapWidget"));
+        showHeapWidget->setGeometry(QRect(950, 60, 120, 30));
+        showFileWidget = new QPushButton(Output);
+        showFileWidget->setObjectName(QString::fromUtf8("showFileWidget"));
+        showFileWidget->setGeometry(QRect(1080, 20, 120, 30));
+        showRegWidget = new QPushButton(Output);
+        showRegWidget->setObjectName(QString::fromUtf8("showRegWidget"));
+        showRegWidget->setGeometry(QRect(1080, 60, 120, 30));
+        showExceptionWidget = new QPushButton(Output);
+        showExceptionWidget->setObjectName(QString::fromUtf8("showExceptionWidget"));
+        showExceptionWidget->setGeometry(QRect(1210, 20, 120, 30));
+        showNetWidget = new QPushButton(Output);
+        showNetWidget->setObjectName(QString::fromUtf8("showNetWidget"));
+        showNetWidget->setGeometry(QRect(1210, 60, 120, 30));
 
         retranslateUi(Output);
 
@@ -193,6 +218,12 @@ public:
         label_5->setText(QCoreApplication::translate("Output", "\345\274\202\345\270\270\344\277\241\346\201\257", nullptr));
         label_6->setText(QCoreApplication::translate("Output", "\346\226\207\344\273\266\347\233\221\346\216\247", nullptr));
         label_7->setText(QCoreApplication::translate("Output", "\346\263\250\345\206\214\350\241\250\347\233\221\346\216\247", nullptr));
+        showLogWidget->setText(QCoreApplication::translate("Output", "\346\211\223\345\274\200\346\227\245\345\277\227\347\252\227\345\217\243", nullptr));
+        showHeapWidget->setText(QCoreApplication::translate("Output", "\346\211\223\345\274\200\345\240\206\347\252\227\345\217\243", nullptr));
+        showFileWidget->setText(QCoreApplication::translate("Output", "\346\211\223\345\274\200\346\226\207\344\273\266\347\252\227\345\217\243", nullptr));
+        showRegWidget->setText(QCoreApplication::translate("Output", "\346\211\223\345\274\200\346\263\250\345\206\214\350\241\250\347\252\227\345\217\243", nullptr));
+        showExceptionWidget->setText(QCoreApplication::translate("Output", "\346\211\223\345\274\200\345\274\202\345\270\270\347\252\227\345\217\243", nullptr));
+        showNetWidget->setText(QCoreApplication::translate("Output", "\346\211\223\345\274\200\347\275\221\347\273\234\347\252\227\345\217\243", nullptr));
     } // retranslateUi
 
 };

@@ -12,23 +12,38 @@ SOURCES += \
     Inject.cpp \
     Util.cpp \
     colorfulmodel.cpp \
+    exceptionwidget.cpp \
+    filewidget.cpp \
+    heapwidget.cpp \
     hookanalysis.cpp \
     injectthread.cpp \
+    logwidget.cpp \
     main.cpp \
     output.cpp \
+    regwidget.cpp \
     widget.cpp
 
 HEADERS += \
     Inject.h \
     Util.h \
     colorfulmodel.h \
+    exceptionwidget.h \
+    filewidget.h \
+    heapwidget.h \
     hookanalysis.h \
     injectthread.h \
+    logwidget.h \
     output.h \
+    regwidget.h \
     widget.h
 
 FORMS += \
+    exceptionwidget.ui \
+    filewidget.ui \
+    heapwidget.ui \
+    logwidget.ui \
     output.ui \
+    regwidget.ui \
     widget.ui
 
 LIBS += \

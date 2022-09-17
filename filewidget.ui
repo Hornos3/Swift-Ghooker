@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>fileWidget</class>
+ <widget class="QWidget" name="fileWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>850</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QListView" name="access">
+   <property name="geometry">
+    <rect>
+     <x>11</x>
+     <y>11</y>
+     <width>160</width>
+     <height>231</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListView" name="shareMode">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>261</y>
+     <width>160</width>
+     <height>231</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListView" name="createDisp">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>11</y>
+     <width>250</width>
+     <height>231</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QListView" name="flagAttr">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>261</y>
+     <width>250</width>
+     <height>231</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QTreeView" name="treeView">
+   <property name="geometry">
+    <rect>
+     <x>176</x>
+     <y>11</y>
+     <width>410</width>
+     <height>481</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

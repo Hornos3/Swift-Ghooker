@@ -43,6 +43,7 @@ public:
     QCheckBox *InjRegDeleteValue;
     QCheckBox *InjRegCloseKey;
     QCheckBox *InjRegOpenKeyEx;
+    QCheckBox *InjCloseHandle;
 
     void setupUi(QWidget *Widget)
     {
@@ -243,6 +244,14 @@ public:
         palette18.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
         palette18.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
         InjRegOpenKeyEx->setPalette(palette18);
+        InjCloseHandle = new QCheckBox(Widget);
+        InjCloseHandle->setObjectName(QString::fromUtf8("InjCloseHandle"));
+        InjCloseHandle->setGeometry(QRect(40, 500, 131, 26));
+        QPalette palette19;
+        palette19.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette19.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette19.setBrush(QPalette::Disabled, QPalette::WindowText, brush4);
+        InjCloseHandle->setPalette(palette19);
 
         retranslateUi(Widget);
 
@@ -274,6 +283,7 @@ public:
         InjRegDeleteValue->setText(QCoreApplication::translate("Widget", "RegDeleteValue", nullptr));
         InjRegCloseKey->setText(QCoreApplication::translate("Widget", "RegCloseKey", nullptr));
         InjRegOpenKeyEx->setText(QCoreApplication::translate("Widget", "RegOpenKeyEx", nullptr));
+        InjCloseHandle->setText(QCoreApplication::translate("Widget", "CloseHandle", nullptr));
     } // retranslateUi
 
 };

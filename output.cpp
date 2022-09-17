@@ -43,6 +43,12 @@ Output::Output(QWidget *parent) :
                                             "FILE_FLAG_NO_BUFFERING" << "FILE_FLAG_RANDOM_ACCESS" <<
                                             "FILE_FLAG_SEQUENTIAL_SCAN" << "FILE_FLAG_DELETE_ON_CLOSE");
 
+    fWdg = new fileWidget(fileViewModel, fileAccessModel, fileShareModeModel, fileCreateDispModel, fileFlagAttrModel, analyser);
+    rWdg = new regWidget(regeditModel);
+    hWdg = new heapWidget(heapViewModel);
+    eWdg = new exceptionWidget(exceptionModel);
+    lWdg = new logWidget(&analyser->logList, logWidgetModel);
+
     ui->processInfo->setModel(model);
     ui->heapView->setModel(heapViewModel);
     ui->fileView->setModel(fileViewModel);
@@ -125,6 +131,7 @@ void Output::updateLog(){
 
 void Output::closeEvent(QCloseEvent * event){
     ui->logInfo->clear();
+    event->accept();
 }
 
 void Output::trimExeInfo(QString& fullInfo){
@@ -156,6 +163,9 @@ Output::~Output()
 void Output::on_fileView_clicked(const QModelIndex &index)
 {
     int selectedRow = index.row();
+    if(index.parent().isValid())
+        return;
+
     fileHandleAttr handle = analyser->fileHandles[fileViewModel->item(selectedRow)->text().toULongLong(nullptr, 16)];
     list<int> fileAccess = analyser->getGenericAccess(handle.access);
     auto iter = fileAccess.begin();
@@ -229,5 +239,35 @@ void Output::on_fileView_clicked(const QModelIndex &index)
             fileFlagAttrModel->data(idx, Qt::BackgroundRole);
         }
     }
+}
+
+
+void Output::on_showFileWidget_clicked()
+{
+    fWdg->show();
+}
+
+
+void Output::on_showRegWidget_clicked()
+{
+    rWdg->show();
+}
+
+
+void Output::on_showHeapWidget_clicked()
+{
+    hWdg->show();
+}
+
+
+void Output::on_showExceptionWidget_clicked()
+{
+    eWdg->show();
+}
+
+
+void Output::on_showLogWidget_clicked()
+{
+    lWdg->show();
 }
 

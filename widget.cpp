@@ -14,11 +14,14 @@ extern void (*InjOpenFileFunc)(bool);
 extern void (*InjCreateFileFunc)(bool);
 extern void (*InjReadFileFunc)(bool);
 extern void (*InjWriteFileFunc)(bool);
+extern void (*InjCloseHandleFunc)(bool);
 extern void (*InjRegCreateKeyExFunc)(bool);
 extern void (*InjRegSetValueExFunc)(bool);
 extern void (*InjRegDeleteValueFunc)(bool);
 extern void (*InjRegCloseKeyFunc)(bool);
 extern void (*InjRegOpenKeyExFunc)(bool);
+
+extern char* (*getLastHookBeforeCall)(void);
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -36,6 +39,7 @@ Widget::Widget(QWidget *parent)
     connect(ui->InjCreateFile, &QCheckBox::stateChanged, this, &Widget::setCreateFileInj);
     connect(ui->InjReadFile, &QCheckBox::stateChanged, this, &Widget::setReadFileInj);
     connect(ui->InjWriteFile, &QCheckBox::stateChanged, this, &Widget::setWriteFileInj);
+    connect(ui->InjCloseHandle, &QCheckBox::stateChanged, this, &Widget::setCloseHandleInj);
     connect(ui->InjRegCreateKeyEx, &QCheckBox::stateChanged, this, &Widget::setRegCreateKeyExInj);
     connect(ui->InjRegSetValueEx, &QCheckBox::stateChanged, this, &Widget::setRegSetValueExInj);
     connect(ui->InjRegDeleteValue, &QCheckBox::stateChanged, this, &Widget::setRegDeleteValueInj);
@@ -49,7 +53,7 @@ Widget::~Widget()
 }
 
 void Widget::on_selectFile_clicked(){
-    getFilenameAndShow(ui->targetFile, "可执行文件(*.exe)");
+    getFilenameAndShow(ui->targetFile, "executable file(*.exe)");
 }
 
 void Widget::on_startAnalysis_clicked(){
@@ -64,6 +68,7 @@ void Widget::on_startAnalysis_clicked(){
         output->analyser->analyseFile = false;
     }
     std::wstring filename = ui->targetFile->text().toStdWString();
+    output->analyser->exeFileName = ui->targetFile->text();
     if(filename != L"......"){
         output->show();
 
@@ -76,6 +81,32 @@ void Widget::on_startAnalysis_clicked(){
 
         while(!inject.isFinished())
             QCoreApplication::processEvents();
+
+        output->updateLog();
+
+        QString suspectedLastHook = getLastHookBeforeCall();
+        output->analyser->appendRecord(suspectedLastHook, true);
+
+        if(output->analyser->analyseHeap){
+            if(output->analyser->chunksExpl->empty())
+                QMessageBox::information(this, "堆监控总结", "程序结束前，所有堆块都已被释放");
+            else{
+                QString info = "程序结束前，有";
+                info += to_string(output->analyser->chunksExpl->size()).c_str();
+                info += "个堆块没有被释放。";
+                if(output->analyser->chunksExpl->size() > 50){
+                    info += "未被释放的堆块过多，无法展示，请移步堆监控查看，此时这里保存有程序执行最后一刻的堆空间布局监控情况";
+                }else{
+                    info += "分别为：";
+                    for(uint64_t address : *output->analyser->chunksExpl){
+                        info += ull2a(address);
+                        info += ", ";
+                    }
+                    info += "有关堆块更加详细的信息，请移步堆监控进行查看。";
+                }
+                QMessageBox::information(this, "堆监控总结", info);
+            }
+        }
     }
     else
         QMessageBox::warning(this, "未指定文件", "你还没有指定要分析的可执行文件，请先指定可执行文件！");
@@ -139,6 +170,12 @@ void Widget::setWriteFileInj(){
     bool choice = ui->InjWriteFile->isChecked();
     output->analyser->injWriteFile = choice;
     InjWriteFileFunc(choice);
+}
+
+void Widget::setCloseHandleInj(){
+    bool choice = ui->InjCloseHandle->isChecked();
+    output->analyser->injCloseHandle = choice;
+    InjCloseHandleFunc(choice);
 }
 
 void Widget::setRegCreateKeyExInj(){

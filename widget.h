@@ -26,6 +26,7 @@ public:
     void setCreateFileInj();
     void setReadFileInj();
     void setWriteFileInj();
+    void setCloseHandleInj();
     void setRegCreateKeyExInj();
     void setRegSetValueExInj();
     void setRegDeleteValueInj();

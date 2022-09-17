@@ -9,6 +9,11 @@
 #include <QStringListModel>
 #include "hookanalysis.h"
 #include "colorfulmodel.h"
+#include "filewidget.h"
+#include "regwidget.h"
+#include "heapwidget.h"
+#include "exceptionwidget.h"
+#include "logwidget.h"
 
 #define FILEACCESS_COUNT 3
 #define FILESHAREMODE_COUNT 3
@@ -33,7 +38,8 @@ public:
     colorfulModel* fileShareModeModel;
     colorfulModel* fileCreateDispModel;
     colorfulModel* fileFlagAttrModel;
-    hookAnalysis* analyser = new hookAnalysis(heapViewModel, fileViewModel, exceptionModel, regeditModel);
+    QStandardItemModel* logWidgetModel = new QStandardItemModel(this);
+    hookAnalysis* analyser = new hookAnalysis(heapViewModel, fileViewModel, exceptionModel, regeditModel, logWidgetModel);
 
     explicit Output(QWidget *parent = nullptr);
     void updateLog();
@@ -42,8 +48,24 @@ public:
     void trimExeInfo(QString& fullInfo);
     ~Output();
 
+    fileWidget* fWdg;
+    regWidget* rWdg;
+    heapWidget* hWdg;
+    exceptionWidget* eWdg;
+    logWidget* lWdg;
+
 private slots:
     void on_fileView_clicked(const QModelIndex &index);
+
+    void on_showFileWidget_clicked();
+
+    void on_showRegWidget_clicked();
+
+    void on_showHeapWidget_clicked();
+
+    void on_showExceptionWidget_clicked();
+
+    void on_showLogWidget_clicked();
 
 private:
     Ui::Output *ui;
