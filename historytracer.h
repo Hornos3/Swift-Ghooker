@@ -2,6 +2,7 @@
 #define HISTORYTRACER_H
 
 #include "hookanalysis.h"
+#include <QProgressDialog>
 
 class historyTracer
 {
@@ -10,7 +11,9 @@ public:
                   QStandardItemModel* exceptionModel, QStandardItemModel* regeditModel,
                   QStandardItemModel* logWidgetModel, QStandardItemModel* netModel,
                   QStandardItemModel* memoryModel, QStandardItemModel* moduleModel);
-    historyTracer(hookAnalysis* analyser);
+    historyTracer(hookAnalysis* analyser, QWidget* parent = nullptr);
+
+    QWidget* parent;
     std::vector<fullLog>* logList;
     hookAnalysis* mainAnalyser;
     int totalStep = 0;
@@ -20,6 +23,7 @@ public:
     bool stepBack();
     bool stepFront();
     bool jumpTo(int logId);
+
 };
 
 #endif // HISTORYTRACER_H

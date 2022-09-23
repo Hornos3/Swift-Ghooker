@@ -134,6 +134,10 @@ void Output::initialize(std::vector<bool> choices){
     analyser->injConnect = choices[19];
     analyser->injSocket = choices[20];
     analyser->injAccept = choices[21];
+    analyser->analyseHeap = choices[2] && choices[3] && choices[4] && choices[5];
+    analyser->analyseFile = choices[6] && choices[7] && choices[8] && choices[9];
+    analyser->analyseReg = choices[10] && choices[11] && choices[12] && choices[13] && choices[14] && choices[15];
+    analyser->analyseNet = choices[16] && choices[17] && choices[18] && choices[19] && choices[20] && choices[21];
 }
 
 QString Output::getInjOptions(){
@@ -165,7 +169,6 @@ QString Output::getInjOptions(){
 
 void Output::updateLog(){
 //    lock->lockForWrite();
-
     while(!getMutexSignal);
 
     ifstream in("./hookLog/lasthook.tmp");
@@ -198,7 +201,7 @@ void Output::updateLog(){
         showExeInfo();
         assert(ui->logInfo->toPlainText().isEmpty());
         ui->logInfo->appendPlainText(analyser->exeInfo.to_string() + getInjOptions() +
-                                     "****************************************\n");
+                                     "\n************************************************************\n");
     }
     if(!mayRepeat){
         trimExeInfo(logQ);
@@ -217,6 +220,12 @@ void Output::updateLog(){
 }
 
 void Output::closeEvent(QCloseEvent * event){
+    if(loadHistory){
+        event->accept();
+        delete this->analyser;
+        delete this;
+        return;
+    }
     if(injThread != nullptr && !injThread->isFinished()){
         QMessageBox::warning(this, "警告", "目标进程还没有执行完毕，无法关闭此分析界面！");
         event->ignore();
@@ -233,6 +242,8 @@ void Output::saveFullLog(){
     QString allLog = ui->logInfo->toPlainText();
 
     ofstream logFile("./hookLog/hookLog_complete.log", ios::trunc);
+    QString header = ("hook count: " + to_string(analyser->logList.size()) + "\n").c_str();
+    logFile.write(header.toStdString().c_str(), header.length());
     logFile.write(allLog.toStdString().c_str(), allLog.length());
     logFile.close();
 
@@ -418,3 +429,6 @@ void Output::on_prevStep_clicked()
 
 }
 
+void Output::appendLog(QString log){
+    ui->logInfo->appendPlainText(log);
+}

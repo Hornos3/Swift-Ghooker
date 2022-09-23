@@ -51,7 +51,7 @@ public:
     hookAnalysis* analyser = new hookAnalysis(heapViewModel, fileViewModel, exceptionModel,
                                               regeditModel, logWidgetModel, netModel,
                                               memoryModel, moduleModel);
-    historyTracer* tracer = new historyTracer(analyser);
+    historyTracer* tracer = new historyTracer(analyser, this);
     std::vector<bool> injectionOptions;
 
     explicit Output(std::vector<bool> choices = {}, QWidget *parent = nullptr);
@@ -61,6 +61,7 @@ public:
     void closeEvent(QCloseEvent * event);
     void trimExeInfo(QString& fullInfo);
     void saveFullLog();
+    void appendLog(QString log);
     QString getInjOptions();
     ~Output();
 
@@ -72,6 +73,7 @@ public:
     memoryWidget* mWdg;
     netWidget* nWdg;
     moduleWidget* moWdg;
+    bool loadHistory = false;
 
     injectThread* injThread;
 

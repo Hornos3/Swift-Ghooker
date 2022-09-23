@@ -120,6 +120,9 @@ void Widget::on_startAnalysis_clicked(){
 
         QString suspectedLastHook = getLastHookBeforeCall();
         output->analyser->appendRecord(suspectedLastHook, nullptr, 0, true);
+        output->trimExeInfo(suspectedLastHook);
+        output->appendLog(suspectedLastHook + "Return Value: (UNKNOWN) 0xDEADBEEFCAFEBABE / <THIS_API_CAUSES_CRUSH>\n"
+                                              "----------------------------------------------------\n");
 
         if(output->analyser->analyseHeap){
             if(output->analyser->chunksExpl->empty())
@@ -145,6 +148,12 @@ void Widget::on_startAnalysis_clicked(){
     }
     else
         QMessageBox::warning(this, "未指定文件", "你还没有指定要分析的可执行文件，请先指定可执行文件！");
+}
+
+void Widget::on_startAnalyseHistory_clicked()
+{
+    output->loadHistory = true;
+    output->tracer->initialize();
 }
 
 std::vector<bool> Widget::getAllChoices(){
@@ -501,4 +510,5 @@ void Widget::on_allNet_clicked()
         ui->InjAccept->setChecked(false);
     }
 }
+
 

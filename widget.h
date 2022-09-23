@@ -57,5 +57,6 @@ private slots:
     void on_allFile_clicked();
     void on_allReg_clicked();
     void on_allNet_clicked();
+    void on_startAnalyseHistory_clicked();
 };
 #endif // WIDGET_H
