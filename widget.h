@@ -2,10 +2,12 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include <QVideoWidget>
+#include <QMediaPlayer>
 #include "output.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class Widget; }
+namespace Ui { class Widget;}
 QT_END_NAMESPACE
 
 class Widget : public QWidget
@@ -32,6 +34,15 @@ public:
     void setRegDeleteValueInj();
     void setRegCloseKeyInj();
     void setRegOpenKeyExInj();
+    void setRegDeleteKeyExInj();
+    void setSendInj();
+    void setRecvInj();
+    void setBindInj();
+    void setConnectInj();
+    void setSocketInj();
+    void setAcceptInj();
+
+    std::vector<bool> getAllChoices();
 
     ~Widget();
 
@@ -41,5 +52,10 @@ private:
 private slots:
     void on_selectFile_clicked();
     void on_startAnalysis_clicked();
+    void on_allMessageBox_clicked();
+    void on_allHeap_clicked();
+    void on_allFile_clicked();
+    void on_allReg_clicked();
+    void on_allNet_clicked();
 };
 #endif // WIDGET_H

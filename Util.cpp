@@ -56,3 +56,15 @@ char* ull2a(uint64_t value, bool containsPrefix){
         sprintf_s(ret, 19, "%zx", value);
     return ret;
 }
+
+QString ip_int2str(unsigned ip){
+    QString ret;
+    ret += to_string(ip & 0xFF).c_str();
+    ret += ".";
+    ret += to_string((ip >> 8) & 0xFF).c_str();
+    ret += ".";
+    ret += to_string((ip >> 16) & 0xFF).c_str();
+    ret += ".";
+    ret += to_string(ip >> 24).c_str();
+    return ret;
+}

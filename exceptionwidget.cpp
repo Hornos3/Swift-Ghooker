@@ -7,6 +7,8 @@ exceptionWidget::exceptionWidget(QStandardItemModel *exceptionModel, QWidget *pa
 {
     ui->setupUi(this);
     ui->tableView->setModel(exceptionModel);
+    ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    this->setWindowIcon(QIcon(":/background/icon.ico"));
 }
 
 exceptionWidget::~exceptionWidget()

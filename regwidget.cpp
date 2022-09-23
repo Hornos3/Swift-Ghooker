@@ -7,6 +7,8 @@ regWidget::regWidget(QStandardItemModel *regModel, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->treeView->setModel(regModel);
+    ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    this->setWindowIcon(QIcon(":/background/icon.ico"));
 }
 
 regWidget::~regWidget()

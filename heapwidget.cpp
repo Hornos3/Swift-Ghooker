@@ -7,6 +7,8 @@ heapWidget::heapWidget(QStandardItemModel* heapModel, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->treeView->setModel(heapModel);
+    ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    this->setWindowIcon(QIcon(":/background/icon.ico"));
 }
 
 heapWidget::~heapWidget()

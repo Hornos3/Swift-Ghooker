@@ -12,14 +12,30 @@
 #define REGKEYVAL 1
 #define REGSTATUS 2
 
+#define MEMADDR 0
+#define MEMLENGTH 1
+#define MEMCONTENTTYPE 2
+
 hookAnalysis::hookAnalysis(QStandardItemModel* tableModel, QStandardItemModel* fileViewModel,
                            QStandardItemModel* exceptionModel, QStandardItemModel* regeditModel,
-                           QStandardItemModel* logWidgetModel){
+                           QStandardItemModel* logWidgetModel, QStandardItemModel *netModel,
+                           QStandardItemModel *memoryModel, QStandardItemModel *moduleModel){
     this->heapViewModel = tableModel;
     this->fileViewModel = fileViewModel;
     this->exceptionModel = exceptionModel;
     this->regeditModel = regeditModel;
     this->logWidgetModel = logWidgetModel;
+    this->netModel = netModel;
+    this->memoryModel = memoryModel;
+    this->moduleModel = moduleModel;
+}
+
+uint64_t getCallerRIP(){
+    uint64_t fill;
+    fill = 0xdeadbeef;
+    fill = *(uint64_t*)(&fill + 2);         // get rbp of this function
+    fill = *(uint64_t*)(fill + 0x18);       // get rip of last function
+    return fill;
 }
 
 /**
@@ -27,7 +43,7 @@ hookAnalysis::hookAnalysis(QStandardItemModel* tableModel, QStandardItemModel* f
  * @param newRecord 新一条记录
  * @return 处理是否产生异常
  */
-bool hookAnalysis::appendRecord(QString newRecord, bool lastRecord){
+bool hookAnalysis::appendRecord(QString newRecord, char *binBuf, int bufSize, bool lastRecord){
     fullLog latestLog;
     size_t idxptr;
     bool useVar = false;
@@ -37,6 +53,31 @@ bool hookAnalysis::appendRecord(QString newRecord, bool lastRecord){
     argType returnType;
     realArg retVal;
     QString line;
+    QList<QString> dllList;
+
+    // getCallerRIP();
+
+    // 获取进程中所有模块（exe文件、加载的dll文件）的名字、加载基地址等信息
+    if(!modulesGot){
+        ifstream moduleFile("./hookLog/processList.txt");
+        QString content;
+        char buffer[0x10000] = {0};
+        moduleFile.read(buffer, 0x10000);
+        content = buffer;
+        auto mlines = content.split("\n");
+        for(const auto &mod : mlines){
+            if(mod.length() == 0)
+                continue;
+            auto ele = mod.split(" ");
+            moduleModel->appendRow(QList<QStandardItem*>() <<
+                                   new QStandardItem(ele[0]) <<
+                                   new QStandardItem(ele[1]) <<
+                                   new QStandardItem(ele[2]) <<
+                                   new QStandardItem(ele[3]) <<
+                                   new QStandardItem(ele[4]));
+        }
+        modulesGot = true;
+    }
 
     // 获取该条记录的编号（此编号唯一确定一条记录，避免重复记录）
     idxptr = newRecord.indexOf("ID: ");
@@ -98,11 +139,11 @@ bool hookAnalysis::appendRecord(QString newRecord, bool lastRecord){
         // 当类型是字符串时，获取字符串的内容
         QString str;
         if(thisArg.type == charptr || thisArg.type == wcharptr || (useVar && argName == "lpData")){
-            assert(elements.size() >= 6);
-            str = line.split("\"").at(1);
+            if(elements.size() >= 6){
+                str = line.split("\"").at(1);
+                thisArg.str = new QString(str);
+            }
         }
-        if(!str.isEmpty())
-            thisArg.str = new QString(str);
 
         // 保存参数
         latestLog.args.insert({argName, thisArg});
@@ -119,6 +160,15 @@ bool hookAnalysis::appendRecord(QString newRecord, bool lastRecord){
         exeInfo.processName = line.mid(22);
         exeFileName = exeInfo.processName;
     }
+
+    // 获取钩子信息——堆栈调用链
+    idxeptr = newRecord.indexOf("\n", idxptr);
+    line = newRecord.mid(idxptr, idxeptr - idxptr);
+    // qDebug() << line;
+    idxptr = idxeptr + 1;
+    line = line.mid(19);
+    dllList = line.split("->");
+    latestLog.callChain = dllList;
 
     // 获取exe加载信息——stdin句柄的值
     idxeptr = newRecord.indexOf("\n", idxptr);
@@ -195,7 +245,8 @@ bool hookAnalysis::appendRecord(QString newRecord, bool lastRecord){
     line = newRecord.mid(idxptr, idxeptr - idxptr);
     idxptr = idxeptr + 1;
     elements = line.split(" ");
-    returnType = getType(elements[2].mid(1, elements[2].length() - 2));
+    retVal.originalTypeName = elements[2].mid(1, elements[2].length() - 2);
+    returnType = getType(retVal.originalTypeName);
     retVal.type = returnType;
 
     // 保存返回值的整数值
@@ -207,8 +258,8 @@ bool hookAnalysis::appendRecord(QString newRecord, bool lastRecord){
 
     // 保存返回值的字符串内容
     if(retVal.type == charptr || retVal.type == wcharptr){
-        assert(elements.size() >= 6);
-        str = line.split("\"").at(1);
+        if(elements.size() >= 6)
+            str = line.split("\"").at(1);
     }
     if(!str.isEmpty())
         retVal.str = new QString(str);
@@ -250,7 +301,7 @@ bool hookAnalysis::appendRecord(QString newRecord, bool lastRecord){
             latestLog.argsAfterCall.insert({argName, thisArg});
 
             idxeptr = newRecord.indexOf("\n", idxptr);
-            line = newRecord.mid(idxptr + 1, idxeptr - idxptr);
+            line = newRecord.mid(idxptr, idxeptr - idxptr);
             idxptr = idxeptr + 1;
         }
     }
@@ -264,19 +315,36 @@ bool hookAnalysis::appendRecord(QString newRecord, bool lastRecord){
     else if(lastRecord)
         latestLog.retVal.value.imm = 0xdeadbeefcafebabe;
     logList.push_back(latestLog);
-    updateRecordBeauty(latestLog);
-    if(latestLog.funcName.contains("Heap") && analyseHeap)
-        analyseNewHeapInst(latestLog);
-    else if((latestLog.funcName.contains("File") || latestLog.funcName == "CloseHandle") && analyseFile)
-        analyseNewFileInst(latestLog);
-    else if(latestLog.funcName.contains("Reg") && analyseReg)
-        analyseNewRegInst(latestLog);
+    updateRecordBeauty(latestLog, lastRecord);
+    diverter(latestLog, binBuf);
     return false;
 }
 
-bool hookAnalysis::updateRecordBeauty(fullLog latestLog){
+void hookAnalysis::diverter(fullLog latestLog, char* binBuf){
+    QString fName = latestLog.funcName;
+    if(fName.contains("Heap") && analyseHeap)
+        analyseNewHeapInst(latestLog);
+    else if((fName.contains("File") || fName == "CloseHandle") && analyseFile)
+        analyseNewFileInst(latestLog, binBuf);
+    else if(fName.contains("Reg") && analyseReg)
+        analyseNewRegInst(latestLog);
+    else if(fName == "send" && analyseNet)
+        newSend(latestLog, binBuf);
+    else if(fName == "recv" && analyseNet)
+        newRecv(latestLog, binBuf);
+    else if(fName == "connect" && analyseNet)
+        newConnection(latestLog);
+    else if(fName == "bind" && analyseNet)
+        bindLocalSocket(latestLog);
+    else if(fName == "socket" && analyseNet)
+        addLocalUnbindedSocket(latestLog);
+    else if(fName == "accept" && analyseNet)
+        newAcception(latestLog);
+}
+
+bool hookAnalysis::updateRecordBeauty(fullLog latestLog, bool lastRecord){
     int rowCount = logWidgetModel->rowCount();
-    logWidgetModel->insertRow(rowCount, QList<QStandardItem*>() <<
+    logWidgetModel->appendRow(QList<QStandardItem*>() <<
                               new QStandardItem(to_string(latestLog.id).c_str()) <<
                               new QStandardItem(latestLog.funcName));
     auto father = logWidgetModel->item(rowCount);
@@ -293,6 +361,22 @@ bool hookAnalysis::updateRecordBeauty(fullLog latestLog){
                               new QStandardItem(ull2a(arg.second.value.imm)) <<
                               new QStandardItem(*arg.second.str));
     }
+    if(lastRecord && latestLog.retVal.value.imm == 0xdeadbeefcafebabe)
+        father->appendRow(QList<QStandardItem*>() <<
+                          new QStandardItem("返回值") <<
+                          new QStandardItem(latestLog.retVal.originalTypeName) <<
+                          new QStandardItem(ull2a(latestLog.retVal.value.imm)) <<
+                          new QStandardItem("<无法获取返回值，调用本API直接导致程序崩溃>"));
+    else
+        father->appendRow(QList<QStandardItem*>() <<
+                          new QStandardItem("返回值") <<
+                          new QStandardItem(latestLog.retVal.originalTypeName) <<
+                          new QStandardItem(ull2a(latestLog.retVal.value.imm)) <<
+                          (latestLog.retVal.str == nullptr ? nullptr : new QStandardItem(*latestLog.retVal.str)));
+    auto callLayers = new QStandardItem("模块调用层级");
+    for(int i=0; i<latestLog.callChain.size(); i++)
+        callLayers->appendRow(new QStandardItem(latestLog.callChain[i]));
+    father->appendRow(QList<QStandardItem*>() << callLayers);
     return true;
 }
 
@@ -300,7 +384,7 @@ argType hookAnalysis::getType(QString input){
     argType type = others;
     if(input == "HANDLE" || input == "LPVOID" || input == "HKEY")
         type = voidptr;
-    else if(input == "DWORD" || input == "UINT" || input == "REGSAM")
+    else if(input == "DWORD" || input == "UINT" || input == "REGSAM" || input == "ULONG")
         type = uint32;
     else if(input == "int" || input == "HFILE")
         type = int32;
@@ -312,6 +396,8 @@ argType hookAnalysis::getType(QString input){
         type = wcharptr;
     else if(input == "BOOL")
         type = Bool;
+    else if(input == "short")
+        type = int16;
     return type;
 }
 
@@ -337,15 +423,15 @@ void hookAnalysis::analyseNewHeapInst(fullLog newHeapLog){
 }
 
 // 文件操作分析入口函数，对OpenFile、CreateFile、ReadFile、WriteFile相关文件进行跟踪分析。
-void hookAnalysis::analyseNewFileInst(fullLog newFileLog){
+void hookAnalysis::analyseNewFileInst(fullLog newFileLog, char* binBuf){
     if(newFileLog.funcName == "OpenFile"){
 
     }else if(newFileLog.funcName == "CreateFile"){
         addFileHandle(newFileLog);
     }else if(newFileLog.funcName == "ReadFile"){
-        addReadWriteFileRecord(newFileLog, true);
+        addReadWriteFileRecord(newFileLog, binBuf, true);
     }else if(newFileLog.funcName == "WriteFile"){
-        addReadWriteFileRecord(newFileLog, false);
+        addReadWriteFileRecord(newFileLog, binBuf, false);
     }else if(newFileLog.funcName == "CloseHandle"){
         closeFileHandle(newFileLog);
     }else{
@@ -358,13 +444,15 @@ void hookAnalysis::analyseNewRegInst(fullLog newRegLog){
     if(newRegLog.funcName == "RegCreateKeyEx"){
         addRegKey(newRegLog);
     }else if(newRegLog.funcName == "RegSetValueEx"){
-        setRegKey(newRegLog);
+        setRegVal(newRegLog);
     }else if(newRegLog.funcName == "RegDeleteValue"){
-        deleteRegKey(newRegLog);
+        deleteRegValue(newRegLog);
     }else if(newRegLog.funcName == "RegCloseKey"){
         closeRegKey(newRegLog);
     }else if(newRegLog.funcName == "RegOpenKeyEx"){
         openRegKey(newRegLog);
+    }else if(newRegLog.funcName == "RegDeleteKeyEx"){
+        deleteRegKey(newRegLog);
     }else
         exit(1);
 }
@@ -439,8 +527,11 @@ bool hookAnalysis::destroyHandle(fullLog newHeapLog){
     QStandardItem* father = heapViewModel->item(findHandleIdx);
     for(int i=0; i<father->rowCount(); i++){
         // 判断CHUNK的使用状态
-        if(father->child(i, HEAPSTATUS)->text() == "正在使用")      // 正在使用的CHUNK所在的HANDLE被销毁
+        if(father->child(i, HEAPSTATUS)->text() == "正在使用"){      // 正在使用的CHUNK所在的HANDLE被销毁
             memoryLeakRisks.insert({newHeapLog.id, father->child(i)->text().toULongLong(nullptr, 16)});
+            handleException({newHeapLog.id, DestroyBeforeFree},
+                            new exceptionInfo{.addressWithException = father->child(i)->text().toULongLong(nullptr, 16)});
+        }
         father->child(i, HEAPSTATUS)->setText("无效");
     }
     heapHandlesExpl->erase(heapHandlesExpl->find(handleToDestroy));
@@ -489,7 +580,8 @@ bool hookAnalysis::addChunk(fullLog newHeapLog){
             // 首先判断这个找到的CHUNK是否正在被使用，如果正在被使用，那么产生异常
             // （这种异常经常会产生，因为有的CHUNK并不是程序本身调用malloc等堆相关函数来产生的，因此有的CHUNK被释放的操作可能不能跟踪到）
             // 但这里只会对这种情况记录异常，如果size有改动还是会继续进行修改。
-            if(father->child(findChunkIdx, HEAPSTATUS)->text() == "正在使用"){
+            if(father->child(findChunkIdx, HEAPSTATUS)->text() == "正在使用" &&
+                    heapHandlesExpl->find(handleAddr) != heapHandlesExpl->end()){
                 handleException({newHeapLog.id, AllocSameChunk},
                                 new exceptionInfo{.addressWithException = allocatedChunk});
             }
@@ -562,8 +654,8 @@ bool hookAnalysis::freeChunk(fullLog newHeapLog){
         }else{
             father->child(findChunkIdx, HEAPSTATUS)->setText("已被释放");
             auto removeIter = chunksExpl->find(victim);
-            assert(removeIter != chunksExpl->end());
-            chunksExpl->erase(removeIter);
+            if(removeIter != chunksExpl->end())
+                chunksExpl->erase(removeIter);
         }
     }
     validFreeCount++;
@@ -754,11 +846,14 @@ bool hookAnalysis::addFileHandle(fullLog newFileLog){
  * @param newFileLog 最新操作日志
  * @return 是否添加成功
  */
-bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, bool isRead){
+bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, char* binBuf, bool isRead){
     // 文件是否读取成功
     bool success = newFileLog.retVal.value.imm;
+    // 是否与exe文件相关联
+    bool relatedToExe = false;
     // 操作的文件句柄
     uint64_t handle = newFileLog.args["hFile"].value.imm;
+    uint64_t address = newFileLog.args["lpBuffer"].value.imm;
     // 如果这个文件句柄是标准输入输出句柄，则不进行分析
     if(handle == exeInfo.STDIN || handle == exeInfo.STDOUT || handle == exeInfo.STDERR)
         return true;
@@ -773,39 +868,83 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, bool isRead){
     auto father = fileViewModel->item(findHandleIdx);
     QString fName = fileViewModel->item(findHandleIdx, FILENAME)->text();
     QString fileSuffix = fName.split(".").last();
-    if(fileSuffix == "exe" || fileSuffix == "dll" || fileSuffix == "ocx"){
+    if(fileSuffix == "exe" || fileSuffix == "dll" || fileSuffix == "ocx" || fileSuffix == "bat" ||
+            fileSuffix == "vbs"){
+        relatedToExe = true;
         if(isRead){
             handleException({newFileLog.id, TryReadExecutableFile},
                             new exceptionInfo{.fileName = new QString(fName)});
-            exeFileContentPtr.insert({newFileLog.args["lpBuffer"].value.imm,
-                                         newFileLog.args["nNumberOfBytesToRead"].value.imm});
-        }
-        else{
+        }else{
             handleException({newFileLog.id, TryWriteExecutableFile},
                             new exceptionInfo{.fileName = new QString(fName)});
         }
     }
     if(isRead){
+        bufContent type = relatedToExe ? ExeFileContent_FROMFILE : ToBeCatagorized_FROMFILE;
         // 要读取的字节数
         uint64_t requiredBytes = newFileLog.args["nNumberOfBytesToRead"].value.imm;
         // 实际读取的字节数
         uint64_t actualBytes = newFileLog.argsAfterCall["lpNumberOfBytesRead"].value.imm;
+
         father->insertRow(father->rowCount(), QList<QStandardItem*>() <<
                           new QStandardItem("READ") <<
                           new QStandardItem(ull2a(requiredBytes)) <<
                           new QStandardItem(ull2a(actualBytes)) <<
                           new QStandardItem(success ? "SUCCESS" : "FAILED"));
-    }
-    else{
-        // 要读取的字节数
+        type = addMemory(newFileLog.id, address, binBuf, actualBytes, type);
+        int memInsIdx = findHandle(address, memoryModel);
+        if(memInsIdx < 0){
+            memoryModel->insertRow(-memInsIdx-1, QList<QStandardItem*>() <<
+                                   new QStandardItem(ull2a(address)) <<
+                                   new QStandardItem(ull2a(actualBytes)) <<
+                                   new QStandardItem(bufType[(int)type]));
+            memoryModel->item(-memInsIdx-1)->appendRow(QList<QStandardItem*>() <<
+                                                       new QStandardItem(to_string(newFileLog.id).c_str()) <<
+                                                       new QStandardItem(ull2a(actualBytes)) <<
+                                                       new QStandardItem(memInstType[((int)type & 12) >> 2]) <<
+                                                       new QStandardItem(fName));
+        }else{
+            if(actualBytes > 0)
+                memoryModel->item(memInsIdx, 2)->setText(bufType[(int)type]);
+            memoryModel->item(memInsIdx)->appendRow(QList<QStandardItem*>() <<
+                                                       new QStandardItem(to_string(newFileLog.id).c_str()) <<
+                                                       new QStandardItem(ull2a(actualBytes)) <<
+                                                       new QStandardItem(memInstType[((int)type & 12) >> 2]) <<
+                                                       new QStandardItem(fName));
+        }
+    }else{
+        bufContent type = relatedToExe ? ExeFileContent_TOFILE : ToBeCatagorized_TOFILE;
+        // 要写入的字节数
         uint64_t requiredBytes = newFileLog.args["nNumberOfBytesToWrite"].value.imm;
-        // 实际读取的字节数
+        // 实际写入的字节数
         uint64_t actualBytes = newFileLog.argsAfterCall["lpNumberOfBytesWritten"].value.imm;
         father->insertRow(father->rowCount(), QList<QStandardItem*>() <<
                           new QStandardItem("WRITE") <<
                           new QStandardItem(ull2a(requiredBytes)) <<
                           new QStandardItem(ull2a(actualBytes)) <<
                           new QStandardItem(success ? "SUCCESS" : "FAILED"));
+        type = addMemory(newFileLog.id, address, binBuf, actualBytes, type);
+        int memInsIdx = findHandle(address, memoryModel);
+        if(memInsIdx < 0){
+            memoryModel->insertRow(-memInsIdx-1, QList<QStandardItem*>() <<
+                                   new QStandardItem(ull2a(address)) <<
+                                   new QStandardItem(ull2a(actualBytes)) <<
+                                   new QStandardItem(bufType[(int)type]));
+            memoryModel->item(-memInsIdx-1)->appendRow(QList<QStandardItem*>() <<
+                                                       new QStandardItem(to_string(newFileLog.id).c_str()) <<
+                                                       new QStandardItem(ull2a(actualBytes)) <<
+                                                       new QStandardItem(memInstType[((int)type & 12) >> 2]) <<
+                                                       new QStandardItem(fName));
+        }else{
+            if(memoryModel->item(memInsIdx, 2)->text().contains("接收") && relatedToExe)
+                handleException({newFileLog.id, SaveExeContentFromNet},
+                                new exceptionInfo{.fileName = new QString(fName)});
+            memoryModel->item(memInsIdx)->appendRow(QList<QStandardItem*>() <<
+                                                    new QStandardItem(to_string(newFileLog.id).c_str()) <<
+                                                    new QStandardItem(ull2a(actualBytes)) <<
+                                                    new QStandardItem(memInstType[((int)type & 12) >> 2]) <<
+                                                    new QStandardItem(fName));
+        }
     }
     return true;
 }
@@ -864,25 +1003,32 @@ bool hookAnalysis::closeFileHandle(fullLog newFileLog){
 }
 
 void hookAnalysis::extractDir(fullLog newFileLog){
-    if(newFileLog.funcName != "CreateFile" || ((HANDLE)newFileLog.retVal.value.imm == INVALID_HANDLE_VALUE))
-        return;
-    auto relatedDir = newFileLog.args["lpFileName"].str->split("\\");
-    relatedDir.erase(relatedDir.end() - 1);
-    auto currentDirLayers = currentDir.split("\\");
-    currentDirLayers.append(relatedDir);
-    for(auto iter = currentDirLayers.begin(); iter != currentDirLayers.end();){
-        if(*iter == ".")
-            iter = currentDirLayers.erase(iter);
-        else if(*iter == ".."){
-            iter = currentDirLayers.erase(iter);
-            iter--;
-            if(iter != currentDirLayers.begin())
+    QString newdir;
+    if(newFileLog.args["lpFileName"].str->contains(":")){
+        auto layers = newFileLog.args["lpFileName"].str->split("\\");
+        layers.erase(layers.end() - 1);
+        newdir = layers.join("\\");
+    }else{
+        if(newFileLog.funcName != "CreateFile" || ((HANDLE)newFileLog.retVal.value.imm == INVALID_HANDLE_VALUE))
+            return;
+        auto relatedDir = newFileLog.args["lpFileName"].str->split("\\");
+        relatedDir.erase(relatedDir.end() - 1);
+        auto currentDirLayers = currentDir.split("\\");
+        currentDirLayers.append(relatedDir);
+        for(auto iter = currentDirLayers.begin(); iter != currentDirLayers.end();){
+            if(*iter == ".")
                 iter = currentDirLayers.erase(iter);
-            iter++;
-        }else
-            iter++;
+            else if(*iter == ".."){
+                iter = currentDirLayers.erase(iter);
+                iter--;
+                if(iter != currentDirLayers.begin())
+                    iter = currentDirLayers.erase(iter);
+                iter++;
+            }else
+                iter++;
+        }
+        newdir = currentDirLayers.join("\\");
     }
-    QString newdir = currentDirLayers.join("\\");
     if(!relatedDirs.contains(newdir) && !relatedDirs.empty())
         handleException({newFileLog.id, RelatingMultipleDirs},
                         new exceptionInfo{.fileName = new QString(newdir)});
@@ -940,10 +1086,10 @@ void hookAnalysis::insertNewRegHandle(fullLog log){
     uint64_t hKeyGot = log.argsAfterCall["phkResult"].value.imm;
     int insIdx = findRegKey(hKeyGot);
     // 如果找到了这个句柄，且这个句柄正在使用，说明分配到了两个相同的句柄，出现异常。
-    if(insIdx > 0 && regeditModel->item(insIdx, REGSTATUS)->text() == "正在使用"){
+    if(insIdx >= 0 && regeditModel->item(insIdx, REGSTATUS)->text() == "正在使用"){
         handleException({log.id, SameRegHandleGot},
                         new exceptionInfo{.addressWithException = hKeyGot});
-    }else if(insIdx > 0){
+    }else if(insIdx >= 0){
         // 找到了这个句柄，但这个句柄已经被关闭，则重启这个句柄
         QString directory = getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str;
         regeditModel->item(insIdx, REGSTATUS)->setText("正在使用");
@@ -952,17 +1098,23 @@ void hookAnalysis::insertNewRegHandle(fullLog log){
                                               new QStandardItem("OPEN") <<
                                               new QStandardItem("打开此句柄（键值为" + directory + "）") <<
                                               new QStandardItem(ull2a(log.retVal.value.imm)));
+        // assert(regHandles.find(directory) != regHandles.end());
+        regHandles.insert({directory, hKeyGot});
         // 判断是否是开机自启动注册表项
-        if((getOpenRegKeyName(log) == "HKEY_CURRENT_USER" || getOpenRegKeyName(log) == "HKEY_LOCAL_MACHINE")
-                && *log.args["lpSubKey"].str == "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
+        if(getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str ==
+            "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+            getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str ==
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
             handleException({log.id, VisitingStartupReg},
                             new exceptionInfo{.fileName = new QString(directory)});
     }else{
         // 没有找到这个句柄，则进行插入
         QString directory = getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str;
         // 判断是否是开机自启动注册表项
-        if((getOpenRegKeyName(log) == "HKEY_CURRENT_USER" || getOpenRegKeyName(log) == "HKEY_LOCAL_MACHINE")
-                && *log.args["lpSubKey"].str == "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
+        if(getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str ==
+            "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+            getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str ==
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
             handleException({log.id, VisitingStartupReg},
                             new exceptionInfo{.fileName = new QString(directory)});
         if(directory == "*")   // 没有找到键值，无法进行插入
@@ -972,6 +1124,8 @@ void hookAnalysis::insertNewRegHandle(fullLog log){
                                 new QStandardItem(ull2a(hKeyGot)) <<
                                 new QStandardItem(directory) <<
                                 new QStandardItem("正在使用"));
+        // assert(regHandles.find(directory) == regHandles.end());
+        regHandles.insert({directory, hKeyGot});
     }
 }
 
@@ -990,6 +1144,8 @@ void hookAnalysis::appendNewRegSet(fullLog log, QStandardItem* father){
     case REG_EXPAND_SZ:
     case REG_MULTI_SZ:{
         value = *log.args["lpData"].str;
+        if(value.isEmpty())
+            value = "<空>";
         break;
     }
     default:
@@ -1316,7 +1472,7 @@ void hookAnalysis::handleException(pair<int, APIException> latestException, exce
         detail = "尝试写入可执行文件";
         detail += *info->fileName;
         detail += "内容。";
-        exceptionType = "TryReadExecutableFile";
+        exceptionType = "TryWriteExecutableFile";
         break;
     }
     case TryDeleteStartupRegVal:{
@@ -1382,6 +1538,76 @@ void hookAnalysis::handleException(pair<int, APIException> latestException, exce
         exceptionType = "RelatingMultipleDirs";
         break;
     }
+    case TryDeleteStartupRegKey:{
+        detail = "尝试删除整个开机自启动注册表项：";
+        detail += *info->fileName;
+        detail += "。";
+        exceptionType = "TryDeleteStartupRegKey";
+        break;
+    }
+    case DeleteRegKeyWithOpenHKey:{
+        detail = "尝试删除注册表项：";
+        detail += *info->fileName;
+        detail += "，而此时该项或其子项存在未被关闭的句柄。";
+        exceptionType = "DeleteRegKeyWithOpenHKey";
+        break;
+    }
+    case BindUntrackedSocket:{
+        detail = "对未被监测的SOCKET调用bind函数绑定：";
+        detail += ull2a(info->addressWithException);
+        detail += "。";
+        exceptionType = "BindUntrackedSocket";
+        break;
+    }
+    case UntrackedSocketForSend:{
+        detail = "未被监测的SOCKET有发送行为：";
+        detail += ull2a(info->addressWithException);
+        detail += "。";
+        exceptionType = "UntrackedSocketForSend";
+        break;
+    }
+    case UntrackedSocketForRecv:{
+        detail = "未被监测的SOCKET有接收行为：";
+        detail += ull2a(info->addressWithException);
+        detail += "。";
+        exceptionType = "UntrackedSocketForRecv";
+        break;
+    }
+    case SendFailed:{
+        detail = "套接字";
+        detail += ull2a(info->addressWithException);
+        detail += "发送消息失败。";
+        exceptionType = "SendFailed";
+        break;
+    }
+    case RecvFailed:{
+        detail = "套接字";
+        detail += ull2a(info->addressWithException);
+        detail += "接收消息失败。";
+        exceptionType = "RecvFailed";
+        break;
+    }
+    case SendExeContentToNet:{
+        detail = "套接字";
+        detail += ull2a(info->addressWithException);
+        detail += "将exe文件信息发送到网络。";
+        exceptionType = "SendExeContentToNet";
+        break;
+    }
+    case SaveExeContentFromNet:{
+        detail = "套接字";
+        detail += ull2a(info->addressWithException);
+        detail += "将接收到的消息保存到exe文件中。";
+        exceptionType = "SaveExeContentFromNet";
+        break;
+    }
+    case DestroyBeforeFree:{
+        detail = "堆块";
+        detail += ull2a(info->addressWithException);
+        detail += "在其被释放之前其所在堆就已经被删除，存在风险。";
+        exceptionType = "DestroyBeforeFree";
+        break;
+    }
     }
 
     exceptionModel->insertRow(row, QList<QStandardItem*>() <<
@@ -1404,7 +1630,7 @@ bool hookAnalysis::addRegKey(fullLog newRegLog){
     return true;
 }
 
-bool hookAnalysis::setRegKey(fullLog newRegLog){
+bool hookAnalysis::setRegVal(fullLog newRegLog){
     // 首先获得操作的返回值
     long retVal = (long)newRegLog.retVal.value.imm;
     if(retVal != 0){        // 如果返回值不为0，说明操作没有正常完成。
@@ -1422,10 +1648,11 @@ bool hookAnalysis::setRegKey(fullLog newRegLog){
     }
 
     // 如果设置的是自启动项句柄中的键值
-    if((getOpenRegKeyName(newRegLog) == "HKEY_CURRENT_USER" || getOpenRegKeyName(newRegLog) == "HKEY_LOCAL_MACHINE")
-            && *newRegLog.args["lpSubKey"].str == "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
+    QString fullPath = getOpenRegKeyName(newRegLog);
+    if(fullPath == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+       fullPath == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
         handleException({newRegLog.id, TrySetStartupRegVal},
-                        new exceptionInfo{.fileName = newRegLog.args["lpSubKey"].str});
+                        new exceptionInfo{.fileName = newRegLog.args["lpValueName"].str});
 
     // 找到了这个注册表项，插入子项
     appendNewRegSet(newRegLog, regeditModel->item(keyIdx));
@@ -1477,6 +1704,44 @@ bool hookAnalysis::openRegKey(fullLog newRegLog){
     return true;
 }
 
+bool hookAnalysis::deleteRegValue(fullLog newRegLog){
+    // 首先获得操作的返回值
+    long retVal = (long)newRegLog.retVal.value.imm;
+    if(retVal != 0){        // 如果返回值不为0，说明操作没有正常完成。
+        handleException({newRegLog.id, RegDeleteFail},
+                        new exceptionInfo{.errorCode = retVal});
+    }
+
+    // 查找要修改的注册表项
+    uint64_t regHandle = newRegLog.args["hKey"].value.imm;
+    int keyIdx = findRegKey(regHandle);
+    if(keyIdx < 0){ // 如果没有找到这个句柄，无法进行后续分析
+        handleException({newRegLog.id, UntrackedRegHandle},
+                        new exceptionInfo{.addressWithException = regHandle});
+        return false;
+    }
+
+    // 找到这个注册表项，删除指定键值
+    QString keyVal = *newRegLog.args["lpValueName"].str;
+
+    // 如果删除的是自启动项句柄中的键值
+    QString fullPath = getOpenRegKeyName(newRegLog);
+    if(fullPath == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+       fullPath == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
+        handleException({newRegLog.id, TryDeleteStartupRegVal},
+                        new exceptionInfo{.fileName = newRegLog.args["lpValueName"].str});
+
+    regeditModel->item(keyIdx)->insertRow(regeditModel->item(keyIdx)->rowCount(),
+                                          QList<QStandardItem*>() <<
+                                          new QStandardItem("DELETE VALUE") <<
+                                          new QStandardItem("删除该句柄下的\"" + keyVal + "\"键值") <<
+                                          new QStandardItem(ull2a(retVal)));
+
+    regHandles.insert({fullPath, regHandle});
+
+    return true;
+}
+
 bool hookAnalysis::deleteRegKey(fullLog newRegLog){
     // 首先获得操作的返回值
     long retVal = (long)newRegLog.retVal.value.imm;
@@ -1494,20 +1759,48 @@ bool hookAnalysis::deleteRegKey(fullLog newRegLog){
         return false;
     }
 
-    // 找到这个注册表项，删除指定键值
-    QString keyVal = *newRegLog.args["lpValueName"].str;
+    // 由于注册表界面并没有对注册表项值进行整理监控，因此一些异常难以判断，如判断删除键值失败的原因等。
+    // 找到这个注册表项，删除指定项值
+    QString keyVal = *newRegLog.args["lpSubKey"].str;
 
-    // 如果删除的是自启动项句柄中的键值
-    if((getOpenRegKeyName(newRegLog) == "HKEY_CURRENT_USER" || getOpenRegKeyName(newRegLog) == "HKEY_LOCAL_MACHINE")
-            && *newRegLog.args["lpSubKey"].str == "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
-        handleException({newRegLog.id, TryDeleteStartupRegVal},
-                        new exceptionInfo{.fileName = newRegLog.args["lpSubKey"].str});
+    // 如果删除的是自启动项句柄中的项值，则此操作会将所有自启动项全部删除
+    QString fullPath = getOpenRegKeyName(newRegLog) + "\\" + *newRegLog.args["lpSubKey"].str;
+    if(fullPath == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+       fullPath == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
+        handleException({newRegLog.id, TryDeleteStartupRegKey},
+                        new exceptionInfo{.fileName = new QString(fullPath)});
 
     regeditModel->item(keyIdx)->insertRow(regeditModel->item(keyIdx)->rowCount(),
                                           QList<QStandardItem*>() <<
-                                          new QStandardItem("DELETE") <<
-                                          new QStandardItem("删除该句柄下的\"" + keyVal + "\"键值") <<
+                                          new QStandardItem("DELETE KEY") <<
+                                          new QStandardItem("删除该句柄下的\"" + keyVal + "\"项值") <<
                                           new QStandardItem(ull2a(retVal)));
+
+    auto iter = regHandles.find(fullPath);
+    while(iter != regHandles.end() && iter->first.startsWith(fullPath)){
+        uint64_t handle = iter->second;
+        int idx = findRegKey(handle);
+        if(idx >= 0 && regeditModel->item(idx, REGSTATUS)->text() == "正在使用"){
+            handleException({newRegLog.id, DeleteRegKeyWithOpenHKey},
+                            new exceptionInfo{.fileName = new QString(fullPath)});
+            break;
+        }
+        else
+            iter++;
+    }
+
+    iter = regHandles.find(fullPath);
+    while(iter != regHandles.end() && iter->first == fullPath){
+        uint64_t handle = iter->second;
+        int idx = findRegKey(handle);
+        if(idx >= 0){
+            regeditModel->item(idx, REGSTATUS)->setText("已被删除");
+            iter = regHandles.erase(iter);
+        }
+        else
+            iter++;
+    }
+
     return true;
 }
 
@@ -1523,4 +1816,282 @@ QString hookAnalysis::getOpenRegKeyName(fullLog newRegLog, int findIdx){
     }
     // 如果找到句柄，就能够找到键值
     return regeditModel->item(findIdx, REGKEYVAL)->text();
+}
+
+/**
+ * @brief hookAnalysis::addMemory 添加内存监视
+ * @param logId 日志编号
+ * @param targetMem 目标进程中该内存所在地址
+ * @param buf 本进程中拷贝了目标进程目标地址内容的内存块地址
+ * @param bufLen 内存块大小
+ * @param type 内容类型
+ */
+bufContent hookAnalysis::addMemory(int logId, uint64_t targetMem, char* buf, int bufLen, bufContent type){
+    bool isascii = true;
+    if(((int)type & 3) == 0){   // 待判断类型
+        if(bufLen <= 0x1000)    // 只能检测是否是英文，不能检测是否是中文
+            for(int i=0; i<bufLen; i++){
+                if(!isprint((unsigned char)buf[i])){
+                    isascii = false;
+                    break;
+                }
+            }
+        else
+            for(int i=0; i<0x800; i++){
+                if(!isprint((unsigned char)buf[i]) ||
+                        !isprint((unsigned char)buf[bufLen - i - 1])){
+                    isascii = false;
+                    break;
+                }
+            }
+    }
+    if(((int)type & 3) != 2)      // 不是可执行文件内容，修改其类型
+        type = (bufContent)(((int)type & 12) + (isascii ? 1 : 3));
+    auto iter = keyMemories.find(targetMem);
+    if(iter != keyMemories.end())
+        iter->second.insert({logId, {bufLen, buf, type}});
+    else{
+        auto newmap = map<int, memoryInfo>();
+        newmap.insert({logId, {bufLen, buf, type}});
+        keyMemories.insert({targetMem, newmap});
+    }
+    return type;
+}
+
+bool hookAnalysis::addLocalUnbindedSocket(fullLog newNetLog){
+    uint64_t newSocket = newNetLog.retVal.value.imm;
+    QString Af = af[newNetLog.args["af"].value.imm];
+    QString type = sockType[newNetLog.args["type"].value.imm];
+    QString proto = ipproto.find(newNetLog.args["protocol"].value.imm)->second;
+    int insIdx = findHandle(newSocket, netModel);
+    if(insIdx < 0)
+        netModel->insertRow(-insIdx - 1, QList<QStandardItem*>() <<
+                            new QStandardItem(ull2a(newSocket)) <<
+                            new QStandardItem(Af + "/" + type + "/" + proto) <<
+                            new QStandardItem("未指定") <<
+                            new QStandardItem("未指定"));
+    else{
+        netModel->item(insIdx, 1)->setText(Af + "/" + type + "/" + proto);
+        netModel->item(insIdx, 2)->setText("未指定");
+        netModel->item(insIdx, 3)->setText("未指定");
+    }
+    return true;
+}
+
+bool hookAnalysis::bindLocalSocket(fullLog newNetLog){
+    uint64_t socket = newNetLog.args["s"].value.imm;
+    int sidx = findHandle(socket, netModel);
+    if(sidx < 0){   // 没有找到这个SOCKET，不作处理
+        handleException({newNetLog.id, BindUntrackedSocket},
+                        new exceptionInfo{.addressWithException = socket});
+        return false;
+    }
+
+    QString sin_family = af[newNetLog.args["name->sin_family"].value.imm];
+    unsigned ip = newNetLog.args["name->sin_addr.s_addr"].value.imm;
+    QString ipaddr = ip_int2str(ip);
+    QString port = to_string(htons(newNetLog.args["name->sin_port"].value.imm)).c_str();
+
+    netModel->item(sidx, 2)->setText(ipaddr);
+    netModel->item(sidx, 3)->setText(port);
+    netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
+                                    new QStandardItem("BIND") << nullptr <<
+                                    new QStandardItem(ipaddr + ":" + port));
+
+    return true;
+}
+
+bool hookAnalysis::newAcception(fullLog newNetLog){
+    uint64_t remoteSocket = newNetLog.retVal.value.imm;
+    QString remoteip = ip_int2str(newNetLog.argsAfterCall["addr->sin_addr.s_addr"].value.imm);
+    QString remotePort = to_string(htons(newNetLog.argsAfterCall["addr->sin_port"].value.imm)).c_str();
+    QString msgType = af[newNetLog.argsAfterCall["addr->sin_family"].value.imm];
+    uint64_t localSocket = newNetLog.args["s"].value.imm;
+
+    int sidx = findHandle(localSocket, netModel);
+    if(sidx < 0){   // 没有找到这个SOCKET，不作处理
+        handleException({newNetLog.id, BindUntrackedSocket},
+                        new exceptionInfo{.addressWithException = localSocket});
+        return false;
+    }
+
+    netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
+                                    new QStandardItem("ACCEPT") <<
+                                    new QStandardItem(remoteSocket) <<
+                                    new QStandardItem(remoteip + ":" + remotePort) <<
+                                    new QStandardItem(netModel->item(sidx, 2)->text() + ":" +
+                                                      netModel->item(sidx, 3)->text()));
+    socketPairs.insert({remoteSocket, localSocket});
+    remoteSockInfo.insert({remoteSocket, remoteip + ":" + remotePort});
+    return true;
+}
+
+bool hookAnalysis::newConnection(fullLog newNetLog){
+    uint64_t socket = newNetLog.args["s"].value.imm;
+    int sidx = findHandle(socket, netModel);
+    if(sidx < 0){   // 没有找到这个SOCKET，不作处理
+        handleException({newNetLog.id, BindUntrackedSocket},
+                        new exceptionInfo{.addressWithException = socket});
+        return false;
+    }
+
+    QString sin_family = af[newNetLog.args["name->sin_family"].value.imm];
+    unsigned ip = newNetLog.args["name->sin_addr.s_addr"].value.imm;
+    QString ipaddr = ip_int2str(ip);
+    QString port = to_string(htons(newNetLog.args["name->sin_port"].value.imm)).c_str();
+
+    netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
+                                    new QStandardItem("CONNECT") << nullptr << nullptr <<
+                                    new QStandardItem(ipaddr + ":" + port));
+    connectionInfo.insert({socket, ipaddr + ":" + port});
+    return true;
+}
+
+bool hookAnalysis::newSend(fullLog newNetLog, char* buf){
+    uint64_t socket = newNetLog.args["s"].value.imm;
+    uint64_t serverSock;
+    int ret = newNetLog.retVal.value.imm;
+    if(ret < 0){    // 返回值小于0，发送出错
+        handleException({newNetLog.id, SendFailed},
+                        new exceptionInfo{.addressWithException = socket});
+        return false;
+    }
+    bool isServer = false;
+    int sfind = findHandle(socket, netModel);
+    // 注意send函数的SOCKET永远是客户端的SOCKET，即如果这个SOCKET在socketPairs中能够找到键，那么本地就是服务器
+    // 如果在监控列表（本地SOCKET列表）中能够找到，那么本地就是客户端
+    if(sfind < 0){  // 这个SOCKET不是本地SOCKET，初步判断是远程SOCKET，下面再远程SOCKET中查找
+        auto iter = socketPairs.find(socket);
+        if(iter == socketPairs.end()){  // 这个SOCKET在远程SOCKET列表中也找不到，报异常
+            handleException({newNetLog.id, UntrackedSocketForSend},
+                            new exceptionInfo{.addressWithException = socket});
+            return false;
+        }
+        serverSock = iter->second;
+        isServer = true;
+    }
+    // 如果本地是服务器，那么socket就是远程的SOCKET
+    if(isServer){
+        sfind = findHandle(serverSock, netModel);   // 获取服务器（本地）的SOCKET
+        assert(sfind >= 0);
+        netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
+                                         new QStandardItem("SEND") <<
+                                         new QStandardItem(ull2a(socket)) <<
+                                         new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
+                                                           netModel->item(sfind, 3)->text()) <<
+                                         new QStandardItem(remoteSockInfo[socket]) <<
+                                         new QStandardItem(ull2a(ret)));
+    }else{
+        // 如果本地是客户端，那么socket就是本地的SOCKET
+        sfind = findHandle(socket, netModel);
+        assert(sfind >= 0);
+        netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
+                                         new QStandardItem("SEND") <<
+                                         nullptr <<
+                                         new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
+                                                           netModel->item(sfind, 3)->text()) <<
+                                         new QStandardItem(connectionInfo[socket]) <<
+                                         new QStandardItem(ull2a(ret)));
+    }
+    uint64_t victimBuf = newNetLog.args["buf"].value.imm;
+    int memIdx = findHandle(victimBuf, memoryModel);
+    if(memIdx < 0){
+        bufContent type = addMemory(newNetLog.id, victimBuf, buf, ret, ToBeCatagorized_TONET);
+        memoryModel->insertRow(-memIdx - 1, QList<QStandardItem*>() <<
+                               new QStandardItem(ull2a(victimBuf)) <<
+                               new QStandardItem(ull2a(ret)) <<
+                               new QStandardItem(bufType[(int)type]));
+        memoryModel->item(-memIdx-1)->appendRow(QList<QStandardItem*>() <<
+                                                new QStandardItem(to_string(newNetLog.id).c_str()) <<
+                                                new QStandardItem(ull2a(ret)) <<
+                                                new QStandardItem("SEND TO NET") <<
+                                                new QStandardItem(isServer ?
+                                                                      remoteSockInfo[socket] : connectionInfo[socket]));
+    }else{
+        addMemory(newNetLog.id, victimBuf, buf, ret, ToBeCatagorized_TONET);
+        memoryModel->item(memIdx)->appendRow(QList<QStandardItem*>() <<
+                                                new QStandardItem(to_string(newNetLog.id).c_str()) <<
+                                                new QStandardItem(ull2a(ret)) <<
+                                                new QStandardItem("SEND TO NET") <<
+                                                new QStandardItem(isServer ?
+                                                                      remoteSockInfo[socket] : connectionInfo[socket]));
+        if(memoryModel->item(memIdx, 2)->text() == bufType[(int)ExeFileContent_FROMFILE])
+            handleException({newNetLog.id, SendExeContentToNet},
+                            new exceptionInfo{.addressWithException = socket});
+    }
+    return true;
+}
+
+bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
+    uint64_t socket = newNetLog.args["s"].value.imm;
+    uint64_t serverSock;
+    int ret = newNetLog.retVal.value.imm;
+    if(ret < 0){    // 返回值小于0，接收出错
+        handleException({newNetLog.id, RecvFailed},
+                        new exceptionInfo{.addressWithException = socket});
+        return false;
+    }
+    bool isServer = false;
+    int sfind = findHandle(socket, netModel);
+    // 注意recv函数的SOCKET永远是客户端的SOCKET，即如果这个SOCKET在socketPairs中能够找到键，那么本地就是服务器
+    // 如果在监控列表（本地SOCKET列表）中能够找到，那么本地就是客户端
+    if(sfind < 0){  // 这个SOCKET不是本地SOCKET，初步判断是远程SOCKET，下面再远程SOCKET中查找
+        auto iter = socketPairs.find(socket);
+        if(iter == socketPairs.end()){  // 这个SOCKET在远程SOCKET列表中也找不到，报异常
+            handleException({newNetLog.id, UntrackedSocketForRecv},
+                            new exceptionInfo{.addressWithException = socket});
+            return false;
+        }
+        serverSock = iter->second;
+        isServer = true;
+    }
+    // 如果本地是服务器，那么socket就是远程的SOCKET
+    if(isServer){
+        sfind = findHandle(serverSock, netModel);   // 获取服务器（本地）的SOCKET
+        assert(sfind >= 0);
+        netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
+                                         new QStandardItem("RECV") <<
+                                         new QStandardItem(ull2a(socket)) <<
+                                         new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
+                                                           netModel->item(sfind, 3)->text()) <<
+                                         new QStandardItem(remoteSockInfo[socket]) <<
+                                         new QStandardItem(ull2a(ret)));
+    }else{
+        // 如果本地是客户端，那么socket就是本地的SOCKET
+        sfind = findHandle(socket, netModel);
+        assert(sfind >= 0);
+        netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
+                                         new QStandardItem("RECV") <<
+                                         nullptr <<
+                                         new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
+                                                           netModel->item(sfind, 3)->text()) <<
+                                         new QStandardItem(connectionInfo[socket]) <<
+                                         new QStandardItem(ull2a(ret)));
+    }
+    uint64_t victimBuf = newNetLog.args["buf"].value.imm;
+    int memIdx = findHandle(victimBuf, memoryModel);
+    if(memIdx < 0){
+        bufContent type = addMemory(newNetLog.id, victimBuf, buf, ret, ToBeCatagorized_TONET);
+        memoryModel->insertRow(-memIdx - 1, QList<QStandardItem*>() <<
+                               new QStandardItem(ull2a(victimBuf)) <<
+                               new QStandardItem(ull2a(ret)) <<
+                               new QStandardItem(bufType[(int)type]));
+        memoryModel->item(-memIdx-1)->appendRow(QList<QStandardItem*>() <<
+                                                new QStandardItem(to_string(newNetLog.id).c_str()) <<
+                                                new QStandardItem(ull2a(ret)) <<
+                                                new QStandardItem("RECV TO NET") <<
+                                                new QStandardItem(isServer ?
+                                                                      remoteSockInfo[socket] : connectionInfo[socket]));
+    }else{
+        bufContent type = addMemory(newNetLog.id, victimBuf, buf, ret, ToBeCatagorized_TONET);
+        if(ret > 0)
+            memoryModel->item(memIdx, 2)->setText(bufType[(int)type]);
+        memoryModel->item(memIdx)->appendRow(QList<QStandardItem*>() <<
+                                                new QStandardItem(to_string(newNetLog.id).c_str()) <<
+                                                new QStandardItem(ull2a(ret)) <<
+                                                new QStandardItem("RECV TO NET") <<
+                                                new QStandardItem(isServer ?
+                                                                      remoteSockInfo[socket] : connectionInfo[socket]));
+    }
+    return true;
 }

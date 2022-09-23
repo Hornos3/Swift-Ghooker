@@ -1,5 +1,15 @@
 <RCC>
     <qresource prefix="/">
         <file>background/back.png</file>
+        <file>background/disco_elysium_four_Moment.jpg</file>
+        <file>background/blue.png</file>
+        <file>background/cyan.png</file>
+        <file>background/clicked.png</file>
+        <file>background/unclicked.png</file>
+        <file>background/LGbutton.png</file>
+        <file>background/LRbutton.png</file>
+        <file>background/RGbutton.png</file>
+        <file>background/RRbutton.png</file>
+        <file>background/icon.ico</file>
     </qresource>
 </RCC>

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>文件界面</string>
   </property>
   <widget class="QListView" name="access">
    <property name="geometry">

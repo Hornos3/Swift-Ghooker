@@ -10,6 +10,7 @@
 using namespace std;
 
 #pragma comment(lib, "D:/SSdesign/detours/lib.X64/detours.lib")
+#pragma comment(lib, "ws2_32.lib")
 wchar_t currentDirectory[0x1000];
 
 QLibrary injectLib("injectionDLL");
@@ -29,6 +30,13 @@ void (*InjRegSetValueExFunc)(bool);
 void (*InjRegDeleteValueFunc)(bool);
 void (*InjRegCloseKeyFunc)(bool);
 void (*InjRegOpenKeyExFunc)(bool);
+void (*InjRegDeleteKeyExFunc)(bool);
+void (*InjSendFunc)(bool);
+void (*InjRecvFunc)(bool);
+void (*InjConnectFunc)(bool);
+void (*InjBindFunc)(bool);
+void (*InjSocketFunc)(bool);
+void (*InjAcceptFunc)(bool);
 
 bool (*getMutexSignal)(void);
 void (*setMutexSignal)(void);
@@ -42,7 +50,7 @@ char* (*getLastHookBeforeCall)(void);
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QCoreApplication::setApplicationVersion("1.3.2");
+    QCoreApplication::setApplicationVersion("2.9.1");
 
     // 检查injectionDLL.dll是否存在
     if(!injectLib.load()){
@@ -68,6 +76,13 @@ int main(int argc, char *argv[])
     InjRegDeleteValueFunc = (void(*)(bool))injectLib.resolve("openInjectRegDeleteValue");
     InjRegCloseKeyFunc = (void(*)(bool))injectLib.resolve("openInjectRegCloseKey");
     InjRegOpenKeyExFunc = (void(*)(bool))injectLib.resolve("openInjectRegOpenKeyEx");
+    InjRegDeleteKeyExFunc = (void(*)(bool))injectLib.resolve("openInjectRegDeleteKeyEx");
+    InjSendFunc = (void(*)(bool))injectLib.resolve("openInjectSend");
+    InjRecvFunc = (void(*)(bool))injectLib.resolve("openInjectRecv");
+    InjConnectFunc = (void(*)(bool))injectLib.resolve("openInjectConnect");
+    InjBindFunc = (void(*)(bool))injectLib.resolve("openInjectBind");
+    InjSocketFunc = (void(*)(bool))injectLib.resolve("openInjectSocket");
+    InjAcceptFunc = (void(*)(bool))injectLib.resolve("openInjectAccept");
 
     getMutexSignal = (bool(*)(void))injectLib.resolve("getMutexSignal");
     setMutexSignal = (void(*)(void))injectLib.resolve("setMutexSignal");

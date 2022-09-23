@@ -1,8 +1,9 @@
-QT       += core gui
+QT       += core gui multimedia multimediawidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++20
+CONFIG += resources_big
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -15,10 +16,14 @@ SOURCES += \
     exceptionwidget.cpp \
     filewidget.cpp \
     heapwidget.cpp \
+    historytracer.cpp \
     hookanalysis.cpp \
     injectthread.cpp \
     logwidget.cpp \
     main.cpp \
+    memorywidget.cpp \
+    modulewidget.cpp \
+    netwidget.cpp \
     output.cpp \
     regwidget.cpp \
     widget.cpp
@@ -30,9 +35,13 @@ HEADERS += \
     exceptionwidget.h \
     filewidget.h \
     heapwidget.h \
+    historytracer.h \
     hookanalysis.h \
     injectthread.h \
     logwidget.h \
+    memorywidget.h \
+    modulewidget.h \
+    netwidget.h \
     output.h \
     regwidget.h \
     widget.h
@@ -42,6 +51,9 @@ FORMS += \
     filewidget.ui \
     heapwidget.ui \
     logwidget.ui \
+    memorywidget.ui \
+    modulewidget.ui \
+    netwidget.ui \
     output.ui \
     regwidget.ui \
     widget.ui

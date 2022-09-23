@@ -13,12 +13,16 @@ extern void (*setMutexSignal)(void);
 extern QReadWriteLock* lock;
 int counter = 0;
 
-Output::Output(QWidget *parent) :
+Output::Output(std::vector<bool> choices, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Output)
 {
     ui->setupUi(this);
     ui->logInfo->setReadOnly(true);
+    this->setFixedSize(1500, 800);
+    this->setWindowIcon(QIcon(":/background/icon.ico"));
+
+    ui->regeditView->header()->setStyleSheet("background-color:rgba(0,0,0,0)");
 
     QStringList verticalList;
     verticalList << "进程名" << "文件描述" << "版本" << "内部名" << "公司名" << "版权" << "原始名" << "产品版本";
@@ -31,6 +35,10 @@ Output::Output(QWidget *parent) :
     fileViewModel->setHorizontalHeaderLabels(QStringList() << "句柄指针/操作类型" << "文件名/字节数" << "状态/成功字节数" << "是否成功");
     exceptionModel->setHorizontalHeaderLabels(QStringList() << "异常操作编号" << "异常类型" << "详细信息");
     regeditModel->setHorizontalHeaderLabels(QStringList() << "句柄/操作类型" << "键值/操作细节" << "状态/操作返回");
+    netModel->setHorizontalHeaderLabels(QStringList() << "SOCKET地址/通信类型" << "通信类型/SOCKET地址"
+                                        << "IP/该套接字对应IP与端口" << "端口号/目标套接字对应IP与端口" << "消息长度");
+    memoryModel->setHorizontalHeaderLabels(QStringList() << "地址/操作ID" << "长度" << "保存内容/操作类型" << "来源/去向");
+    moduleModel->setHorizontalHeaderLabels(QStringList() << "模块名" << "基地址" << "入口地址" << "大小" << "文件所在路径");
     fileAccessModel = new colorfulModel(QStringList() << "权限" << "READ" << "WRITE" << "EXECUTE");
     fileShareModeModel = new colorfulModel(QStringList() << "共享选项" << "SHARE_READ" << "SHARE_WRITE" << "SHARE_DELETE");
     fileCreateDispModel = new colorfulModel(QStringList() << "创建选项" << "CREATE_NEW" << "CREATE_ALWAYS" <<
@@ -48,11 +56,15 @@ Output::Output(QWidget *parent) :
     hWdg = new heapWidget(heapViewModel);
     eWdg = new exceptionWidget(exceptionModel);
     lWdg = new logWidget(&analyser->logList, logWidgetModel);
+    mWdg = new memoryWidget(&analyser->keyMemories, memoryModel);
+    nWdg = new netWidget(netModel);
+    moWdg = new moduleWidget(moduleModel);
 
     ui->processInfo->setModel(model);
     ui->heapView->setModel(heapViewModel);
     ui->fileView->setModel(fileViewModel);
     ui->exceptionWindow->setModel(exceptionModel);
+    ui->netView->setModel(netModel);
     ui->regeditView->setModel(regeditModel);
     ui->fileAccess->setModel(fileAccessModel);
     ui->fileShareMode->setModel(fileShareModeModel);
@@ -69,6 +81,15 @@ Output::Output(QWidget *parent) :
     ui->fileCreationDisposition->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->fileFlagsAndAttributes->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
+    initialize(choices);
+
+    // ui->processInfo->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    watcher->addPath("./hookLog/lasthook.tmp");
+    connect(this->watcher, &QFileSystemWatcher::fileChanged, this, &Output::updateLog);
+}
+
+void Output::initialize(std::vector<bool> choices){
+    injectionOptions = choices;
     regeditModel->insertRow(0, QList<QStandardItem*>() <<
                             new QStandardItem(ull2a((uint64_t)HKEY_CLASSES_ROOT)) <<
                             new QStandardItem("HKEY_CLASSES_ROOT") <<
@@ -89,10 +110,57 @@ Output::Output(QWidget *parent) :
                             new QStandardItem(ull2a((uint64_t)HKEY_CURRENT_CONFIG)) <<
                             new QStandardItem("HKEY_CURRENT_CONFIG") <<
                             new QStandardItem("正在使用"));
+    if(choices.size() == 0)
+        return;
+    analyser->injMessageBoxA = choices[0];
+    analyser->injMessageBoxW = choices[1];
+    analyser->injHeapCreate = choices[2];
+    analyser->injHeapDestroy = choices[3];
+    analyser->injHeapAlloc = choices[4];
+    analyser->injHeapFree = choices[5];
+    analyser->injCreateFile = choices[6];
+    analyser->injReadFile = choices[7];
+    analyser->injWriteFile = choices[8];
+    analyser->injCloseHandle = choices[9];
+    analyser->injRegCreateKeyEx = choices[10];
+    analyser->injRegSetValueEx = choices[11];
+    analyser->injRegDeleteValue = choices[12];
+    analyser->injRegCloseKey = choices[13];
+    analyser->injRegOpenKeyEx = choices[14];
+    analyser->injRegDeleteKeyEx = choices[15];
+    analyser->injSend = choices[16];
+    analyser->injRecv = choices[17];
+    analyser->injBind = choices[18];
+    analyser->injConnect = choices[19];
+    analyser->injSocket = choices[20];
+    analyser->injAccept = choices[21];
+}
 
-    // ui->processInfo->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    watcher->addPath("./hookLog/lasthook.tmp");
-    connect(this->watcher, &QFileSystemWatcher::fileChanged, this, &Output::updateLog);
+QString Output::getInjOptions(){
+    QString ret = "injected APIs:\n";
+    ret += injectionOptions[0] ? "\tMessageBoxA\n" : "";
+    ret += injectionOptions[1] ? "\tMessageBoxW\n" : "";
+    ret += injectionOptions[2] ? "\tHeapCreate\n" : "";
+    ret += injectionOptions[3] ? "\tHeapDestroy\n" : "";
+    ret += injectionOptions[4] ? "\tHeapAlloc\n" : "";
+    ret += injectionOptions[5] ? "\tHeapFree\n" : "";
+    ret += injectionOptions[6] ? "\tCreateFile\n" : "";
+    ret += injectionOptions[7] ? "\tReadFile\n" : "";
+    ret += injectionOptions[8] ? "\tWriteFile\n" : "";
+    ret += injectionOptions[9] ? "\tCloseHandle\n" : "";
+    ret += injectionOptions[10] ? "\tRegCreateKeyEx\n" : "";
+    ret += injectionOptions[11] ? "\tRegSetValueEx\n" : "";
+    ret += injectionOptions[12] ? "\tRegDeleteValue\n" : "";
+    ret += injectionOptions[13] ? "\tRegCloseKey\n" : "";
+    ret += injectionOptions[14] ? "\tRegOpenKeyEx\n" : "";
+    ret += injectionOptions[15] ? "\tRegDeleteKeyEx\n" : "";
+    ret += injectionOptions[16] ? "\tSend\n" : "";
+    ret += injectionOptions[17] ? "\tRecv\n" : "";
+    ret += injectionOptions[18] ? "\tBind\n" : "";
+    ret += injectionOptions[19] ? "\tConnect\n" : "";
+    ret += injectionOptions[20] ? "\tSocket\n" : "";
+    ret += injectionOptions[21] ? "\tAccept\n" : "";
+    return ret;
 }
 
 void Output::updateLog(){
@@ -103,35 +171,88 @@ void Output::updateLog(){
     ifstream in("./hookLog/lasthook.tmp");
     char newLog[0x800] = {0};
     in.read(newLog, 0x800);
+    in.close();
+
+    unsigned fileSize = 0;
+    char* buf = nullptr;
+    QFileInfo i("./hookLog/lastCap.dat");
+    fileSize = i.size();
+    if(fileSize != 0){
+        ifstream binaryIn("./hookLog/lastCap.dat");
+        buf = (char*)calloc(fileSize, 1);
+        binaryIn.read(buf, fileSize);
+        binaryIn.close();
+    }
+
+    setMutexSignal();
+
     wstring logW = stringTowstring(newLog);
     QString logQ = QString::fromStdWString(logW);
-    if(logQ.isEmpty()){
-//        lock->unlock();
-        setMutexSignal();
+    if(logQ.isEmpty())
         return;
-    }
     bool exeInfoGot = analyser->exeInfoGot;
-//    bool mayRepeat = false;
-    bool mayRepeat = analyser->appendRecord(logQ);
+
+    bool mayRepeat = analyser->appendRecord(logQ, buf);
+
     if(exeInfoGot ^ analyser->exeInfoGot){
         showExeInfo();
         assert(ui->logInfo->toPlainText().isEmpty());
-        ui->logInfo->appendPlainText(analyser->exeInfo.to_string());
+        ui->logInfo->appendPlainText(analyser->exeInfo.to_string() + getInjOptions() +
+                                     "****************************************\n");
     }
     if(!mayRepeat){
         trimExeInfo(logQ);
         ui->logInfo->appendPlainText(logQ);
+        ui->currentStep->setMaximum(ui->currentStep->maximum() + 1);
+        ui->currentStep->setValue(ui->currentStep->value() + 1);
+        ui->stepCount->setMaximum(ui->stepCount->maximum() + 1);
+        ui->stepCount->setValue(ui->stepCount->value() + 1);
+        ++tracer->totalStep;
+        ++tracer->currentStep;
     }else
         qDebug() << ++counter;
     in.close();
 
-    setMutexSignal();
 //    lock->unlock();
 }
 
 void Output::closeEvent(QCloseEvent * event){
-    ui->logInfo->clear();
+    if(injThread != nullptr && !injThread->isFinished()){
+        QMessageBox::warning(this, "警告", "目标进程还没有执行完毕，无法关闭此分析界面！");
+        event->ignore();
+        return;
+    }
+    QMessageBox::information(this, "退出", "本次分析结果会保存到文件系统中，但下一次分析可能会进行覆盖，请注意备份。");
+    saveFullLog();
     event->accept();
+    delete this->analyser;
+    delete this;
+}
+
+void Output::saveFullLog(){
+    QString allLog = ui->logInfo->toPlainText();
+
+    ofstream logFile("./hookLog/hookLog_complete.log", ios::trunc);
+    logFile.write(allLog.toStdString().c_str(), allLog.length());
+    logFile.close();
+
+    // 内存内容保存格式：
+    // 8字节内存地址 + 4字节操作id + 4字节内存长度 + 4字节内存类型 + 内容
+    ofstream memCapFile("./hookLog/memoryCaps.mcp", ios::trunc | ios::binary);
+    for(const auto &outer : analyser->keyMemories){
+        uint64_t memAddr = outer.first;
+        for(const auto &inner : outer.second){
+            int id = inner.first;
+            int bufLen = inner.second.length;
+            int type = (int)inner.second.type;
+            memCapFile.write((char*)(&memAddr), 8);
+            memCapFile.write((char*)(&id), 4);
+            memCapFile.write((char*)(&bufLen), 4);
+            memCapFile.write((char*)(&type), 4);
+            memCapFile.write(inner.second.content, bufLen);
+        }
+    }
+    memCapFile.close();
 }
 
 void Output::trimExeInfo(QString& fullInfo){
@@ -139,7 +260,9 @@ void Output::trimExeInfo(QString& fullInfo){
     size_t startRemPos = 4;
     while(lines.at(startRemPos).startsWith("\t"))
         startRemPos++;
-    lines.remove(startRemPos, 11);
+    lines.remove(startRemPos, 1);
+    startRemPos++;
+    lines.remove(startRemPos, 10);
     fullInfo = lines.join("\n");
 }
 
@@ -269,5 +392,29 @@ void Output::on_showExceptionWidget_clicked()
 void Output::on_showLogWidget_clicked()
 {
     lWdg->show();
+}
+
+
+void Output::on_showMemoryWidget_clicked()
+{
+    mWdg->show();
+}
+
+
+void Output::on_showNetWidget_clicked()
+{
+    nWdg->show();
+}
+
+
+void Output::on_showModulesWidget_clicked()
+{
+    moWdg->show();
+}
+
+
+void Output::on_prevStep_clicked()
+{
+
 }
 

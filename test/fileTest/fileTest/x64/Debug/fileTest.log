@@ -1,4 +1,0 @@
-﻿  fileTest.cpp
-D:\SSdesign\UI\designMain\test\fileTest\fileTest\fileTest.cpp(32,14): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
-D:\SSdesign\UI\designMain\test\fileTest\fileTest\fileTest.cpp(132,34): warning C4312: “类型强制转换”: 从“unsigned int”转换到更大的“HANDLE”
-  fileTest.vcxproj -> D:\SSdesign\UI\designMain\test\fileTest\fileTest\x64\Debug\fileTest.exe

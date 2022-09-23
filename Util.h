@@ -15,5 +15,6 @@ QString getFilenameAndShow(QLabel* label, const QString& filter = "", const QStr
 wstring stringTowstring(string str);
 string wstring2string(wstring wstr);
 char* ull2a(uint64_t value, bool containsPrefix = true);
+QString ip_int2str(unsigned ip);
 
 #endif // UTIL_H

@@ -24,6 +24,12 @@ fileWidget::fileWidget(QStandardItemModel* fileModel,
     this->createDisp = createDisp;
     this->flagAttr = flagAttr;
     this->analyser = analyser;
+    ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->access->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->shareMode->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->createDisp->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->flagAttr->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    this->setWindowIcon(QIcon(":/background/icon.ico"));
 }
 
 fileWidget::~fileWidget()
@@ -33,7 +39,10 @@ fileWidget::~fileWidget()
 
 void fileWidget::on_treeView_clicked(const QModelIndex &index)
 {
-    int selectedRow = index.row();
+    auto realIdx = index;
+    if(index.parent().isValid())
+        realIdx = index.parent();
+    int selectedRow = realIdx.row();
     fileHandleAttr handle = analyser->fileHandles[fileModel->item(selectedRow)->text().toULongLong(nullptr, 16)];
     list<int> fileAccess = analyser->getGenericAccess(handle.access);
     auto iter = fileAccess.begin();

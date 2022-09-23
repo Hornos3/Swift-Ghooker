@@ -169,3 +169,149 @@ Todo:
 - 完成注册表API测试程序的编写与测试
 - 尝试美化界面
 - 完成对网络通信API的截获与分析
+
+Version 1.8.0
+Finished time: 18:46 2022/9/17
+Update:
+- 完成了注册表API测试程序的编写和测试，新增了RegDeleteKeyEx这个API的截获
+Todo:
+- 尝试美化界面
+- 完成对网络通信API的截获与分析
+- 实现监控界面的重用
+
+Version 1.8.1
+Finished time: 20:22 2022/9/17
+Update:
+- 完成了监控界面的重用
+Todo:
+- 尝试美化界面
+- 完成对网络通信API的截获与分析
+
+Version 2.0.0
+Finished time: 10:13 2022/9/18
+Update:
+- 完成了界面的简单美化
+Todo:
+- 完成对网络通信API的截获与分析
+
+Version 2.1.0
+Finished time: 16:37 2022/9/18
+Update:
+- 完成了DLL端内存监控的接口与函数编写
+- 完成了DLL端网络API的截获编写
+Todo:
+- 完成主界面端内存监控的接口与方法，为网络API截获提供条件
+
+Version 2.2.0
+Finished time: 09:14 2022/9/19
+Update:
+- 完成了内存视图相关接口以及展示的初步实现
+Todo:
+- 新增对于Use After Free的检测
+- 完成网络相关API的分析和截获
+
+Version 2.2.1
+Finished time: 10:40 2022/9/19
+Update:
+- 新增对于网络API——accept的截获
+- 6个网络API的输出测试初步完成
+Todo:
+- 新增对于Use After Free的检测
+- 完成网络相关API的分析和截获
+
+Version 2.3.0
+Finished time: 18:35 2022/9/19
+Update:
+- 完成对网络相关API的截获
+Todo:
+- 处理好网络send和recv函数与内存视图的接口
+- 新增对于Use After Free的检测
+- 设置目标进程没有结束时不允许关闭监视界面
+
+Version 2.3.1
+Finished time: 19:54 2022/9/19
+Update:
+- 初步完成网络send和recv函数与内存视图的接口
+- 修复了监视界面退出崩溃的bug
+Todo:
+- 编写测试程序进行网络相关API截获测试
+- 新增对于Use After Free的检测
+
+Version 2.4.0
+Finished time: 11:04 2022/9/20
+Update:
+- 完成了网络测试程序的编写与测试，网络视图基本完成
+Todo:
+- 编写最终测试程序
+- 更新文件测试程序，实现将exe内容上传到网络功能，并进行测试
+- 在监控界面退出时自动保存日志，同时删除dll中保存总日志的部分
+- 取消dll对标准输入输出的截获
+
+Version 2.5.0
+Finished time: 11:37 2022/9/20
+Update:
+- 在监控界面退出时能够自动保存日志，删除了dll中保存总日志的部分，提升了截获效率
+- 取消dll对标准输入输出的截获，提高了截获效率
+Todo:
+- 编写最终测试程序
+- 更新文件测试程序，实现将exe内容上传到网络功能，并进行测试
+
+Version 2.6.0
+Finished time: 15:33 2022/9/20
+Update:
+- 更新文件操作测试程序，新增发送exe文件和接收数据到exe文件两项测试，并测试完毕
+Todo:
+- 编写最终测试程序
+- 新增对于Use After Free的检测
+- 尝试截获memcpy和memmove函数，并完善内存流追踪
+
+Version 2.7.0
+Finished time: 21:00 2022/9/20
+Update:
+- 最终测试程序初步编写完成，也已经测试完成
+Todo:
+- 新增对于Use After Free的检测
+- 尝试截获memcpy和memmove函数，并完善内存流追踪
+
+Version 2.7.1
+Finished time: 22:25 2022/9/20
+Update:
+- 修复了文件路径解析错误的bug
+- 设置所有显示框为不可编辑
+Todo:
+- 新增对于Use After Free的检测
+- 尝试截获memcpy和memmove函数，并完善内存流追踪
+- 尝试解决截获过程中刷新速度越来越慢的问题
+- 进行代码优化，删除已被弃用的代码和数据结构
+- 日志界面添加返回值
+- 完成内存模块地址的获取
+
+Version 2.8.0
+Finished time: 22:56 2022/9/21
+Update:
+- 修复了内存长度为0时错误修改内存属性的bug
+- 清理了一些弃用的方法和数据结构
+- 在日志界面添加了返回值显示
+- 能够在dll加载时获取到内存模块结构并在第一次挂钩时保存到模块视图中显示
+Todo:
+- 获取每一次挂钩时调用API的模块名称
+- 取消对非HeapCreate创建的HANDLE的CHUNK的重复申请检查
+
+Version 2.9.0
+Finished time: 15:34 2022/9/22
+Update:
+- 取消对非HeapCreate创建的HANDLE的CHUNK的重复申请检查
+- 修复了目标程序崩溃后最后一条无返回值日志错误显示返回值的bug
+- 获取到了每一次挂钩时调用API的模块名称并能够将其显示在日志文件中
+Todo:
+- 将完成的调用堆栈显示在日志界面中
+- 尝试开发快照功能，便于程序结束后分析
+
+Version 2.9.1
+Finished time: 16:19 2022/9/22
+Update:
+- 修复了测试程序中的一些bug，基本完成总的测试程序的编写。
+Todo:
+- 将完成的调用堆栈显示在日志界面中
+- 尝试开发快照功能，便于程序结束后分析
+- 开发一种妥善保存日志的方式，使所有分析能够高效地被还原

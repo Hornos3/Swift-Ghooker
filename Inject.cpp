@@ -18,9 +18,6 @@ void dllInject(const WCHAR* inputEXE){
                                     NULL, dirPath, &si, &pi, dllPath, NULL)){
         ResumeThread(pi.hThread);
         WaitForSingleObject(pi.hProcess, INFINITE);
-    }else{
-        char error[100];
-        sprintf_s(error, "%d", GetLastError());
-        QMessageBox::critical(nullptr, "错误", error);
-    }
+    }else
+        printf_s("%d", GetLastError());
 }

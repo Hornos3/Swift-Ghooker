@@ -44,7 +44,7 @@ public:
 
     void retranslateUi(QWidget *logWidget)
     {
-        logWidget->setWindowTitle(QCoreApplication::translate("logWidget", "Form", nullptr));
+        logWidget->setWindowTitle(QCoreApplication::translate("logWidget", "\346\227\245\345\277\227\347\225\214\351\235\242", nullptr));
     } // retranslateUi
 
 };

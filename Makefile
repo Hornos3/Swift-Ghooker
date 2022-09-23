@@ -300,14 +300,20 @@ Makefile: designMain.pro ..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\win32-msvc\qmake.
 		..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\features\yacc.prf \
 		..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\features\lex.prf \
 		designMain.pro \
+		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6MultimediaWidgets.prl \
+		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Multimedia.prl \
 		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Widgets.prl \
 		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Gui.prl \
+		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Network.prl \
 		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Core.prl \
 		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6EntryPoint.prl \
 		..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\features\build_pass.prf \
 		background.qrc \
+		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6MultimediaWidgetsd.prl \
+		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Multimediad.prl \
 		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Widgetsd.prl \
 		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Guid.prl \
+		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Networkd.prl \
 		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Cored.prl \
 		..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6EntryPointd.prl
 	$(QMAKE) -o Makefile designMain.pro -spec win32-msvc "CONFIG+=debug" "CONFIG+=qml_debug"
@@ -527,14 +533,20 @@ Makefile: designMain.pro ..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\win32-msvc\qmake.
 ..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\features\yacc.prf:
 ..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\features\lex.prf:
 designMain.pro:
+..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6MultimediaWidgets.prl:
+..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Multimedia.prl:
 ..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Widgets.prl:
 ..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Gui.prl:
+..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Network.prl:
 ..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Core.prl:
 ..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6EntryPoint.prl:
 ..\..\..\Qt\6.3.1\msvc2019_64\mkspecs\features\build_pass.prf:
 background.qrc:
+..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6MultimediaWidgetsd.prl:
+..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Multimediad.prl:
 ..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Widgetsd.prl:
 ..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Guid.prl:
+..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Networkd.prl:
 ..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6Cored.prl:
 ..\..\..\Qt\6.3.1\msvc2019_64\lib\Qt6EntryPointd.prl:
 qmake: FORCE

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1200</width>
-    <height>600</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Widget</string>
+   <string>主界面</string>
   </property>
   <widget class="QLabel" name="label">
    <property name="geometry">
@@ -25,14 +25,14 @@
      <x>0</x>
      <y>0</y>
      <width>1200</width>
-     <height>600</height>
+     <height>650</height>
     </rect>
    </property>
    <property name="text">
     <string/>
    </property>
    <property name="pixmap">
-    <pixmap resource="background.qrc">:/background/back.png</pixmap>
+    <pixmap resource="background.qrc">:/background/disco_elysium_four_Moment.jpg</pixmap>
    </property>
    <property name="scaledContents">
     <bool>true</bool>
@@ -152,15 +152,15 @@
     </font>
    </property>
    <property name="text">
-    <string>请输入需要分析的可执行文件：</string>
+    <string>请选择需要分析的可执行文件：</string>
    </property>
   </widget>
   <widget class="QPushButton" name="selectFile">
    <property name="geometry">
     <rect>
-     <x>240</x>
+     <x>260</x>
      <y>110</y>
-     <width>93</width>
+     <width>51</width>
      <height>31</height>
     </rect>
    </property>
@@ -169,8 +169,16 @@
      <family>汉仪瑞虎宋W</family>
     </font>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	border-image:url(:/background/unclicked.png)
+}
+QPushButton:pressed{
+	border-image:url(:/background/clicked.png)
+}</string>
+   </property>
    <property name="text">
-    <string>浏览......</string>
+    <string>浏览</string>
    </property>
   </widget>
   <widget class="QLabel" name="targetFile">
@@ -231,10 +239,10 @@
   <widget class="QPushButton" name="startAnalysis">
    <property name="geometry">
     <rect>
-     <x>500</x>
-     <y>500</y>
-     <width>200</width>
-     <height>50</height>
+     <x>380</x>
+     <y>550</y>
+     <width>191</width>
+     <height>51</height>
     </rect>
    </property>
    <property name="font">
@@ -243,8 +251,16 @@
      <pointsize>16</pointsize>
     </font>
    </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	border-image:url(:/background/unclicked.png)
+}
+QPushButton:pressed{
+	border-image:url(:/background/clicked.png)
+}</string>
+   </property>
    <property name="text">
-    <string>开始分析</string>
+    <string>开始进程截获</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
@@ -405,8 +421,8 @@
   <widget class="QCheckBox" name="InjHeapCreate">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>260</y>
+     <x>240</x>
+     <y>200</y>
      <width>131</width>
      <height>26</height>
     </rect>
@@ -455,8 +471,8 @@
   <widget class="QCheckBox" name="InjHeapDestroy">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>290</y>
+     <x>240</x>
+     <y>230</y>
      <width>131</width>
      <height>26</height>
     </rect>
@@ -505,8 +521,8 @@
   <widget class="QCheckBox" name="InjHeapAlloc">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>320</y>
+     <x>240</x>
+     <y>260</y>
      <width>131</width>
      <height>26</height>
     </rect>
@@ -555,8 +571,8 @@
   <widget class="QCheckBox" name="InjHeapFree">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>350</y>
+     <x>240</x>
+     <y>290</y>
      <width>131</width>
      <height>26</height>
     </rect>
@@ -602,61 +618,11 @@
     <string>HeapFree</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="InjOpenFile">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>380</y>
-     <width>131</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="palette">
-    <palette>
-     <active>
-      <colorrole role="WindowText">
-       <brush brushstyle="SolidPattern">
-        <color alpha="255">
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
-        </color>
-       </brush>
-      </colorrole>
-     </active>
-     <inactive>
-      <colorrole role="WindowText">
-       <brush brushstyle="SolidPattern">
-        <color alpha="255">
-         <red>231</red>
-         <green>231</green>
-         <blue>231</blue>
-        </color>
-       </brush>
-      </colorrole>
-     </inactive>
-     <disabled>
-      <colorrole role="WindowText">
-       <brush brushstyle="SolidPattern">
-        <color alpha="127">
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
-        </color>
-       </brush>
-      </colorrole>
-     </disabled>
-    </palette>
-   </property>
-   <property name="text">
-    <string>OpenFile</string>
-   </property>
-  </widget>
   <widget class="QCheckBox" name="InjCreateFile">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>410</y>
+     <x>440</x>
+     <y>200</y>
      <width>131</width>
      <height>26</height>
     </rect>
@@ -667,9 +633,9 @@
       <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
         </color>
        </brush>
       </colorrole>
@@ -705,8 +671,8 @@
   <widget class="QCheckBox" name="InjReadFile">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>440</y>
+     <x>440</x>
+     <y>230</y>
      <width>131</width>
      <height>26</height>
     </rect>
@@ -717,9 +683,9 @@
       <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
         </color>
        </brush>
       </colorrole>
@@ -755,8 +721,8 @@
   <widget class="QCheckBox" name="InjWriteFile">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>470</y>
+     <x>440</x>
+     <y>260</y>
      <width>131</width>
      <height>26</height>
     </rect>
@@ -767,9 +733,9 @@
       <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
         </color>
        </brush>
       </colorrole>
@@ -805,7 +771,7 @@
   <widget class="QCheckBox" name="InjRegCreateKeyEx">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>640</x>
      <y>200</y>
      <width>151</width>
      <height>26</height>
@@ -817,9 +783,9 @@
       <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
         </color>
        </brush>
       </colorrole>
@@ -855,7 +821,7 @@
   <widget class="QCheckBox" name="InjRegSetValueEx">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>640</x>
      <y>230</y>
      <width>151</width>
      <height>26</height>
@@ -867,9 +833,9 @@
       <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
         </color>
        </brush>
       </colorrole>
@@ -905,7 +871,7 @@
   <widget class="QCheckBox" name="InjRegDeleteValue">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>640</x>
      <y>260</y>
      <width>151</width>
      <height>26</height>
@@ -917,9 +883,9 @@
       <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
         </color>
        </brush>
       </colorrole>
@@ -955,7 +921,7 @@
   <widget class="QCheckBox" name="InjRegCloseKey">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>640</x>
      <y>290</y>
      <width>151</width>
      <height>26</height>
@@ -967,9 +933,9 @@
       <colorrole role="WindowText">
        <brush brushstyle="SolidPattern">
         <color alpha="255">
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
         </color>
        </brush>
       </colorrole>
@@ -1005,8 +971,108 @@
   <widget class="QCheckBox" name="InjRegOpenKeyEx">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>640</x>
      <y>320</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>RegOpenKeyEx</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="InjCloseHandle">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>290</y>
+     <width>131</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>CloseHandle</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="InjRegDeleteKeyEx">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>350</y>
      <width>151</width>
      <height>26</height>
     </rect>
@@ -1049,15 +1115,15 @@
     </palette>
    </property>
    <property name="text">
-    <string>RegOpenKeyEx</string>
+    <string>RegDeleteKeyEx</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="InjCloseHandle">
+  <widget class="QCheckBox" name="allReg">
    <property name="geometry">
     <rect>
-     <x>40</x>
-     <y>500</y>
-     <width>131</width>
+     <x>640</x>
+     <y>380</y>
+     <width>151</width>
      <height>26</height>
     </rect>
    </property>
@@ -1099,7 +1165,534 @@
     </palette>
    </property>
    <property name="text">
-    <string>CloseHandle</string>
+    <string>所有注册表API</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="allFile">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>380</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>所有文件API</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="allHeap">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>380</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>所有堆API</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="allMessageBox">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>380</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>所有窗口API</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="InjSend">
+   <property name="geometry">
+    <rect>
+     <x>840</x>
+     <y>200</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>send</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="InjRecv">
+   <property name="geometry">
+    <rect>
+     <x>840</x>
+     <y>230</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>recv</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="InjSocket">
+   <property name="geometry">
+    <rect>
+     <x>840</x>
+     <y>260</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>socket</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="InjConnect">
+   <property name="geometry">
+    <rect>
+     <x>840</x>
+     <y>290</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>connect</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="InjBind">
+   <property name="geometry">
+    <rect>
+     <x>840</x>
+     <y>320</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>bind</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="allNet">
+   <property name="geometry">
+    <rect>
+     <x>840</x>
+     <y>380</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>所有网络API</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="InjAccept">
+   <property name="geometry">
+    <rect>
+     <x>840</x>
+     <y>350</y>
+     <width>151</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>231</red>
+         <green>231</green>
+         <blue>231</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="127">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="text">
+    <string>accept</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="startAnalyseHistory">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>550</y>
+     <width>191</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>汉仪瑞虎宋W</family>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton{
+	border-image:url(:/background/unclicked.png)
+}
+QPushButton:pressed{
+	border-image:url(:/background/clicked.png)
+}</string>
+   </property>
+   <property name="text">
+    <string>历史截获分析</string>
    </property>
   </widget>
  </widget>

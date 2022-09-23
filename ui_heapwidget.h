@@ -44,7 +44,7 @@ public:
 
     void retranslateUi(QWidget *heapWidget)
     {
-        heapWidget->setWindowTitle(QCoreApplication::translate("heapWidget", "Form", nullptr));
+        heapWidget->setWindowTitle(QCoreApplication::translate("heapWidget", "\345\240\206\347\225\214\351\235\242", nullptr));
     } // retranslateUi
 
 };

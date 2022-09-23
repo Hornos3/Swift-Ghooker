@@ -55,7 +55,7 @@ public:
 
     void retranslateUi(QWidget *fileWidget)
     {
-        fileWidget->setWindowTitle(QCoreApplication::translate("fileWidget", "Form", nullptr));
+        fileWidget->setWindowTitle(QCoreApplication::translate("fileWidget", "\346\226\207\344\273\266\347\225\214\351\235\242", nullptr));
     } // retranslateUi
 
 };

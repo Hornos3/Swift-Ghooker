@@ -44,7 +44,7 @@ public:
 
     void retranslateUi(QWidget *exceptionWidget)
     {
-        exceptionWidget->setWindowTitle(QCoreApplication::translate("exceptionWidget", "Form", nullptr));
+        exceptionWidget->setWindowTitle(QCoreApplication::translate("exceptionWidget", "\345\274\202\345\270\270\347\225\214\351\235\242", nullptr));
     } // retranslateUi
 
 };
