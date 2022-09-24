@@ -119,24 +119,29 @@ void Widget::on_startAnalysis_clicked(){
         output->updateLog();
 
         QString suspectedLastHook = getLastHookBeforeCall();
-        output->analyser->appendRecord(suspectedLastHook, nullptr, 0, true);
-        output->trimExeInfo(suspectedLastHook);
-        output->appendLog(suspectedLastHook + "Return Value: (UNKNOWN) 0xDEADBEEFCAFEBABE / <THIS_API_CAUSES_CRUSH>\n"
-                                              "----------------------------------------------------\n");
+        bool repeat = output->analyser->appendRecord(suspectedLastHook, nullptr, 0, true);
+        if(!repeat){
+            output->trimExeInfo(suspectedLastHook);
+            output->appendLog(suspectedLastHook + "Return Value: (UNKNOWN) 0xDEADBEEFCAFEBABE / <THIS_API_CAUSES_CRUSH>\n"
+                                                  "----------------------------------------------------\n");
+        }
 
         if(output->analyser->analyseHeap){
             if(output->analyser->chunksExpl->empty())
                 QMessageBox::information(this, "堆监控总结", "程序结束前，所有堆块都已被释放");
             else{
                 QString info = "程序结束前，有";
-                info += to_string(output->analyser->chunksExpl->size()).c_str();
+                info += to_string(std::count_if(output->analyser->chunksExpl->begin(),
+                                                output->analyser->chunksExpl->end(),
+                                                [](pair<uint64_t, std::map<unsigned, bool>> p)->bool{return p.second.rbegin()->second;}
+                                  )).c_str();
                 info += "个堆块没有被释放。";
                 if(output->analyser->chunksExpl->size() > 50){
                     info += "未被释放的堆块过多，无法展示，请移步堆监控查看，此时这里保存有程序执行最后一刻的堆空间布局监控情况";
                 }else{
                     info += "分别为：";
-                    for(uint64_t address : *output->analyser->chunksExpl){
-                        info += ull2a(address);
+                    for(auto address : *output->analyser->chunksExpl){
+                        info += ull2a(address.first);
                         info += ", ";
                     }
                     info += "有关堆块更加详细的信息，请移步堆监控进行查看。";
@@ -144,7 +149,8 @@ void Widget::on_startAnalysis_clicked(){
                 QMessageBox::information(this, "堆监控总结", info);
             }
         }
-        output = new Output(getAllChoices());
+        output->executing = false;
+        // output = new Output(getAllChoices());
     }
     else
         QMessageBox::warning(this, "未指定文件", "你还没有指定要分析的可执行文件，请先指定可执行文件！");
@@ -153,7 +159,10 @@ void Widget::on_startAnalysis_clicked(){
 void Widget::on_startAnalyseHistory_clicked()
 {
     output->loadHistory = true;
+    output->executing = false;
     output->tracer->initialize();
+    output->updateLogCount();
+    output->analyser->getModules();
 }
 
 std::vector<bool> Widget::getAllChoices(){

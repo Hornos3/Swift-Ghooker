@@ -336,8 +336,10 @@ public:
     std::set<QString> relatedDirs;
 
     std::vector<fullLog> logList;
-    std::set<uint64_t>* heapHandlesExpl = new std::set<uint64_t>();    // 明确使用HeapCreate函数创建的所有堆句柄会保存在这里
-    std::set<uint64_t>* chunksExpl = new std::set<uint64_t>();  // 使用HeapCreate函数创建的堆中的所有未被释放的CHUNK保存在这里
+    // 明确使用HeapCreate函数创建的所有堆句柄会保存在这里
+    std::map<uint64_t, std::map<unsigned, bool>>* heapHandlesExpl = new std::map<uint64_t, std::map<unsigned, bool>>();
+    // 使用HeapCreate函数创建的堆中的所有CHUNK保存在这里
+    std::map<uint64_t, std::map<unsigned, bool>>* chunksExpl = new std::map<uint64_t, std::map<unsigned, bool>>();
     std::map<int, APIException> exceptions;     // 所有的异常保存在这里
     std::map<int, uint64_t> memoryLeakRisks;    // 当有CHUNK没有被释放而HANDLE首先被销毁时，将CHUNK地址保存到此处
     std::map<uint64_t, fileHandleAttr> fileHandles; // 这里保存所有的文件句柄及其属性
@@ -353,6 +355,7 @@ public:
     exeInfo exeInfo;    // 这里保存文件信息
 
     argType getType(QString input);
+    void getModules();
     bool appendRecord(QString newRecord, char* binBuf = nullptr, int bufSize = 0, bool lastRecord = false);
     void diverter(fullLog latestLog, char *binBuf = nullptr);
     bool updateRecordBeauty(fullLog latestLog, bool lastRecord = false);
@@ -404,18 +407,18 @@ public:
 
     bufContent addMemory(int logId, uint64_t targetMem, char* buf, int bufLen, bufContent type);
 
-    // 用于socket函数
     bool addLocalUnbindedSocket(fullLog newNetLog);
-    // 用于bind函数
     bool bindLocalSocket(fullLog newNetLog);
-    // 用于accept函数
     bool newAcception(fullLog newNetLog);
-    // 用于connect函数
     bool newConnection(fullLog newNetLog);
-    // 用于send函数
     bool newSend(fullLog newNetLog, char* buf);
-    // 用于recv函数
     bool newRecv(fullLog newRecvLog, char* buf);
+
+    bool stepBack(fullLog rewindLog);
+    bool revokeHeapCreate(fullLog HeapCreateLog);
+    bool revokeHeapDestroy(fullLog HeapDestroyLog);
+    bool revokeHeapAlloc(fullLog HeapAllocLog);
+    bool revokeHeapFree(fullLog HeapFreeLog);
 };
 
 #endif // HOOKANALYSIS_H

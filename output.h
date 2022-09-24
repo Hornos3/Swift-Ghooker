@@ -62,6 +62,9 @@ public:
     void trimExeInfo(QString& fullInfo);
     void saveFullLog();
     void appendLog(QString log);
+    void changeStep(int changedValue);
+    void updateLogCount();
+
     QString getInjOptions();
     ~Output();
 
@@ -74,6 +77,7 @@ public:
     netWidget* nWdg;
     moduleWidget* moWdg;
     bool loadHistory = false;
+    bool executing = true;
 
     injectThread* injThread;
 
@@ -97,6 +101,8 @@ private slots:
     void on_showModulesWidget_clicked();
 
     void on_prevStep_clicked();
+
+    void on_nextStep_clicked();
 
 private:
     Ui::Output *ui;

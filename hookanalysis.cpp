@@ -30,12 +30,24 @@ hookAnalysis::hookAnalysis(QStandardItemModel* tableModel, QStandardItemModel* f
     this->moduleModel = moduleModel;
 }
 
-uint64_t getCallerRIP(){
-    uint64_t fill;
-    fill = 0xdeadbeef;
-    fill = *(uint64_t*)(&fill + 2);         // get rbp of this function
-    fill = *(uint64_t*)(fill + 0x18);       // get rip of last function
-    return fill;
+void hookAnalysis::getModules(){
+    ifstream moduleFile("./hookLog/processList.txt");
+    QString content;
+    char buffer[0x10000] = {0};
+    moduleFile.read(buffer, 0x10000);
+    content = buffer;
+    auto mlines = content.split("\n");
+    for(const auto &mod : mlines){
+        if(mod.length() == 0)
+            continue;
+        auto ele = mod.split(" ");
+        moduleModel->appendRow(QList<QStandardItem*>() <<
+                               new QStandardItem(ele[0]) <<
+                               new QStandardItem(ele[1]) <<
+                               new QStandardItem(ele[2]) <<
+                               new QStandardItem(ele[3]) <<
+                               new QStandardItem(ele[4]));
+    }
 }
 
 /**
@@ -59,23 +71,7 @@ bool hookAnalysis::appendRecord(QString newRecord, char *binBuf, int bufSize, bo
 
     // 获取进程中所有模块（exe文件、加载的dll文件）的名字、加载基地址等信息
     if(!modulesGot){
-        ifstream moduleFile("./hookLog/processList.txt");
-        QString content;
-        char buffer[0x10000] = {0};
-        moduleFile.read(buffer, 0x10000);
-        content = buffer;
-        auto mlines = content.split("\n");
-        for(const auto &mod : mlines){
-            if(mod.length() == 0)
-                continue;
-            auto ele = mod.split(" ");
-            moduleModel->appendRow(QList<QStandardItem*>() <<
-                                   new QStandardItem(ele[0]) <<
-                                   new QStandardItem(ele[1]) <<
-                                   new QStandardItem(ele[2]) <<
-                                   new QStandardItem(ele[3]) <<
-                                   new QStandardItem(ele[4]));
-        }
+        getModules();
         modulesGot = true;
     }
 
@@ -311,7 +307,7 @@ bool hookAnalysis::appendRecord(QString newRecord, char *binBuf, int bufSize, bo
     // 如果这个函数与注册表操作有关系，则进入注册表分析模块进行进一步行为分析。
     analyse:
     if(latestLog.id == logList.size() - 1 && lastRecord)
-        return false;
+        return true;
     else if(lastRecord)
         latestLog.retVal.value.imm = 0xdeadbeefcafebabe;
     logList.push_back(latestLog);
@@ -473,7 +469,9 @@ bool hookAnalysis::addHandle(fullLog newHeapLog){
     int findHandleIdx = findHandle(allocatedHandle, heapViewModel);                 // 查找这个HANDLE是否已经被监视
     if(findHandleIdx < 0){      // 没有找到这个HANDLE，在表中新增
         insertNewHeapHandle(allocatedHandle, -findHandleIdx - 1);
-        heapHandlesExpl->insert(allocatedHandle);
+        std::map<unsigned, bool> a;
+        a.insert({newHeapLog.id, true});
+        heapHandlesExpl->insert({allocatedHandle, a});
     }else{
         // 首先判断这个HANDLE目前是否正在使用，如果之前监测到明确的HeapDestroy函数将其销毁，那么再一次分配到这个HANDLE就是异常的行为。
         if(heapViewModel->item(findHandleIdx, HEAPSTATUS)->text() == "已被销毁"){
@@ -533,8 +531,12 @@ bool hookAnalysis::destroyHandle(fullLog newHeapLog){
                             new exceptionInfo{.addressWithException = father->child(i)->text().toULongLong(nullptr, 16)});
         }
         father->child(i, HEAPSTATUS)->setText("无效");
+        uint64_t chunkAddr = father->child(i)->text().toULongLong(nullptr, 16);
+        auto f = chunksExpl->find(chunkAddr);
+        assert(f != chunksExpl->end());
+        f->second.insert({newHeapLog.id, false});
     }
-    heapHandlesExpl->erase(heapHandlesExpl->find(handleToDestroy));
+    heapHandlesExpl->find(handleToDestroy)->second.insert({newHeapLog.id, false});
     return true;
 }
 
@@ -560,8 +562,8 @@ bool hookAnalysis::addChunk(fullLog newHeapLog){
 
     uint64_t handleAddr = newHeapLog.args["hHeap"].value.imm;       // 获取该CHUNK所属的handle地址
     int findHandleIdx = findHandle(handleAddr, heapViewModel);                 // 查找这个HANDLE是否已经被监视
-    if(findHandleIdx < 0)      // 没有找到这个HANDLE，在表中新增
-        insertNewHeapHandle(handleAddr, -findHandleIdx - 1);
+    if(findHandleIdx < 0)      // 没有找到这个HANDLE，不作处理
+        return false;
     else{
         // 首先判断这个HANDLE目前是否正在使用，如果之前监测到明确的HeapDestroy函数将其销毁，那么再一次分配到这个HANDLE就是异常的行为。
         // 但即使存在这种异常行为，程序依然会记录这个CHUNK，除非其返回值为nullptr。
@@ -590,8 +592,11 @@ bool hookAnalysis::addChunk(fullLog newHeapLog){
         }
         // 如果一个堆句柄没有检测到其被HeapCreate分配而是根据HeapAlloc监测到，那么这样的堆中分配和释放堆块均不计数
         // 如果有一个堆块被成功分配到了已经被删除的堆句柄，且这个堆句柄明确使用HeapCreate创建，这样的堆块也不会被计数
-        if(heapHandlesExpl->find(handleAddr) != heapHandlesExpl->end())
-            chunksExpl->insert(allocatedChunk);
+        if(heapHandlesExpl->find(handleAddr) != heapHandlesExpl->end()){
+            auto a = std::map<unsigned, bool>();
+            a.insert({newHeapLog.id, true});
+            chunksExpl->insert({allocatedChunk, a});
+        }
     }
     return true;
 }
@@ -623,9 +628,13 @@ bool hookAnalysis::freeChunk(fullLog newHeapLog){
             else if(heapViewModel->item(findHandleIdx)->child(findChunkIdx, HEAPSTATUS)->text() == "正在使用")        // 能够找到这个CHUNK，但是释放失败而且程序还崩溃了
                 handleException({newHeapLog.id, FreeChunkFailed},
                                 new exceptionInfo{.addressWithException = victim});
-            else
+            else{
                 handleException({newHeapLog.id, DoubleFree},
                                 new exceptionInfo{.addressWithException = victim});
+                auto removeIter = chunksExpl->find(victim);
+                if(removeIter != chunksExpl->end())
+                    removeIter->second.insert({newHeapLog.id, false});
+            }
         }
         return false;
     }
@@ -648,15 +657,14 @@ bool hookAnalysis::freeChunk(fullLog newHeapLog){
                         new exceptionInfo{.addressWithException = victim});
     }else{  // 找到这个CHUNK
         // 判断这个CHUNK是否正在被使用，如果已经释放，说明发现了Double Free
-        if(father->child(findChunkIdx, HEAPSTATUS)->text() == "已被释放"){
+        if(father->child(findChunkIdx, HEAPSTATUS)->text() == "已被释放")
             handleException({newHeapLog.id, DoubleFree},
                             new exceptionInfo{.addressWithException = victim});
-        }else{
+        else
             father->child(findChunkIdx, HEAPSTATUS)->setText("已被释放");
-            auto removeIter = chunksExpl->find(victim);
-            if(removeIter != chunksExpl->end())
-                chunksExpl->erase(removeIter);
-        }
+        auto removeIter = chunksExpl->find(victim);
+        if(removeIter != chunksExpl->end())
+            removeIter->second.insert({newHeapLog.id, false});
     }
     validFreeCount++;
     return true;
@@ -2092,6 +2100,134 @@ bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
                                                 new QStandardItem("RECV TO NET") <<
                                                 new QStandardItem(isServer ?
                                                                       remoteSockInfo[socket] : connectionInfo[socket]));
+    }
+    return true;
+}
+
+bool hookAnalysis::stepBack(fullLog rewindLog){
+    if(rewindLog.funcName == "HeapCreate")
+        revokeHeapCreate(rewindLog);
+    else if(rewindLog.funcName == "HeapDestroy")
+        revokeHeapDestroy(rewindLog);
+    else if(rewindLog.funcName == "HeapAlloc")
+        revokeHeapAlloc(rewindLog);
+    else if(rewindLog.funcName == "HeapFree")
+        revokeHeapFree(rewindLog);
+    return true;
+}
+
+bool hookAnalysis::revokeHeapCreate(fullLog HeapCreateLog){
+    uint64_t revHandle = HeapCreateLog.retVal.value.imm;
+    auto f = heapHandlesExpl->find(revHandle);
+    if(f == heapHandlesExpl->end())
+        throw std::exception("HeapCreate: 找不到要回溯的Handle。");
+    int fi = findHandle(revHandle, heapViewModel);
+    if(fi < 0)
+        throw std::exception("HeapCreate: 找不到要回溯的Handle。");
+    auto self = heapViewModel->item(fi);
+    if(self->hasChildren())
+        throw std::exception("HeapCreate: 回溯的Handle非空。");
+    heapViewModel->removeRow(fi);
+    return true;
+}
+
+bool hookAnalysis::revokeHeapDestroy(fullLog HeapDestroyLog){
+    uint64_t revHandle = HeapDestroyLog.args["hHeap"].value.imm;
+    int fi = findHandle(revHandle, heapViewModel);
+    if(fi < 0)
+        throw std::exception("HeapDestroy: 找不到要回溯的Handle。");
+    auto item = heapViewModel->item(fi);
+    heapViewModel->item(fi, HEAPSTATUS)->setText("正在使用");
+    for(int i=0; i<item->rowCount(); i++){
+        uint64_t addr = item->child(i)->text().toULongLong(nullptr, 16);
+        auto f = chunksExpl->find(addr);
+        if(f == chunksExpl->end())
+            throw std::exception("HeapDestroy: 找不到handle下的chunk。");
+        auto isUsing = f->second.find(HeapDestroyLog.id);
+        if(isUsing == f->second.begin())
+            throw std::exception("HeapDestroy: 找不到handle下chunk之前的申请记录。");
+        isUsing--;
+        if(isUsing->second)
+            item->child(i, HEAPSTATUS)->setText("正在使用");
+        else
+            item->child(i, HEAPSTATUS)->setText("已被释放");
+    }
+    return true;
+}
+
+bool hookAnalysis::revokeHeapAlloc(fullLog HeapAllocLog){
+    uint64_t revChunk = HeapAllocLog.retVal.value.imm;
+    uint64_t relatedHandle = HeapAllocLog.args["hHeap"].value.imm;
+    auto f = chunksExpl->find(revChunk);
+    if(f == chunksExpl->end())
+        return false;       // 找不到chunk，不作处理（可能是非HeapCreate的Handle中的chunk）
+    // 在列表中查找这个chunk
+    int fi = findHandle(relatedHandle, heapViewModel);
+    // 父表中查不到
+    if(fi < 0)
+        throw std::exception("HeapAlloc: 找不到要回溯的Chunk所关联的Handle。");
+    // 查询子表
+    int fin = findChunk(revChunk, heapViewModel->item(fi));
+    // 子表查不到，异常
+    if(fin < 0)
+        throw std::exception("HeapAlloc: 找不到要回溯的Chunk。");
+    // 判断该chunk在HeapAlloc之前的状态
+    auto prevStatus = f->second.find(HeapAllocLog.id);
+    if(prevStatus == f->second.end()){
+        throw std::exception("HeapAlloc: 找不到chunk的状态修改记录。");
+    }else if(prevStatus == f->second.begin())     // 如果是初次分配，则删除这个子项
+        heapViewModel->item(fi)->removeRow(fin);
+    else{       // 如果不是，考虑两种情况：该chunk被释放或该chunk无效，无效的可能性在于所在Handle被提前删除又重新分配
+        // 总之在HeapAlloc执行之前，其所在handle一定存在，因此可以找到该handle
+        prevStatus--;
+        auto handleIter = heapHandlesExpl->find(relatedHandle);
+        if(handleIter == heapHandlesExpl->end())    // 找不到handle
+            throw std::exception("HeapAlloc: 找不到要回溯的Chunk所在的Handle。");
+        // 查询该handle的删除和分配记录
+        auto handleLogf = handleIter->second.lower_bound(HeapAllocLog.id);
+        if(handleLogf == handleIter->second.begin())
+            throw std::exception("HeapAlloc: 找不到要回溯的Chunk所在的Handle的创建记录。");
+        handleLogf--;
+        // 获取handle上一次的操作id和chunk上一次被删除/判为无效的操作id，比较其大小。
+        // 如果handle操作id大于chunk操作id，说明该chunk在未被释放的情况下其所在handle就先被释放。此时回溯应该删除该子项。
+        // 如果handle操作id小于chunk操作id，说明该chunk在该handle被创建后曾经被释放过，此时应该修改该子项的状态。
+        int lastHandleInstId = handleLogf->first;
+        int lastChunkInstId = prevStatus->first;
+        if(lastHandleInstId > lastChunkInstId)
+            heapViewModel->item(fi)->removeRow(fin);
+        else if(lastHandleInstId < lastChunkInstId)
+            heapViewModel->item(fi)->child(fin, HEAPSTATUS)->setText("已被释放");
+        else
+            throw std::exception("HeapAlloc: 回溯时发现操作逻辑错误。");
+    }
+    return true;
+}
+
+bool hookAnalysis::revokeHeapFree(fullLog HeapFreeLog){
+    uint64_t revChunk = HeapFreeLog.args["lpMem"].value.imm;
+    uint64_t relatedHandle = HeapFreeLog.args["hHeap"].value.imm;
+    // 暂时不考虑在已删除的handle中分配成功chunk的情况，那么这个chunk一定在之前被分配过，只需要找到即可。
+    auto f = chunksExpl->find(revChunk);
+    if(f == chunksExpl->end())
+        return false;       // 找不到chunk，不作处理（可能是非HeapCreate的Handle中的chunk）
+    int fi = findHandle(relatedHandle, heapViewModel);
+    if(fi < 0)
+        throw std::exception("HeapFree: 找不到要回溯的Chunk所关联的Handle。");
+    // 查询子表
+    int fin = findChunk(revChunk, heapViewModel->item(fi));
+    // 子表查不到，异常
+    if(fin < 0)
+        throw std::exception("HeapFree: 找不到要回溯的Chunk。");
+    // 判断该chunk在HeapAlloc之前的状态
+    auto prevStatus = f->second.find(HeapFreeLog.id);
+    if(prevStatus == f->second.end())       // 找不到状态修改记录，跳过
+        throw std::exception("HeapFree: 找不到chunk的状态修改记录。");
+    else if(prevStatus == f->second.begin())
+        throw std::exception("HeapFree: 找不到chunk的申请记录。");
+    else{
+        prevStatus--;
+        if(prevStatus->second)     // 如果前一次修改该chunk是释放，说明这里是double free，无需修改其状态
+            heapViewModel->item(fi)->child(fin, HEAPSTATUS)->setText("正在使用");
     }
     return true;
 }

@@ -86,6 +86,7 @@ Output::Output(std::vector<bool> choices, QWidget *parent) :
     // ui->processInfo->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     watcher->addPath("./hookLog/lasthook.tmp");
     connect(this->watcher, &QFileSystemWatcher::fileChanged, this, &Output::updateLog);
+    connect(ui->currentStep, &QSpinBox::editingFinished, this, [=](){changeStep(ui->currentStep->value());});
 }
 
 void Output::initialize(std::vector<bool> choices){
@@ -165,6 +166,13 @@ QString Output::getInjOptions(){
     ret += injectionOptions[20] ? "\tSocket\n" : "";
     ret += injectionOptions[21] ? "\tAccept\n" : "";
     return ret;
+}
+
+void Output::updateLogCount(){
+    ui->currentStep->setMaximum(analyser->logList.size());
+    ui->currentStep->setValue(analyser->logList.size());
+    ui->stepCount->setMaximum(analyser->logList.size());
+    ui->stepCount->setValue(analyser->logList.size());
 }
 
 void Output::updateLog(){
@@ -426,9 +434,47 @@ void Output::on_showModulesWidget_clicked()
 
 void Output::on_prevStep_clicked()
 {
+    if(ui->currentStep != 0){
+        tracer->stepBack();
+        ui->currentStep->setValue(ui->currentStep->value() - 1);
+    }
+}
 
+void Output::on_nextStep_clicked()
+{
+    if(ui->currentStep != ui->stepCount){
+        tracer->stepFront();
+        ui->currentStep->setValue(ui->currentStep->value() + 1);
+    }
 }
 
 void Output::appendLog(QString log){
     ui->logInfo->appendPlainText(log);
+    ui->currentStep->setMaximum(ui->currentStep->maximum() + 1);
+    ui->stepCount->setMaximum(ui->currentStep->maximum() + 1);
+    ui->currentStep->setValue(ui->currentStep->maximum());
+    ui->stepCount->setValue(ui->currentStep->maximum());
 }
+
+void Output::changeStep(int changedValue)
+{
+    if(executing)
+        return;
+    int originalStep = tracer->currentStep;
+    if(originalStep < changedValue){
+        while(originalStep < changedValue){
+            tracer->stepFront();
+            originalStep++;
+        }
+    }else{
+        if(originalStep - changedValue < changedValue){ // 如果回溯需要的步骤少，就回溯
+            while(originalStep > changedValue){
+                tracer->stepBack();
+                originalStep--;
+            }
+        }else{
+            // TODO: 清空所有显示信息并从头开始推演
+        }
+    }
+}
+

@@ -362,6 +362,7 @@ bool historyTracer::initialize(){
                          to_string(totalStep) + "条记录").c_str());
 
         mainAnalyser->updateRecordBeauty(log, i == totalStep - 1);
+        mainAnalyser->logList.push_back(log);
         QCoreApplication::processEvents();
     }
 
@@ -370,9 +371,43 @@ bool historyTracer::initialize(){
     return true;
 }
 
+char* historyTracer::getRelatedBuffer(fullLog log){
+    char* relatedBuf = nullptr;
+    if(log.funcName == "ReadFile" || log.funcName == "WriteFile" || log.funcName == "send" || log.funcName == "recv"){
+        uint64_t memAddr;
+        if(log.funcName == "ReadFile" || log.funcName == "WriteFile")
+            memAddr = log.args["lpBuffer"].value.imm;
+        else
+            memAddr = log.args["buf"].value.imm;
+        auto f = mainAnalyser->keyMemories.find(memAddr);
+        if(f == mainAnalyser->keyMemories.end()){
+            QMessageBox::critical(parent, "解析错误", "日志文件内容匹配失败，读取历史记录失败！");
+            return (char*)-1;
+        }
+        auto fi = f->second.find(log.id);
+        if(fi == f->second.end()){
+            QMessageBox::critical(parent, "解析错误", "日志文件内容匹配失败，读取历史记录失败！");
+            return (char*)-1;
+        }
+        relatedBuf = fi->second.content;
+    }
+    return relatedBuf;
+}
+
 bool historyTracer::stepFront(){
+    if(currentStep == totalStep)
+        return false;
     fullLog nextLog = (*logList)[currentStep];
-    // this->mainAnalyser->diverter(nextLog);
-    // TODO
+    this->mainAnalyser->diverter(nextLog, getRelatedBuffer(nextLog));
+    currentStep++;
+    return true;
+}
+
+bool historyTracer::stepBack(){
+    if(currentStep == 0)
+        return false;
+    fullLog lastLog = (*logList)[currentStep - 1];
+    mainAnalyser->stepBack(lastLog);
+    currentStep--;
     return true;
 }

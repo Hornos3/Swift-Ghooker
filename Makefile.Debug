@@ -1575,6 +1575,8 @@ debug\moc_output.cpp: output.h \
 		heapwidget.h \
 		netwidget.h \
 		historytracer.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\QProgressDialog \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\qprogressdialog.h \
 		modulewidget.h \
 		exceptionwidget.h \
 		logwidget.h \
@@ -1944,6 +1946,8 @@ debug\moc_widget.cpp: widget.h \
 		heapwidget.h \
 		netwidget.h \
 		historytracer.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\QProgressDialog \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\qprogressdialog.h \
 		modulewidget.h \
 		exceptionwidget.h \
 		logwidget.h \
@@ -3204,7 +3208,24 @@ debug\historytracer.obj: historytracer.cpp historytracer.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtGui\qglyphrun.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtGui\qrawfont.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtGui\qfontdatabase.h \
-		include\detours.h
+		include\detours.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\QProgressDialog \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\qprogressdialog.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qcoreapplication.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qeventloop.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qcoreapplication_platform.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qfuture.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qfutureinterface.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qmutex.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qresultstore.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qfuture_impl.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qthreadpool.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qthread.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qdeadlinetimer.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qelapsedtimer.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qrunnable.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qexception.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qpromise.h
 
 debug\hookanalysis.obj: hookanalysis.cpp hookanalysis.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\QString \
@@ -3976,6 +3997,8 @@ debug\main.obj: main.cpp widget.h \
 		heapwidget.h \
 		netwidget.h \
 		historytracer.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\QProgressDialog \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\qprogressdialog.h \
 		modulewidget.h \
 		exceptionwidget.h \
 		logwidget.h \
@@ -4802,6 +4825,8 @@ debug\output.obj: output.cpp Util.h \
 		heapwidget.h \
 		netwidget.h \
 		historytracer.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\QProgressDialog \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\qprogressdialog.h \
 		modulewidget.h \
 		exceptionwidget.h \
 		logwidget.h \
@@ -5240,6 +5265,8 @@ debug\widget.obj: widget.cpp widget.h \
 		heapwidget.h \
 		netwidget.h \
 		historytracer.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\QProgressDialog \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\qprogressdialog.h \
 		modulewidget.h \
 		exceptionwidget.h \
 		logwidget.h \

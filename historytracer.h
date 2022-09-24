@@ -23,7 +23,7 @@ public:
     bool stepBack();
     bool stepFront();
     bool jumpTo(int logId);
-
+    char* getRelatedBuffer(fullLog log);
 };
 
 #endif // HISTORYTRACER_H
