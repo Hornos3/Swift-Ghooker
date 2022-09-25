@@ -43,7 +43,7 @@ void fileWidget::on_treeView_clicked(const QModelIndex &index)
     if(index.parent().isValid())
         realIdx = index.parent();
     int selectedRow = realIdx.row();
-    fileHandleAttr handle = analyser->fileHandles[fileModel->item(selectedRow)->text().toULongLong(nullptr, 16)];
+    fileHandleAttr handle = analyser->fileHandles[fileModel->item(selectedRow)->text().toULongLong(nullptr, 16)].rbegin()->second;
     list<int> fileAccess = analyser->getGenericAccess(handle.access);
     auto iter = fileAccess.begin();
 

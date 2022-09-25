@@ -5,12 +5,13 @@
 #include "ui_output.h"
 #include <QReadWriteLock>
 #include <fstream>
+#include <QMutex>
 using namespace std;
 
 extern bool (*getMutexSignal)(void);
 extern void (*setMutexSignal)(void);
 
-extern QReadWriteLock* lock;
+std::recursive_mutex mutexLock;
 int counter = 0;
 
 Output::Output(std::vector<bool> choices, QWidget *parent) :
@@ -177,7 +178,12 @@ void Output::updateLogCount(){
 
 void Output::updateLog(){
 //    lock->lockForWrite();
-    while(!getMutexSignal);
+    // mutexLock.lock();
+    while(!getMutexSignal()){
+        QCoreApplication::processEvents();
+        if(!injThread || injThread->isFinished())
+            return;
+    }
 
     ifstream in("./hookLog/lasthook.tmp");
     char newLog[0x800] = {0};
@@ -197,10 +203,13 @@ void Output::updateLog(){
 
     setMutexSignal();
 
+    // mutexLock.unlock();
+
     wstring logW = stringTowstring(newLog);
     QString logQ = QString::fromStdWString(logW);
-    if(logQ.isEmpty())
+    if(logQ.isEmpty()){
         return;
+    }
     bool exeInfoGot = analyser->exeInfoGot;
 
     bool mayRepeat = analyser->appendRecord(logQ, buf);
@@ -223,7 +232,6 @@ void Output::updateLog(){
     }else
         qDebug() << ++counter;
     in.close();
-
 //    lock->unlock();
 }
 
@@ -308,7 +316,7 @@ void Output::on_fileView_clicked(const QModelIndex &index)
     if(index.parent().isValid())
         return;
 
-    fileHandleAttr handle = analyser->fileHandles[fileViewModel->item(selectedRow)->text().toULongLong(nullptr, 16)];
+    fileHandleAttr handle = analyser->fileHandles[fileViewModel->item(selectedRow)->text().toULongLong(nullptr, 16)].rbegin()->second;
     list<int> fileAccess = analyser->getGenericAccess(handle.access);
     auto iter = fileAccess.begin();
 

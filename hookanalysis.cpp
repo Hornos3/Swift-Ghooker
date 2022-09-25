@@ -84,8 +84,17 @@ bool hookAnalysis::appendRecord(QString newRecord, char *binBuf, int bufSize, bo
     // 与前一个记录进行比较，判断是否有重复的现象出现。
     if(logList.size() != 0 && !lastRecord){
         fullLog lastLog = *(logList.rbegin());
-        if(latestLog < lastLog || latestLog == lastLog)   // 发现重复
+        if(latestLog < lastLog || latestLog == lastLog){   // 发现重复
+            qDebug() << latestLog.id << "<= exception";
+            // assert(false);
             return true;
+        }
+    }else if(lastRecord && *(logList.rbegin()) == latestLog)
+        return true;
+
+    if(!(logList.empty() || latestLog.id == logList.rbegin()->id + 1)){
+        qDebug() << latestLog.id << "> exception";
+        assert(false);
     }
 
     // 获取该条记录的时间（函数调用的时间，精确到毫秒）
@@ -1007,6 +1016,11 @@ bool hookAnalysis::closeFileHandle(fullLog newFileLog){
                                                   new QStandardItem("CLOSE") <<
                                                   new QStandardItem(fileName) << nullptr <<
                                                   new QStandardItem("SUCCESS"));
+    auto f = fileHandles.find(handle);
+    assert(f != fileHandles.end());
+    fileHandleAttr attr = f->second.rbegin()->second;
+    attr.isEnable = false;
+    f->second.insert({newFileLog.id, attr});
     return true;
 }
 
@@ -1084,7 +1098,13 @@ void hookAnalysis::insertNewFileHandle(fullLog log, int insPos){
     newHandleAttr.shareMode = log.args["dwShareMode"].value.imm;
     newHandleAttr.createDisp = log.args["dwCreationDisposition"].value.imm;
     newHandleAttr.flagAttr = log.args["dwFlagsAndAttributes"].value.imm;
-    fileHandles.insert({newHandleAttr.handleAddr, newHandleAttr});
+    auto f = fileHandles.find(newHandleAttr.handleAddr);
+    if(f == fileHandles.end()){
+        std::map<unsigned, fileHandleAttr> attrs;
+        attrs.insert({log.id, newHandleAttr});
+        fileHandles.insert({newHandleAttr.handleAddr, attrs});
+    }else
+        f->second.insert({log.id, newHandleAttr});
 
     fileViewModel->insertRow(-insPos - 1, QList<QStandardItem*>() << new QStandardItem(ull2a(newHandleAttr.handleAddr))
                              << new QStandardItem(fileName) << new QStandardItem("正在使用"));
@@ -2229,5 +2249,40 @@ bool hookAnalysis::revokeHeapFree(fullLog HeapFreeLog){
         if(prevStatus->second)     // 如果前一次修改该chunk是释放，说明这里是double free，无需修改其状态
             heapViewModel->item(fi)->child(fin, HEAPSTATUS)->setText("正在使用");
     }
+    return true;
+}
+
+bool hookAnalysis::revokeCreateFile(fullLog CreateFileLog){
+    uint64_t fileHandle = CreateFileLog.retVal.value.imm;
+    auto f = fileHandles.find(fileHandle);
+    if(f == fileHandles.end())  // 找不到，不作处理
+        return false;
+    auto fileAttr = --f->second.end();
+    if(fileAttr == f->second.begin()){      // 如果这个handle只有这一个被创建的记录
+        if(!fileAttr->second.isEnable)
+            throw std::exception("CreateFile: 找不到句柄的创建记录");
+        int idx = findHandle(fileHandle, fileViewModel);
+        if(idx < 0)
+            throw std::exception("CreateFile: 在列表中找不到句柄");
+        fileViewModel->removeRow(idx);
+    }else{      // 如果这个函数在创建之前还被创建过，那么回溯这一次创建应该将其状态设置为已被关闭
+        fileAttr--;
+        if(fileAttr->second.isEnable)       // 重复分配两次该句柄
+            return false;
+        else{
+            int idx = findHandle(fileHandle, fileViewModel);
+            if(idx < 0)
+                throw std::exception("CreateFile: 在列表中找不到句柄");
+            fileViewModel->item(idx, FILEHANDLESTATUS)->setText("已被关闭");
+        }
+    }
+    return true;
+}
+
+bool hookAnalysis::revokeReadFile(fullLog ReadFileLog){
+    // 对于ReadFile这个API的回溯主要就是在内存和列表子项上面
+    uint64_t fileHandle = ReadFileLog.args["hFile"].value.imm;
+    uint64_t bufferAddr = ReadFileLog.args["lpBuffer"].value.imm;
+
     return true;
 }
