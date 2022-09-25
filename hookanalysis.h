@@ -354,6 +354,9 @@ public:
     std::map<uint64_t, uint64_t> socketPairs;   // SOCKET对，键是远程SOCKET，值是本地SOCKET
     std::map<uint64_t, QString> connectionInfo; // 连接信息，是本机连接到远程，键是本地SOCKET，值是远程IP+端口
     std::map<uint64_t, QString> remoteSockInfo; // 远程SOCKET信息，SOCKET与远程IP+端口相对应
+    // 通用的端口信息，当调用socket、bind、accept、connect这种会修改其自身或连接socket的IP+port的操作都会被记录
+    // pair中的第一个QString为本地IP+port，第二个为远程
+    std::map<uint64_t, std::map<unsigned, pair<QString, QString>>> universalSocketInfo;
 
     exeInfo exeInfo;    // 这里保存文件信息
 
@@ -433,6 +436,12 @@ public:
     bool revokeRegCloseKey(fullLog RegCloseKeyLog);
     bool revokeRegOpenKeyEx(fullLog RegOpenKeyExLog);
     bool revokeRegDeleteKeyEx(fullLog RegDeleteKeyExLog);
+    bool revokeSend(fullLog sendLog);
+    bool revokeRecv(fullLog recvLog);
+    bool revokeSocket(fullLog socketLog);
+    bool revokeConnect(fullLog connectLog);
+    bool revokeBind(fullLog bindLog);
+    bool revokeAccept(fullLog acceptLog);
 };
 
 #endif // HOOKANALYSIS_H

@@ -1917,20 +1917,35 @@ bufContent hookAnalysis::addMemory(int logId, uint64_t targetMem, char* buf, int
 
 bool hookAnalysis::addLocalUnbindedSocket(fullLog newNetLog){
     uint64_t newSocket = newNetLog.retVal.value.imm;
+    if(newSocket == INVALID_SOCKET)
+        return false;
     QString Af = af[newNetLog.args["af"].value.imm];
     QString type = sockType[newNetLog.args["type"].value.imm];
     QString proto = ipproto.find(newNetLog.args["protocol"].value.imm)->second;
     int insIdx = findHandle(newSocket, netModel);
-    if(insIdx < 0)
+    if(insIdx < 0){
         netModel->insertRow(-insIdx - 1, QList<QStandardItem*>() <<
                             new QStandardItem(ull2a(newSocket)) <<
                             new QStandardItem(Af + "/" + type + "/" + proto) <<
-                            new QStandardItem("未指定") <<
-                            new QStandardItem("未指定"));
+                            new QStandardItem("-") <<
+                            new QStandardItem("-"));
+        netModel->item(-insIdx - 1)->appendRow(QList<QStandardItem*>() <<
+                                          new QStandardItem(to_string(newNetLog.id).c_str()) <<
+                                          new QStandardItem("NEW SOCKET"));
+        map<unsigned, pair<QString, QString>> a;
+        a.insert({newNetLog.id, {"-:-", "-:-"}});
+        universalSocketInfo.insert({newSocket, a});
+    }
     else{
         netModel->item(insIdx, 1)->setText(Af + "/" + type + "/" + proto);
-        netModel->item(insIdx, 2)->setText("未指定");
-        netModel->item(insIdx, 3)->setText("未指定");
+        netModel->item(insIdx, 2)->setText("-");
+        netModel->item(insIdx, 3)->setText("-");
+        netModel->item(insIdx)->appendRow(QList<QStandardItem*>() <<
+                                          new QStandardItem(to_string(newNetLog.id).c_str()) <<
+                                          new QStandardItem("NEW SOCKET"));
+        auto f = universalSocketInfo.find(newSocket);
+        assert(f != universalSocketInfo.end());
+        f->second.insert({newNetLog.id, {"-:-", "-:-"}});
     }
     return true;
 }
@@ -1948,13 +1963,28 @@ bool hookAnalysis::bindLocalSocket(fullLog newNetLog){
     unsigned ip = newNetLog.args["name->sin_addr.s_addr"].value.imm;
     QString ipaddr = ip_int2str(ip);
     QString port = to_string(htons(newNetLog.args["name->sin_port"].value.imm)).c_str();
+    // 判断返回值
+    int ret = newNetLog.retVal.value.imm;
+    if(ret){     // bind失败
+        netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
+                                        new QStandardItem(to_string(newNetLog.id).c_str()) <<
+                                        new QStandardItem("BIND") << nullptr <<
+                                        new QStandardItem(ipaddr + ":" + port + ":(失败)"));
+        return false;
+    }
 
     netModel->item(sidx, 2)->setText(ipaddr);
     netModel->item(sidx, 3)->setText(port);
     netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
+                                    new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                     new QStandardItem("BIND") << nullptr <<
                                     new QStandardItem(ipaddr + ":" + port));
-
+    auto f = universalSocketInfo.find(socket);
+    assert(f != universalSocketInfo.end());
+    assert(!f->second.empty());
+    auto ff = --f->second.end();
+    QString remote = ff->second.second;
+    f->second.insert({newNetLog.id, {ipaddr + ":" + port, remote}});
     return true;
 }
 
@@ -1973,6 +2003,7 @@ bool hookAnalysis::newAcception(fullLog newNetLog){
     }
 
     netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
+                                    new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                     new QStandardItem("ACCEPT") <<
                                     new QStandardItem(remoteSocket) <<
                                     new QStandardItem(remoteip + ":" + remotePort) <<
@@ -1980,6 +2011,12 @@ bool hookAnalysis::newAcception(fullLog newNetLog){
                                                       netModel->item(sidx, 3)->text()));
     socketPairs.insert({remoteSocket, localSocket});
     remoteSockInfo.insert({remoteSocket, remoteip + ":" + remotePort});
+    auto f = universalSocketInfo.find(localSocket);
+    assert(f != universalSocketInfo.end());
+    assert(!f->second.empty());
+    auto ff = --f->second.end();
+    QString local = ff->second.first;
+    f->second.insert({newNetLog.id, {local, remoteip + ":" + remotePort}});
     return true;
 }
 
@@ -1998,9 +2035,16 @@ bool hookAnalysis::newConnection(fullLog newNetLog){
     QString port = to_string(htons(newNetLog.args["name->sin_port"].value.imm)).c_str();
 
     netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
+                                    new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                     new QStandardItem("CONNECT") << nullptr << nullptr <<
                                     new QStandardItem(ipaddr + ":" + port));
     connectionInfo.insert({socket, ipaddr + ":" + port});
+    auto f = universalSocketInfo.find(socket);
+    assert(f != universalSocketInfo.end());
+    assert(!f->second.empty());
+    auto ff = --f->second.end();
+    QString local = ff->second.first;
+    f->second.insert({newNetLog.id, {local, ipaddr + ":" + port}});
     return true;
 }
 
@@ -2032,6 +2076,7 @@ bool hookAnalysis::newSend(fullLog newNetLog, char* buf){
         sfind = findHandle(serverSock, netModel);   // 获取服务器（本地）的SOCKET
         assert(sfind >= 0);
         netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
+                                         new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                          new QStandardItem("SEND") <<
                                          new QStandardItem(ull2a(socket)) <<
                                          new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
@@ -2043,6 +2088,7 @@ bool hookAnalysis::newSend(fullLog newNetLog, char* buf){
         sfind = findHandle(socket, netModel);
         assert(sfind >= 0);
         netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
+                                         new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                          new QStandardItem("SEND") <<
                                          nullptr <<
                                          new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
@@ -2107,6 +2153,7 @@ bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
         sfind = findHandle(serverSock, netModel);   // 获取服务器（本地）的SOCKET
         assert(sfind >= 0);
         netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
+                                         new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                          new QStandardItem("RECV") <<
                                          new QStandardItem(ull2a(socket)) <<
                                          new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
@@ -2118,6 +2165,7 @@ bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
         sfind = findHandle(socket, netModel);
         assert(sfind >= 0);
         netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
+                                         new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                          new QStandardItem("RECV") <<
                                          nullptr <<
                                          new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
@@ -2136,7 +2184,7 @@ bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
         memoryModel->item(-memIdx-1)->appendRow(QList<QStandardItem*>() <<
                                                 new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                                 new QStandardItem(ull2a(ret)) <<
-                                                new QStandardItem("RECV TO NET") <<
+                                                new QStandardItem("RECV FROM NET") <<
                                                 new QStandardItem(isServer ?
                                                                       remoteSockInfo[socket] : connectionInfo[socket]));
     }else{
@@ -2146,7 +2194,7 @@ bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
         memoryModel->item(memIdx)->appendRow(QList<QStandardItem*>() <<
                                                 new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                                 new QStandardItem(ull2a(ret)) <<
-                                                new QStandardItem("RECV TO NET") <<
+                                                new QStandardItem("RECV FROM NET") <<
                                                 new QStandardItem(isServer ?
                                                                       remoteSockInfo[socket] : connectionInfo[socket]));
     }
@@ -2182,6 +2230,18 @@ bool hookAnalysis::stepBack(fullLog rewindLog){
         revokeRegOpenKeyEx(rewindLog);
     else if(rewindLog.funcName == "RegDeleteKeyEx")
         revokeRegDeleteKeyEx(rewindLog);
+    else if(rewindLog.funcName == "send")
+        revokeSend(rewindLog);
+    else if(rewindLog.funcName == "recv")
+        revokeRecv(rewindLog);
+    else if(rewindLog.funcName == "connect")
+        revokeConnect(rewindLog);
+    else if(rewindLog.funcName == "bind")
+        revokeBind(rewindLog);
+    else if(rewindLog.funcName == "socket")
+        revokeSocket(rewindLog);
+    else if(rewindLog.funcName == "accept")
+        revokeAccept(rewindLog);
     return true;
 }
 
@@ -2573,5 +2633,187 @@ bool hookAnalysis::revokeRegDeleteKeyEx(fullLog RegDeleteKeyExLog){
     if(fin < 0)
         throw std::exception("RegDeleteKeyEx: map中找不到该操作。");
     father->removeRow(fin);
+    return true;
+}
+
+bool hookAnalysis::revokeSend(fullLog sendLog){
+    int ret = sendLog.retVal.value.imm;
+    if(ret < 0)     // 返回值小于0，发送出错
+        return false;
+    uint64_t socket = sendLog.args["s"].value.imm;
+    uint64_t serverSock;
+    bool isServer = false;
+    int sfind = findHandle(socket, netModel);
+    // 注意send函数的SOCKET永远是客户端的SOCKET，即如果这个SOCKET在socketPairs中能够找到键，那么本地就是服务器
+    // 如果在监控列表（本地SOCKET列表）中能够找到，那么本地就是客户端
+    if(sfind < 0){  // 这个SOCKET不是本地SOCKET，初步判断是远程SOCKET，下面再远程SOCKET中查找
+        auto iter = socketPairs.find(socket);
+        if(iter == socketPairs.end())  // 这个SOCKET在远程SOCKET列表中也找不到，报异常
+            return false;
+        serverSock = iter->second;
+        isServer = true;
+    }
+    if(isServer)
+        sfind = findHandle(serverSock, netModel);
+    else
+        sfind = findHandle(socket, netModel);
+    assert(sfind >= 0);
+    if(netModel->item(sfind)->child(netModel->item(sfind)->rowCount()-1)->text().toInt() != sendLog.id)
+        throw std::exception("send: 操作id不匹配。");
+    netModel->item(sfind)->removeRow(netModel->item(sfind)->rowCount()-1);
+
+    uint64_t victimBuf = sendLog.args["buf"].value.imm;
+    int memIdx = findHandle(victimBuf, memoryModel);
+    assert(memIdx >= 0);
+    if(memoryModel->item(memIdx)->child(memoryModel->item(memIdx)->rowCount()-1)->text().toInt() != sendLog.id)
+        throw std::exception("send: 操作id不匹配。");
+    memoryModel->item(memIdx)->removeRow(memoryModel->item(memIdx)->rowCount()-1);
+    auto f = keyMemories.find(victimBuf);
+    if(f == keyMemories.end())
+        throw std::exception("send: 找不到内存地址。");
+    auto ff = f->second.find(sendLog.id);
+    if(ff == f->second.begin())
+        memoryModel->removeRow(memIdx);
+    else{
+        ff--;
+        memoryModel->item(memIdx, 2)->setText(bufType[(int)ff->second.type]);
+    }
+    return true;
+}
+
+bool hookAnalysis::revokeRecv(fullLog recvLog){
+    int ret = recvLog.retVal.value.imm;
+    if(ret < 0)     // 返回值小于0，发送出错
+        return false;
+    uint64_t socket = recvLog.args["s"].value.imm;
+    uint64_t serverSock;
+    bool isServer = false;
+    int sfind = findHandle(socket, netModel);
+    // 注意send函数的SOCKET永远是客户端的SOCKET，即如果这个SOCKET在socketPairs中能够找到键，那么本地就是服务器
+    // 如果在监控列表（本地SOCKET列表）中能够找到，那么本地就是客户端
+    if(sfind < 0){  // 这个SOCKET不是本地SOCKET，初步判断是远程SOCKET，下面再远程SOCKET中查找
+        auto iter = socketPairs.find(socket);
+        if(iter == socketPairs.end())  // 这个SOCKET在远程SOCKET列表中也找不到，报异常
+            return false;
+        serverSock = iter->second;
+        isServer = true;
+    }
+    if(isServer)
+        sfind = findHandle(serverSock, netModel);
+    else
+        sfind = findHandle(socket, netModel);
+    assert(sfind >= 0);
+    if(netModel->item(sfind)->child(netModel->item(sfind)->rowCount()-1)->text().toInt() != recvLog.id)
+        throw std::exception("recv: 操作id不匹配。");
+    netModel->item(sfind)->removeRow(netModel->item(sfind)->rowCount()-1);
+
+    uint64_t victimBuf = recvLog.args["buf"].value.imm;
+    int memIdx = findHandle(victimBuf, memoryModel);
+    assert(memIdx >= 0);
+    if(memoryModel->item(memIdx)->child(memoryModel->item(memIdx)->rowCount()-1)->text().toInt() != recvLog.id)
+        throw std::exception("recv: 操作id不匹配。");
+    memoryModel->item(memIdx)->removeRow(memoryModel->item(memIdx)->rowCount()-1);
+    auto f = keyMemories.find(victimBuf);
+    if(f == keyMemories.end())
+        throw std::exception("recv: 找不到内存地址。");
+    auto ff = f->second.find(recvLog.id);
+    if(ff == f->second.begin())
+        memoryModel->removeRow(memIdx);
+    else{
+        ff--;
+        memoryModel->item(memIdx, 2)->setText(bufType[(int)ff->second.type]);
+    }
+    return true;
+}
+
+bool hookAnalysis::revokeSocket(fullLog socketLog){
+    uint64_t newSocket = socketLog.retVal.value.imm;
+    if(newSocket == INVALID_SOCKET)
+        return false;
+    int insIdx = findHandle(newSocket, netModel);
+    if(insIdx < 0)
+        return false;
+    auto father = netModel->item(insIdx);
+    assert(father->hasChildren());
+    if(father->rowCount() == 1)
+        netModel->removeRow(insIdx);
+    else{
+        auto f = universalSocketInfo.find(newSocket);
+        if(f == universalSocketInfo.end())
+            throw std::exception("socket: 找不到socket。");
+        auto ff = f->second.find(socketLog.id);
+        if(ff == f->second.end())
+            throw std::exception("socket: 找不到操作。");
+        assert(ff != f->second.begin());
+        ff--;
+        QString local = ff->second.first;
+        auto sp = local.split(":");
+        assert(sp.size() >= 2);
+        QString ipaddr = sp[0];
+        QString port = sp[1];
+        netModel->item(insIdx, 2)->setText(ipaddr);
+        netModel->item(insIdx, 3)->setText(port);
+        if(father->child(father->rowCount()-1)->text().toInt() != socketLog.id)
+            throw std::exception("socket: 操作id不匹配。");
+        father->removeRow(father->rowCount() - 1);
+    }
+    return true;
+}
+
+bool hookAnalysis::revokeConnect(fullLog connectLog){
+    uint64_t newSocket = connectLog.args["s"].value.imm;
+    int insIdx = findHandle(newSocket, netModel);
+    if(insIdx < 0)
+        return false;
+    auto father = netModel->item(insIdx);
+    assert(father->hasChildren());
+    assert(father->rowCount() > 1);
+    if(father->child(father->rowCount()-1)->text().toInt() != connectLog.id)
+        throw std::exception("connect: 操作id不匹配。");
+    father->removeRow(father->rowCount() - 1);
+    return true;
+}
+
+bool hookAnalysis::revokeBind(fullLog bindLog){
+    uint64_t newSocket = bindLog.args["s"].value.imm;
+    int ret = bindLog.retVal.value.imm;
+    int insIdx = findHandle(newSocket, netModel);
+    if(insIdx < 0)
+        return false;
+    auto father = netModel->item(insIdx);
+    assert(father->hasChildren());
+    assert(father->rowCount() > 1);
+    if(father->child(father->rowCount()-1)->text().toInt() != bindLog.id)
+        throw std::exception("bind: 操作id不匹配。");
+    father->removeRow(father->rowCount() - 1);
+    if(ret)
+        return true;
+    auto f = universalSocketInfo.find(newSocket);
+    assert(f != universalSocketInfo.end());
+    auto ff = f->second.find(bindLog.id);
+    assert(ff != f->second.end());
+    assert(ff != f->second.begin());
+    ff--;
+    QString local = ff->second.first;
+    auto sp = local.split(":");
+    assert(sp.size() >= 2);
+    QString ipaddr = sp[0];
+    QString port = sp[1];
+    netModel->item(insIdx, 2)->setText(ipaddr);
+    netModel->item(insIdx, 3)->setText(port);
+    return true;
+}
+
+bool hookAnalysis::revokeAccept(fullLog acceptLog){
+    uint64_t newSocket = acceptLog.args["s"].value.imm;
+    int insIdx = findHandle(newSocket, netModel);
+    if(insIdx < 0)
+        return false;
+    auto father = netModel->item(insIdx);
+    assert(father->hasChildren());
+    assert(father->rowCount() > 1);
+    if(father->child(father->rowCount()-1)->text().toInt() != acceptLog.id)
+        throw std::exception("accept: 操作id不匹配。");
+    father->removeRow(father->rowCount() - 1);
     return true;
 }

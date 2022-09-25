@@ -36,8 +36,8 @@ Output::Output(std::vector<bool> choices, QWidget *parent) :
     fileViewModel->setHorizontalHeaderLabels(QStringList() << "句柄指针/操作编号" << "文件名/操作类型" << "状态/字节数" << "成功字节数" << "是否成功");
     exceptionModel->setHorizontalHeaderLabels(QStringList() << "异常操作编号" << "异常类型" << "详细信息");
     regeditModel->setHorizontalHeaderLabels(QStringList() << "句柄/操作编号" << "键值/操作类型" << "状态/操作细节" << "操作返回");
-    netModel->setHorizontalHeaderLabels(QStringList() << "SOCKET地址/通信类型" << "通信类型/SOCKET地址"
-                                        << "IP/该套接字对应IP与端口" << "端口号/目标套接字对应IP与端口" << "消息长度");
+    netModel->setHorizontalHeaderLabels(QStringList() << "SOCKET地址/操作编号" << "通信类型"
+                                        << "IP/目标SOCKET地址" << "端口号/该套接字对应IP与端口" << "目标套接字对应IP与端口" << "消息长度");
     memoryModel->setHorizontalHeaderLabels(QStringList() << "地址/操作ID" << "长度" << "保存内容/操作类型" << "来源/去向");
     moduleModel->setHorizontalHeaderLabels(QStringList() << "模块名" << "基地址" << "入口地址" << "大小" << "文件所在路径");
     fileAccessModel = new colorfulModel(QStringList() << "权限" << "READ" << "WRITE" << "EXECUTE");
@@ -185,7 +185,7 @@ void Output::updateLog(){
 //    lock->lockForWrite();
     // mutexLock.lock();
     while(!getMutexSignal()){
-        QCoreApplication::processEvents();
+        // QCoreApplication::processEvents();
         if(!injThread || injThread->isFinished())
             return;
     }
