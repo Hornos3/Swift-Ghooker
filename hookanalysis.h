@@ -372,6 +372,7 @@ public:
 
     int findHandle(uint64_t handleAddr, QStandardItemModel *Model);
     int findChunk(uint64_t chunkAddr, QStandardItem* father);
+    int findFileInst(int id, QStandardItem* father);
     int findRegKey(uint64_t handleAddr);
 
     bool addFileHandle(fullLog newFileLog);

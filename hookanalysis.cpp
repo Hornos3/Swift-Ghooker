@@ -723,15 +723,6 @@ int hookAnalysis::findHandle(uint64_t handleAddr, QStandardItemModel *Model){
             floor = (floor + ceil) / 2;
     }
     return -floor-2;
-
-//    for(; rowPtr < rowCount; rowPtr++){
-//        uint64_t findHandle = Model->item(rowPtr)->text().toULongLong(nullptr, 16);
-//        if(findHandle == handleAddr)
-//            return rowPtr;
-//        else if(findHandle > handleAddr)
-//            return -rowPtr - 1;
-//    }
-//    return -rowCount - 1;
 }
 
 /**
@@ -768,15 +759,33 @@ int hookAnalysis::findChunk(uint64_t chunkAddr, QStandardItem* father){
             floor = (floor + ceil) / 2;
     }
     return -floor-2;
+}
 
-//    for(; rowPtr < rowCount; rowPtr++){
-//        uint64_t findChunk = father->child(rowPtr, 0)->text().toULongLong(nullptr, 16);
-//        if(findChunk == chunkAddr)
-//            return rowPtr;
-//        else if(findChunk > chunkAddr)
-//            return -rowPtr - 1;
-//    }
-//    return -rowCount - 1;
+int hookAnalysis::findFileInst(int id, QStandardItem* father){
+    int rowCount = father->rowCount();
+//    int rowPtr = 0;
+
+    int floor = 0, ceil = rowCount;
+    if(rowCount == 0)
+        return -1;
+    if(father->child(0)->text().toInt() > id)
+        return -1;
+    else if(father->child(0)->text().toInt() == id)
+        return 0;
+    if(father->child(rowCount-1)->text().toInt() < id)
+        return -rowCount-1;
+    else if(father->child(rowCount-1)->text().toInt() == id)
+        return rowCount - 1;
+    while(floor != ceil - 1){
+        auto findHandle = father->child((floor + ceil) / 2)->text().toInt();
+        if(findHandle == id)
+            return (floor + ceil) / 2;
+        else if(findHandle > id)
+            ceil = (floor + ceil) / 2;
+        else
+            floor = (floor + ceil) / 2;
+    }
+    return -floor-2;
 }
 
 /**
@@ -787,16 +796,6 @@ int hookAnalysis::findChunk(uint64_t chunkAddr, QStandardItem* father){
  */
 int hookAnalysis::findRegKey(uint64_t handleAddr){
     return findHandle(handleAddr, regeditModel);
-//    int rowCount = regeditModel->rowCount();
-//    int rowPtr = 0;
-//    for(; rowPtr < rowCount; rowPtr++){
-//        uint64_t findHandle = regeditModel->item(rowPtr, REGHANDLE)->text().toULongLong(nullptr, 16);
-//        if(findHandle == handleAddr)
-//            return rowPtr;
-//        else if(findHandle > handleAddr)
-//            return -rowPtr - 1;
-//    }
-//    return -rowCount - 1;
 }
 
 void hookAnalysis::insertNewHeapHandle(uint64_t handleAddr, int insPos){
@@ -846,9 +845,12 @@ bool hookAnalysis::addFileHandle(fullLog newFileLog){
         fileViewModel->item(findHandleIdx, FILENAME)->setText(fileName);
         fileViewModel->item(findHandleIdx, FILEHANDLESTATUS)->setText("正在使用");
         fileViewModel->item(findHandleIdx)->appendRow(QList<QStandardItem*>() <<
+                                                      new QStandardItem(to_string(newFileLog.id).c_str()) <<
                                                       new QStandardItem("OPEN") <<
                                                       new QStandardItem(fileName) << nullptr <<
                                                       new QStandardItem("SUCCESS"));
+        insertNewFileHandle(newFileLog, findHandleIdx);
+
         return true;
     }
 
@@ -904,6 +906,7 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, char* binBuf, bool
         uint64_t actualBytes = newFileLog.argsAfterCall["lpNumberOfBytesRead"].value.imm;
 
         father->insertRow(father->rowCount(), QList<QStandardItem*>() <<
+                          new QStandardItem(to_string(newFileLog.id).c_str()) <<
                           new QStandardItem("READ") <<
                           new QStandardItem(ull2a(requiredBytes)) <<
                           new QStandardItem(ull2a(actualBytes)) <<
@@ -936,6 +939,7 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, char* binBuf, bool
         // 实际写入的字节数
         uint64_t actualBytes = newFileLog.argsAfterCall["lpNumberOfBytesWritten"].value.imm;
         father->insertRow(father->rowCount(), QList<QStandardItem*>() <<
+                          new QStandardItem(to_string(newFileLog.id).c_str()) <<
                           new QStandardItem("WRITE") <<
                           new QStandardItem(ull2a(requiredBytes)) <<
                           new QStandardItem(ull2a(actualBytes)) <<
@@ -984,6 +988,7 @@ bool hookAnalysis::closeFileHandle(fullLog newFileLog){
             handleException({newFileLog.id, CloseFileHandleFailed},
                  new exceptionInfo{.addressWithException = handle});
             fileViewModel->item(findHandleIdx)->appendRow(QList<QStandardItem*>() <<
+                                                          new QStandardItem(to_string(newFileLog.id).c_str()) <<
                                                           new QStandardItem("CLOSE") <<
                                                           new QStandardItem(fileName) << nullptr <<
                                                           new QStandardItem("FAILED"));
@@ -992,6 +997,7 @@ bool hookAnalysis::closeFileHandle(fullLog newFileLog){
             handleException({newFileLog.id, TryCloseClosedHandle},
                  new exceptionInfo{.addressWithException = handle});
             fileViewModel->item(findHandleIdx)->appendRow(QList<QStandardItem*>() <<
+                                                          new QStandardItem(to_string(newFileLog.id).c_str()) <<
                                                           new QStandardItem("CLOSE") <<
                                                           new QStandardItem(fileName) << nullptr <<
                                                           new QStandardItem("FAILED"));
@@ -1013,6 +1019,7 @@ bool hookAnalysis::closeFileHandle(fullLog newFileLog){
     QString fileName = fileViewModel->item(findHandleIdx, 1)->text();
     fileViewModel->item(findHandleIdx, FILEHANDLESTATUS)->setText("已被关闭");
     fileViewModel->item(findHandleIdx)->appendRow(QList<QStandardItem*>() <<
+                                                  new QStandardItem(to_string(newFileLog.id).c_str()) <<
                                                   new QStandardItem("CLOSE") <<
                                                   new QStandardItem(fileName) << nullptr <<
                                                   new QStandardItem("SUCCESS"));
@@ -2133,6 +2140,14 @@ bool hookAnalysis::stepBack(fullLog rewindLog){
         revokeHeapAlloc(rewindLog);
     else if(rewindLog.funcName == "HeapFree")
         revokeHeapFree(rewindLog);
+    else if(rewindLog.funcName == "CreateFile")
+        revokeCreateFile(rewindLog);
+    else if(rewindLog.funcName == "ReadFile")
+        revokeReadFile(rewindLog);
+    else if(rewindLog.funcName == "WriteFile")
+        revokeWriteFile(rewindLog);
+    else if(rewindLog.funcName == "CloseHandle")
+        revokeCloseHandle(rewindLog);
     return true;
 }
 
@@ -2257,7 +2272,9 @@ bool hookAnalysis::revokeCreateFile(fullLog CreateFileLog){
     auto f = fileHandles.find(fileHandle);
     if(f == fileHandles.end())  // 找不到，不作处理
         return false;
-    auto fileAttr = --f->second.end();
+    auto fileAttr = f->second.find(CreateFileLog.id);
+    if(fileAttr == f->second.end())
+        throw std::exception("CreateFile: 找不到句柄的创建记录");
     if(fileAttr == f->second.begin()){      // 如果这个handle只有这一个被创建的记录
         if(!fileAttr->second.isEnable)
             throw std::exception("CreateFile: 找不到句柄的创建记录");
@@ -2273,7 +2290,14 @@ bool hookAnalysis::revokeCreateFile(fullLog CreateFileLog){
             int idx = findHandle(fileHandle, fileViewModel);
             if(idx < 0)
                 throw std::exception("CreateFile: 在列表中找不到句柄");
-            fileViewModel->item(idx, FILEHANDLESTATUS)->setText("已被关闭");
+            if(fileViewModel->item(idx)->hasChildren()){
+                int childIdx = findFileInst(CreateFileLog.id, fileViewModel->item(idx));
+                if(childIdx < 0)
+                    throw std::exception("CreateFile: 在列表中找不到该创建操作");
+                fileViewModel->item(idx)->removeRow(childIdx);
+                fileViewModel->item(idx, FILEHANDLESTATUS)->setText("已被关闭");
+            }else
+                fileViewModel->removeRow(idx);
         }
     }
     return true;
@@ -2283,6 +2307,113 @@ bool hookAnalysis::revokeReadFile(fullLog ReadFileLog){
     // 对于ReadFile这个API的回溯主要就是在内存和列表子项上面
     uint64_t fileHandle = ReadFileLog.args["hFile"].value.imm;
     uint64_t bufferAddr = ReadFileLog.args["lpBuffer"].value.imm;
+    // 找到这个Handle在map中的位置
+    auto f = fileHandles.find(fileHandle);
+    if(f == fileHandles.end())  // 找不到，不管
+        return false;
+    // 找到这个Handle在列表中的位置
+    int fi = findHandle(fileHandle, fileViewModel);
+    if(fi < 0)   // 没找到，异常
+        throw std::exception("ReadFile: 列表中找不到文件句柄。");
+    QStandardItem* father = fileViewModel->item(fi);
+    int fin = findFileInst(ReadFileLog.id, father);
+    if(fin < 0) // 没找到该操作，异常
+        throw std::exception("ReadFile: 列表中找不到该操作。");
+    // 在列表中删除该操作
+    father->removeRow(fin);
+    // 在内存视图中删除该操作对应的子项
+    int memfi = findHandle(bufferAddr, memoryModel);
+    if(memfi < 0)   // 没找到内存地址，异常
+        throw std::exception("ReadFile: 列表中找不到内存地址。");
+    auto memFather = memoryModel->item(memfi);
+    int memfin = findFileInst(ReadFileLog.id, memFather);
+    if(memfin < 0)  // 没找到这个操作，异常
+        throw std::exception("ReadFile: 列表中找不到该操作。");
+    memFather->removeRow(memfin);
+    auto mf = keyMemories.find(bufferAddr);
+    if(mf == keyMemories.end())
+        throw std::exception("ReadFile: 内存map中找不到该地址");
+    auto mff = mf->second.find(ReadFileLog.id);
+    if(mff == mf->second.end())
+        throw std::exception("ReadFile: 内存map中找不到该操作");
+    // 修改该内存的内容描述到API调用之前的状态
+    if(mff == mf->second.begin())
+        memoryModel->item(memfi, 2)->setText("");
+    else{
+        mff--;
+        memoryModel->item(memfi, 2)->setText(bufType[(int)mff->second.type]);
+    }
+    return true;
+}
 
+bool hookAnalysis::revokeWriteFile(fullLog WriteFileLog){
+    // 对于ReadFile这个API的回溯主要就是在内存和列表子项上面
+    uint64_t fileHandle = WriteFileLog.args["hFile"].value.imm;
+    uint64_t bufferAddr = WriteFileLog.args["lpBuffer"].value.imm;
+    // 找到这个Handle在map中的位置
+    auto f = fileHandles.find(fileHandle);
+    if(f == fileHandles.end())  // 找不到，不管
+        return false;
+    // 找到这个Handle在列表中的位置
+    int fi = findHandle(fileHandle, fileViewModel);
+    if(fi < 0)   // 没找到，异常
+        throw std::exception("WriteFile: 列表中找不到文件句柄。");
+    QStandardItem* father = fileViewModel->item(fi);
+    int fin = findFileInst(WriteFileLog.id, father);
+    if(fin < 0) // 没找到该操作，异常
+        throw std::exception("WriteFile: 列表中找不到该操作。");
+    // 在列表中删除该操作
+    father->removeRow(fin);
+    // 在内存视图中删除该操作对应的子项
+    int memfi = findHandle(bufferAddr, memoryModel);
+    if(memfi < 0)   // 没找到内存地址，异常
+        throw std::exception("WriteFile: 列表中找不到内存地址。");
+    auto memFather = memoryModel->item(memfi);
+    int memfin = findFileInst(WriteFileLog.id, memFather);
+    if(memfin < 0)  // 没找到这个操作，异常
+        throw std::exception("WriteFile: 列表中找不到该操作。");
+    memFather->removeRow(memfin);
+    auto mf = keyMemories.find(bufferAddr);
+    if(mf == keyMemories.end())
+        throw std::exception("WriteFile: 内存map中找不到该地址");
+    auto mff = mf->second.find(WriteFileLog.id);
+    if(mff == mf->second.end())
+        throw std::exception("WriteFile: 内存map中找不到该操作");
+    // 修改该内存的内容描述到API调用之前的状态
+    if(mff == mf->second.begin())
+        memoryModel->item(memfi, 2)->setText("");
+    else{
+        mff--;
+        memoryModel->item(memfi, 2)->setText(bufType[(int)mff->second.type]);
+    }
+    return true;
+}
+
+bool hookAnalysis::revokeCloseHandle(fullLog CloseHandleLog){
+    uint64_t fileHandle = CloseHandleLog.args["hObject"].value.imm;
+    // 找到这个Handle在map中的位置
+    auto f = fileHandles.find(fileHandle);
+    if(f == fileHandles.end())  // 找不到，不管
+        return false;
+    // 找到这个Handle在列表中的位置
+    int fi = findHandle(fileHandle, fileViewModel);
+    if(fi < 0)   // 没找到，异常
+        throw std::exception("CloseHandle: 列表中找不到文件句柄。");
+    QStandardItem* father = fileViewModel->item(fi);
+    int fin = findFileInst(CloseHandleLog.id, father);
+    if(fin < 0) // 没找到该操作，异常
+        throw std::exception("CloseHandle: 列表中找不到该操作。");
+    // 在列表中删除该操作
+    father->removeRow(fin);
+    // 找到前一个操作
+    auto ff = f->second.find(CloseHandleLog.id);
+    if(ff == f->second.end())
+        throw std::exception("CloseHandle: map中找不到文件句柄。");
+    if(ff == f->second.begin())
+        throw std::exception("CloseHandle: map中找不到handle的创建记录。");
+    ff--;
+    // 修改状态
+    if(ff->second.isEnable)
+        fileViewModel->item(fi, FILEHANDLESTATUS)->setText("正在使用");
     return true;
 }

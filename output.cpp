@@ -33,7 +33,7 @@ Output::Output(std::vector<bool> choices, QWidget *parent) :
     model->setVerticalHeaderLabels(verticalList);
 
     heapViewModel->setHorizontalHeaderLabels(QStringList() << "地址" << "类别" << "大小" << "状态");
-    fileViewModel->setHorizontalHeaderLabels(QStringList() << "句柄指针/操作类型" << "文件名/字节数" << "状态/成功字节数" << "是否成功");
+    fileViewModel->setHorizontalHeaderLabels(QStringList() << "句柄指针/操作编号" << "文件名/操作类型" << "状态/字节数" << "成功字节数" << "是否成功");
     exceptionModel->setHorizontalHeaderLabels(QStringList() << "异常操作编号" << "异常类型" << "详细信息");
     regeditModel->setHorizontalHeaderLabels(QStringList() << "句柄/操作类型" << "键值/操作细节" << "状态/操作返回");
     netModel->setHorizontalHeaderLabels(QStringList() << "SOCKET地址/通信类型" << "通信类型/SOCKET地址"
