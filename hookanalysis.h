@@ -345,6 +345,8 @@ public:
     std::map<int, uint64_t> memoryLeakRisks;    // 当有CHUNK没有被释放而HANDLE首先被销毁时，将CHUNK地址保存到此处
     std::map<uint64_t, std::map<unsigned, fileHandleAttr>> fileHandles; // 这里保存所有的文件句柄及其属性
     std::multimap<QString, uint64_t> regHandles;   // 键是打开的注册表项的完整路径，值是打开的句柄
+    // 键是句柄，值是一个map，保存开关操作编号和是否开启+key名
+    std::map<uint64_t, std::map<unsigned, pair<QString, bool>>> regHandlesExpl;
     // 用于读写文件、网络传输两个模块，保存文件内容
     // 关键内存块保存在这里，地址+内容+保存的内容类别，其中外层map的值也是map主要是考虑到内存空间中内容的变化，便于回溯
     // 其中内层map的键是截获的API编号，外层map的键是这块内存在目标进程的地址
@@ -425,6 +427,12 @@ public:
     bool revokeReadFile(fullLog ReadFileLog);
     bool revokeWriteFile(fullLog WriteFileLog);
     bool revokeCloseHandle(fullLog CloseHandleLog);
+    bool revokeRegCreateKeyEx(fullLog RegCreateKeyExLog);
+    bool revokeRegSetValueEx(fullLog RegSetValueLog);
+    bool revokeRegDeleteValue(fullLog RegDeleteValueLog);
+    bool revokeRegCloseKey(fullLog RegCloseKeyLog);
+    bool revokeRegOpenKeyEx(fullLog RegOpenKeyExLog);
+    bool revokeRegDeleteKeyEx(fullLog RegDeleteKeyExLog);
 };
 
 #endif // HOOKANALYSIS_H

@@ -1119,14 +1119,20 @@ void hookAnalysis::insertNewFileHandle(fullLog log, int insPos){
 
 void hookAnalysis::insertNewRegHandle(fullLog log){
     uint64_t hKeyGot = log.argsAfterCall["phkResult"].value.imm;
+    // 如果句柄无效则不作处理
+    if(hKeyGot == (uint64_t)INVALID_HANDLE_VALUE)
+        return;
+    QString directory = getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str;
+    auto f = regHandlesExpl.find(hKeyGot);
     int insIdx = findRegKey(hKeyGot);
     // 如果找到了这个句柄，且这个句柄正在使用，说明分配到了两个相同的句柄，出现异常。
     if(insIdx >= 0 && regeditModel->item(insIdx, REGSTATUS)->text() == "正在使用"){
         handleException({log.id, SameRegHandleGot},
                         new exceptionInfo{.addressWithException = hKeyGot});
+        assert(f != regHandlesExpl.end());
+        f->second.insert({log.id, {directory, true}});
     }else if(insIdx >= 0){
         // 找到了这个句柄，但这个句柄已经被关闭，则重启这个句柄
-        QString directory = getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str;
         regeditModel->item(insIdx, REGSTATUS)->setText("正在使用");
         regeditModel->item(insIdx, REGKEYVAL)->setText(directory);
         regeditModel->item(insIdx)->appendRow(QList<QStandardItem*>() <<
@@ -1142,17 +1148,16 @@ void hookAnalysis::insertNewRegHandle(fullLog log){
             "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
             handleException({log.id, VisitingStartupReg},
                             new exceptionInfo{.fileName = new QString(directory)});
+        assert(f != regHandlesExpl.end());
+        f->second.insert({log.id, {directory, true}});
     }else{
         // 没有找到这个句柄，则进行插入
-        QString directory = getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str;
         // 判断是否是开机自启动注册表项
-        if(getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str ==
-            "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
-            getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str ==
-            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
+        if(directory == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+            directory == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
             handleException({log.id, VisitingStartupReg},
                             new exceptionInfo{.fileName = new QString(directory)});
-        if(directory == "*")   // 没有找到键值，无法进行插入
+        if(directory.startsWith("*"))   // 没有找到键值，无法进行插入
             return;
         // 正式插入这个键值
         regeditModel->insertRow(-insIdx - 1, QList<QStandardItem*>() <<
@@ -1161,6 +1166,9 @@ void hookAnalysis::insertNewRegHandle(fullLog log){
                                 new QStandardItem("正在使用"));
         // assert(regHandles.find(directory) == regHandles.end());
         regHandles.insert({directory, hKeyGot});
+        std::map<unsigned, pair<QString, bool>> a;
+        a.insert({log.id, {directory, true}});
+        regHandlesExpl.insert({hKeyGot, a});
     }
 }
 
@@ -1192,6 +1200,7 @@ void hookAnalysis::appendNewRegSet(fullLog log, QStandardItem* father){
     QString detail = "将键" + keyName + "设置为" + regType + "类型，值为" + value;
 
     father->insertRow(father->rowCount(), QList<QStandardItem*>() <<
+                      new QStandardItem(to_string(log.id).c_str()) <<
                       new QStandardItem("SET") <<
                       new QStandardItem(detail) <<
                       new QStandardItem(ull2a(log.retVal.value.imm)));
@@ -1719,9 +1728,13 @@ bool hookAnalysis::closeRegKey(fullLog newRegLog){
     regeditModel->item(keyIdx, REGSTATUS)->setText("已被关闭");
     regeditModel->item(keyIdx)->insertRow(regeditModel->item(keyIdx)->rowCount(),
                                           QList<QStandardItem*>() <<
+                                          new QStandardItem(to_string(newRegLog.id).c_str()) <<
                                           new QStandardItem("CLOSE") <<
                                           new QStandardItem("关闭该句柄（键值为" + regeditModel->item(keyIdx, 1)->text() + "）") <<
                                           new QStandardItem(ull2a(retVal)));
+    auto f = regHandlesExpl.find(regHandle);
+    assert(f != regHandlesExpl.end());
+    f->second.insert({newRegLog.id, {regeditModel->item(keyIdx, 1)->text(), false}});
     return true;
 }
 
@@ -1731,6 +1744,13 @@ bool hookAnalysis::openRegKey(fullLog newRegLog){
     if(retVal != 0){        // 如果返回值不为0，说明操作没有正常完成。
         handleException({newRegLog.id, RegOpenFail},
                         new exceptionInfo{.errorCode = retVal});
+        return false;
+    }
+    uint64_t source = newRegLog.args["hKey"].value.imm;
+    int f = findRegKey(source);
+    if(f < 0){
+        handleException({newRegLog.id, UntrackedRegHandle},
+                        new exceptionInfo{.addressWithException = source});
         return false;
     }
 
@@ -1768,6 +1788,7 @@ bool hookAnalysis::deleteRegValue(fullLog newRegLog){
 
     regeditModel->item(keyIdx)->insertRow(regeditModel->item(keyIdx)->rowCount(),
                                           QList<QStandardItem*>() <<
+                                          new QStandardItem(to_string(newRegLog.id).c_str()) <<
                                           new QStandardItem("DELETE VALUE") <<
                                           new QStandardItem("删除该句柄下的\"" + keyVal + "\"键值") <<
                                           new QStandardItem(ull2a(retVal)));
@@ -1807,6 +1828,7 @@ bool hookAnalysis::deleteRegKey(fullLog newRegLog){
 
     regeditModel->item(keyIdx)->insertRow(regeditModel->item(keyIdx)->rowCount(),
                                           QList<QStandardItem*>() <<
+                                          new QStandardItem(to_string(newRegLog.id).c_str()) <<
                                           new QStandardItem("DELETE KEY") <<
                                           new QStandardItem("删除该句柄下的\"" + keyVal + "\"项值") <<
                                           new QStandardItem(ull2a(retVal)));
@@ -2148,6 +2170,18 @@ bool hookAnalysis::stepBack(fullLog rewindLog){
         revokeWriteFile(rewindLog);
     else if(rewindLog.funcName == "CloseHandle")
         revokeCloseHandle(rewindLog);
+    else if(rewindLog.funcName == "RegCreateKeyEx")
+        revokeRegCreateKeyEx(rewindLog);
+    else if(rewindLog.funcName == "RegSetValueEx")
+        revokeRegSetValueEx(rewindLog);
+    else if(rewindLog.funcName == "RegDeleteValue")
+        revokeRegDeleteValue(rewindLog);
+    else if(rewindLog.funcName == "RegCloseKey")
+        revokeRegCloseKey(rewindLog);
+    else if(rewindLog.funcName == "RegOpenKeyEx")
+        revokeRegOpenKeyEx(rewindLog);
+    else if(rewindLog.funcName == "RegDeleteKeyEx")
+        revokeRegDeleteKeyEx(rewindLog);
     return true;
 }
 
@@ -2269,6 +2303,8 @@ bool hookAnalysis::revokeHeapFree(fullLog HeapFreeLog){
 
 bool hookAnalysis::revokeCreateFile(fullLog CreateFileLog){
     uint64_t fileHandle = CreateFileLog.retVal.value.imm;
+    if(fileHandle == (uint64_t)INVALID_HANDLE_VALUE)
+        return false;
     auto f = fileHandles.find(fileHandle);
     if(f == fileHandles.end())  // 找不到，不作处理
         return false;
@@ -2415,5 +2451,127 @@ bool hookAnalysis::revokeCloseHandle(fullLog CloseHandleLog){
     // 修改状态
     if(ff->second.isEnable)
         fileViewModel->item(fi, FILEHANDLESTATUS)->setText("正在使用");
+    return true;
+}
+
+bool hookAnalysis::revokeRegCreateKeyEx(fullLog RegCreateKeyExLog){
+    uint64_t regHandle = RegCreateKeyExLog.argsAfterCall["phkResult"].value.imm;
+    if(regHandle == (uint64_t)INVALID_HANDLE_VALUE)
+        return false;
+    auto f = regHandlesExpl.find(regHandle);
+    if(f == regHandlesExpl.end())
+        return false;
+    auto ff = f->second.find(RegCreateKeyExLog.id);
+    if(ff == f->second.end())
+        throw std::exception("RegCreateKeyEx: map中找不到该操作。");
+    int fi = findHandle(regHandle, regeditModel);
+    if(fi < 0)
+        throw std::exception("RegCreateKeyEx: 列表中找不到该handle。");
+    auto father = regeditModel->item(fi);
+    if(!father->hasChildren())     // 第一次被申请
+        regeditModel->removeRow(fi);
+    else{
+        int fin = findFileInst(RegCreateKeyExLog.id, father);
+        if(fin < 0)
+            throw std::exception("RegCreateKeyEx: map中找不到该操作。");
+        father->removeRow(fin);
+        assert(ff != f->second.begin());
+        ff--;
+        QString lastDir = ff->second.first;
+        regeditModel->item(fi, 1)->setText(lastDir);
+    }
+    return true;
+}
+
+bool hookAnalysis::revokeRegSetValueEx(fullLog RegSetValueLog){
+    uint64_t regHandle = RegSetValueLog.args["hKey"].value.imm;
+    int fi = findHandle(regHandle, regeditModel);
+    if(fi < 0)
+        return false;
+    auto father = regeditModel->item(fi);
+    int fin = findFileInst(RegSetValueLog.id, father);
+    if(fin < 0)
+        throw std::exception("RegSetValue: map中找不到该操作。");
+    father->removeRow(fin);
+    return true;
+}
+
+bool hookAnalysis::revokeRegDeleteValue(fullLog RegDeleteValueLog){
+    uint64_t regHandle = RegDeleteValueLog.args["hKey"].value.imm;
+    int fi = findHandle(regHandle, regeditModel);
+    if(fi < 0)
+        return false;
+    auto father = regeditModel->item(fi);
+    int fin = findFileInst(RegDeleteValueLog.id, father);
+    if(fin < 0)
+        throw std::exception("RegDeleteValue: map中找不到该操作。");
+    father->removeRow(fin);
+    return true;
+}
+
+bool hookAnalysis::revokeRegCloseKey(fullLog RegCloseKeyLog){
+    uint64_t regHandle = RegCloseKeyLog.args["hKey"].value.imm;
+    if(regHandle == (uint64_t)INVALID_HANDLE_VALUE)
+        return false;
+    auto f = regHandlesExpl.find(regHandle);
+    if(f == regHandlesExpl.end())
+        return false;
+    auto ff = f->second.find(RegCloseKeyLog.id);
+    if(ff == f->second.end())
+        throw std::exception("RegCloseKey: map中找不到该操作。");
+    int fi = findHandle(regHandle, regeditModel);
+    if(fi < 0)
+        throw std::exception("RegCloseKey: 列表中找不到该handle。");
+    auto father = regeditModel->item(fi);
+    int fin = findFileInst(RegCloseKeyLog.id, father);
+    if(fin < 0)
+        throw std::exception("RegCloseKey: map中找不到该操作。");
+    father->removeRow(fin);
+    assert(ff != f->second.begin());
+    ff--;
+    if(ff->second.second)
+        regeditModel->item(fi, REGSTATUS)->setText("正在使用");
+    return true;
+}
+
+bool hookAnalysis::revokeRegOpenKeyEx(fullLog RegOpenKeyExLog){
+    uint64_t regHandle = RegOpenKeyExLog.argsAfterCall["phkResult"].value.imm;
+    if(regHandle == (uint64_t)INVALID_HANDLE_VALUE)
+        return false;
+    auto f = regHandlesExpl.find(regHandle);
+    if(f == regHandlesExpl.end())
+        return false;
+    auto ff = f->second.find(RegOpenKeyExLog.id);
+    if(ff == f->second.end())
+        throw std::exception("RegOpenKeyEx: map中找不到该操作。");
+    int fi = findHandle(regHandle, regeditModel);
+    if(fi < 0)
+        throw std::exception("RegOpenKeyEx: 列表中找不到该handle。");
+    auto father = regeditModel->item(fi);
+    if(!father->hasChildren())     // 第一次被申请
+        regeditModel->removeRow(fi);
+    else{
+        int fin = findFileInst(RegOpenKeyExLog.id, father);
+        if(fin < 0)
+            throw std::exception("RegOpenKeyEx: map中找不到该操作。");
+        father->removeRow(fin);
+        assert(ff != f->second.begin());
+        ff--;
+        QString lastDir = ff->second.first;
+        regeditModel->item(fi, 1)->setText(lastDir);
+    }
+    return true;
+}
+
+bool hookAnalysis::revokeRegDeleteKeyEx(fullLog RegDeleteKeyExLog){
+    uint64_t regHandle = RegDeleteKeyExLog.args["hKey"].value.imm;
+    int fi = findHandle(regHandle, regeditModel);
+    if(fi < 0)
+        return false;
+    auto father = regeditModel->item(fi);
+    int fin = findFileInst(RegDeleteKeyExLog.id, father);
+    if(fin < 0)
+        throw std::exception("RegDeleteKeyEx: map中找不到该操作。");
+    father->removeRow(fin);
     return true;
 }

@@ -35,7 +35,7 @@ Output::Output(std::vector<bool> choices, QWidget *parent) :
     heapViewModel->setHorizontalHeaderLabels(QStringList() << "地址" << "类别" << "大小" << "状态");
     fileViewModel->setHorizontalHeaderLabels(QStringList() << "句柄指针/操作编号" << "文件名/操作类型" << "状态/字节数" << "成功字节数" << "是否成功");
     exceptionModel->setHorizontalHeaderLabels(QStringList() << "异常操作编号" << "异常类型" << "详细信息");
-    regeditModel->setHorizontalHeaderLabels(QStringList() << "句柄/操作类型" << "键值/操作细节" << "状态/操作返回");
+    regeditModel->setHorizontalHeaderLabels(QStringList() << "句柄/操作编号" << "键值/操作类型" << "状态/操作细节" << "操作返回");
     netModel->setHorizontalHeaderLabels(QStringList() << "SOCKET地址/通信类型" << "通信类型/SOCKET地址"
                                         << "IP/该套接字对应IP与端口" << "端口号/目标套接字对应IP与端口" << "消息长度");
     memoryModel->setHorizontalHeaderLabels(QStringList() << "地址/操作ID" << "长度" << "保存内容/操作类型" << "来源/去向");
@@ -112,6 +112,11 @@ void Output::initialize(std::vector<bool> choices){
                             new QStandardItem(ull2a((uint64_t)HKEY_CURRENT_CONFIG)) <<
                             new QStandardItem("HKEY_CURRENT_CONFIG") <<
                             new QStandardItem("正在使用"));
+    analyser->regHandlesExpl.insert({(uint64_t)HKEY_CURRENT_CONFIG, map<unsigned, pair<QString, bool>>()});
+    analyser->regHandlesExpl.insert({(uint64_t)HKEY_CURRENT_USER, map<unsigned, pair<QString, bool>>()});
+    analyser->regHandlesExpl.insert({(uint64_t)HKEY_CLASSES_ROOT, map<unsigned, pair<QString, bool>>()});
+    analyser->regHandlesExpl.insert({(uint64_t)HKEY_LOCAL_MACHINE, map<unsigned, pair<QString, bool>>()});
+    analyser->regHandlesExpl.insert({(uint64_t)HKEY_USERS, map<unsigned, pair<QString, bool>>()});
     if(choices.size() == 0)
         return;
     analyser->injMessageBoxA = choices[0];
