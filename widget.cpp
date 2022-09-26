@@ -74,6 +74,8 @@ void Widget::on_selectFile_clicked(){
 }
 
 void Widget::on_startAnalysis_clicked(){
+    if(output->uselessFlag)
+        output = new Output(getAllChoices());
     output->initialize(getAllChoices());
     if(!ui->allHeap->isChecked()){
         QMessageBox::warning(this, "警告", "您没有打开所有堆操作API选项，堆空间实时监测将不可用。");
@@ -118,12 +120,14 @@ void Widget::on_startAnalysis_clicked(){
         output->injThread = nullptr;
         output->updateLog();
 
-        QString suspectedLastHook = getLastHookBeforeCall();
-        bool repeat = output->analyser->appendRecord(suspectedLastHook, nullptr, 0, true);
-        if(!repeat){
-            output->trimExeInfo(suspectedLastHook);
-            output->appendLog(suspectedLastHook + "Return Value: (UNKNOWN) 0xDEADBEEFCAFEBABE / <THIS_API_CAUSES_CRUSH>\n"
-                                                  "----------------------------------------------------\n");
+        if(output->analyser->logList.size() < MAXIMUM_HOOK){
+            QString suspectedLastHook = getLastHookBeforeCall();
+            bool repeat = output->analyser->appendRecord(suspectedLastHook, nullptr, 0, true);
+            if(!repeat){
+                output->trimExeInfo(suspectedLastHook);
+                output->appendLog(suspectedLastHook + "Return Value: (UNKNOWN) 0xDEADBEEFCAFEBABE / <THIS_API_CAUSES_CRUSH>\n"
+                                                      "----------------------------------------------------\n");
+            }
         }
 
         if(output->analyser->analyseHeap){
@@ -131,18 +135,24 @@ void Widget::on_startAnalysis_clicked(){
                 QMessageBox::information(this, "堆监控总结", "程序结束前，所有堆块都已被释放");
             else{
                 QString info = "程序结束前，有";
-                info += to_string(std::count_if(output->analyser->chunksExpl->begin(),
-                                                output->analyser->chunksExpl->end(),
-                                                [](pair<uint64_t, std::map<unsigned, bool>> p)->bool{return p.second.rbegin()->second;}
-                                  )).c_str();
+                int unleashed = std::count_if(output->analyser->chunksExpl->begin(),
+                                              output->analyser->chunksExpl->end(),
+                                              [](pair<uint64_t, std::map<unsigned, bool>> p)->bool{
+                                                  return p.second.rbegin()->second;
+                                              });
+                info += to_string(unleashed).c_str();
                 info += "个堆块没有被释放。";
-                if(output->analyser->chunksExpl->size() > 50){
+                if(unleashed > 50){
                     info += "未被释放的堆块过多，无法展示，请移步堆监控查看，此时这里保存有程序执行最后一刻的堆空间布局监控情况";
                 }else{
-                    info += "分别为：";
-                    for(auto address : *output->analyser->chunksExpl){
-                        info += ull2a(address.first);
-                        info += ", ";
+                    if(unleashed){
+                        info += "分别为：";
+                        for(const auto &address : *output->analyser->chunksExpl){
+                            if(address.second.rbegin()->second){
+                                info += ull2a(address.first);
+                                info += ", ";
+                            }
+                        }
                     }
                     info += "有关堆块更加详细的信息，请移步堆监控进行查看。";
                 }
@@ -150,7 +160,6 @@ void Widget::on_startAnalysis_clicked(){
             }
         }
         output->executing = false;
-        // output = new Output(getAllChoices());
     }
     else
         QMessageBox::warning(this, "未指定文件", "你还没有指定要分析的可执行文件，请先指定可执行文件！");
@@ -158,6 +167,8 @@ void Widget::on_startAnalysis_clicked(){
 
 void Widget::on_startAnalyseHistory_clicked()
 {
+    if(output->uselessFlag)
+        output = new Output();
     output->loadHistory = true;
     output->executing = false;
     output->tracer->initialize();

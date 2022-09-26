@@ -92,7 +92,7 @@ bool hookAnalysis::appendRecord(QString newRecord, char *binBuf, int bufSize, bo
     }else if(lastRecord && *(logList.rbegin()) == latestLog)
         return true;
 
-    if(!(logList.empty() || latestLog.id == logList.rbegin()->id + 1)){
+    if(!(logList.empty() || latestLog.id == logList.rbegin()->id + 1) && latestLog.id < MAXIMUM_HOOK){
         qDebug() << latestLog.id << "> exception";
         assert(false);
     }
@@ -487,8 +487,10 @@ bool hookAnalysis::addHandle(fullLog newHeapLog){
             handleException({newHeapLog.id, AllocSameHandle},
                             new exceptionInfo{.addressWithException = allocatedHandle});
         }
-        else
+        else{
             heapViewModel->item(findHandleIdx, HEAPSTATUS)->setText("正在使用");   // 修改HANDLE状态
+            setLineColor(heapViewModel, findHandleIdx, 150, 255, 150);
+        }
     }
     return true;
 }
@@ -531,6 +533,7 @@ bool hookAnalysis::destroyHandle(fullLog newHeapLog){
     // 将HANDLE设置为销毁状态，同时将其内部所有CHUNK均设置为无效状态
     // 会对其内部的CHUNK进行检查，如果有CHUNK正在被使用而这个HANDLE先被销毁，则目标程序再次访问这个CHUNK就会产生SIGSEGV错误。
     heapViewModel->item(findHandleIdx, HEAPSTATUS)->setText("已被销毁");
+    setLineColor(heapViewModel, findHandleIdx, 255, 150, 150);
     QStandardItem* father = heapViewModel->item(findHandleIdx);
     for(int i=0; i<father->rowCount(); i++){
         // 判断CHUNK的使用状态
@@ -538,7 +541,9 @@ bool hookAnalysis::destroyHandle(fullLog newHeapLog){
             memoryLeakRisks.insert({newHeapLog.id, father->child(i)->text().toULongLong(nullptr, 16)});
             handleException({newHeapLog.id, DestroyBeforeFree},
                             new exceptionInfo{.addressWithException = father->child(i)->text().toULongLong(nullptr, 16)});
-        }
+            setLineColor(father, i, 200, 100, 0);
+        }else
+            setLineColor(father, i, 200, 200, 200);
         father->child(i, HEAPSTATUS)->setText("无效");
         uint64_t chunkAddr = father->child(i)->text().toULongLong(nullptr, 16);
         auto f = chunksExpl->find(chunkAddr);
@@ -598,6 +603,7 @@ bool hookAnalysis::addChunk(fullLog newHeapLog){
             }
             father->child(findChunkIdx, SIZE)->setText(ull2a(chunkSize));       // 修改size
             father->child(findChunkIdx, HEAPSTATUS)->setText("正在使用");            // 修改状态
+            setLineColor(father, findChunkIdx, 150, 255, 150);
         }
         // 如果一个堆句柄没有检测到其被HeapCreate分配而是根据HeapAlloc监测到，那么这样的堆中分配和释放堆块均不计数
         // 如果有一个堆块被成功分配到了已经被删除的堆句柄，且这个堆句柄明确使用HeapCreate创建，这样的堆块也不会被计数
@@ -669,24 +675,16 @@ bool hookAnalysis::freeChunk(fullLog newHeapLog){
         if(father->child(findChunkIdx, HEAPSTATUS)->text() == "已被释放")
             handleException({newHeapLog.id, DoubleFree},
                             new exceptionInfo{.addressWithException = victim});
-        else
+        else{
             father->child(findChunkIdx, HEAPSTATUS)->setText("已被释放");
+            setLineColor(father, findChunkIdx, 255, 150, 150);
+        }
         auto removeIter = chunksExpl->find(victim);
         if(removeIter != chunksExpl->end())
             removeIter->second.insert({newHeapLog.id, false});
     }
     validFreeCount++;
     return true;
-}
-
-void hookAnalysis::setChildRow(QStandardItem* parent, int row, QStringList elements){
-    for(int i=0; i<4; i++)
-        parent->setChild(row, i, new QStandardItem(elements[i]));
-}
-
-void hookAnalysis::setRow(int row, QStringList elements){
-    for(int i=0; i<4; i++)
-        heapViewModel->setItem(row, i, new QStandardItem(elements[i]));
 }
 
 /**
@@ -799,8 +797,11 @@ int hookAnalysis::findRegKey(uint64_t handleAddr){
 }
 
 void hookAnalysis::insertNewHeapHandle(uint64_t handleAddr, int insPos){
-    heapViewModel->insertRow(insPos);
-    setRow(insPos, QStringList() << ull2a(handleAddr) << "HANDLE" << "" << "正在使用");
+    heapViewModel->insertRow(insPos, QList<QStandardItem*>() <<
+                             new QStandardItem(ull2a(handleAddr)) <<
+                             new QStandardItem("HANDLE") << new QStandardItem() <<
+                             new QStandardItem("正在使用"));
+    setLineColor(heapViewModel, insPos, 150, 255, 150);
 }
 
 void hookAnalysis::insertNewHeapChild(uint64_t chunkAddr, uint64_t size, QStandardItem* father, int insPos){
@@ -808,6 +809,7 @@ void hookAnalysis::insertNewHeapChild(uint64_t chunkAddr, uint64_t size, QStanda
                       new QStandardItem("CHUNK") <<
                       new QStandardItem(ull2a(size)) <<
                       new QStandardItem("正在使用"));
+    setLineColor(father, insPos, 150, 255, 150);
 }
 
 void hookAnalysis::insertUnknownSizeChunk(uint64_t chunkAddr, QStandardItem* father, int insPos){
@@ -815,6 +817,7 @@ void hookAnalysis::insertUnknownSizeChunk(uint64_t chunkAddr, QStandardItem* fat
                       new QStandardItem("CHUNK") <<
                       new QStandardItem("???") <<
                       new QStandardItem("已被释放"));
+    setLineColor(father, insPos, 255, 150, 150);
 }
 
 /**
@@ -844,11 +847,13 @@ bool hookAnalysis::addFileHandle(fullLog newFileLog){
         extractDir(newFileLog);
         fileViewModel->item(findHandleIdx, FILENAME)->setText(fileName);
         fileViewModel->item(findHandleIdx, FILEHANDLESTATUS)->setText("正在使用");
+        setLineColor(fileViewModel, findHandleIdx, 150, 255, 150);
         fileViewModel->item(findHandleIdx)->appendRow(QList<QStandardItem*>() <<
                                                       new QStandardItem(to_string(newFileLog.id).c_str()) <<
                                                       new QStandardItem("OPEN") <<
-                                                      new QStandardItem(fileName) << nullptr <<
+                                                      new QStandardItem(fileName) << new QStandardItem() <<
                                                       new QStandardItem("SUCCESS"));
+        setLineColor(fileViewModel->item(findHandleIdx), fileViewModel->item(findHandleIdx)->rowCount() - 1, 200, 255, 200);
         insertNewFileHandle(newFileLog, findHandleIdx);
 
         return true;
@@ -911,6 +916,7 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, char* binBuf, bool
                           new QStandardItem(ull2a(requiredBytes)) <<
                           new QStandardItem(ull2a(actualBytes)) <<
                           new QStandardItem(success ? "SUCCESS" : "FAILED"));
+        setLineColor(father, father->rowCount() - 1, 255, 255, 200);
         type = addMemory(newFileLog.id, address, binBuf, actualBytes, type);
         int memInsIdx = findHandle(address, memoryModel);
         if(memInsIdx < 0){
@@ -923,6 +929,7 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, char* binBuf, bool
                                                        new QStandardItem(ull2a(actualBytes)) <<
                                                        new QStandardItem(memInstType[((int)type & 12) >> 2]) <<
                                                        new QStandardItem(fName));
+            setLineColor(memoryModel->item(-memInsIdx-1), memoryModel->item(-memInsIdx-1)->rowCount() - 1, 255, 255, 200);
         }else{
             if(actualBytes > 0)
                 memoryModel->item(memInsIdx, 2)->setText(bufType[(int)type]);
@@ -931,6 +938,7 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, char* binBuf, bool
                                                        new QStandardItem(ull2a(actualBytes)) <<
                                                        new QStandardItem(memInstType[((int)type & 12) >> 2]) <<
                                                        new QStandardItem(fName));
+            setLineColor(memoryModel->item(memInsIdx), memoryModel->item(memInsIdx)->rowCount() - 1, 255, 255, 200);
         }
     }else{
         bufContent type = relatedToExe ? ExeFileContent_TOFILE : ToBeCatagorized_TOFILE;
@@ -944,6 +952,7 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, char* binBuf, bool
                           new QStandardItem(ull2a(requiredBytes)) <<
                           new QStandardItem(ull2a(actualBytes)) <<
                           new QStandardItem(success ? "SUCCESS" : "FAILED"));
+        setLineColor(father, father->rowCount() - 1, 200, 200, 255);
         type = addMemory(newFileLog.id, address, binBuf, actualBytes, type);
         int memInsIdx = findHandle(address, memoryModel);
         if(memInsIdx < 0){
@@ -956,6 +965,7 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, char* binBuf, bool
                                                        new QStandardItem(ull2a(actualBytes)) <<
                                                        new QStandardItem(memInstType[((int)type & 12) >> 2]) <<
                                                        new QStandardItem(fName));
+            setLineColor(memoryModel->item(-memInsIdx-1), memoryModel->item(-memInsIdx-1)->rowCount() - 1, 200, 200, 255);
         }else{
             if(memoryModel->item(memInsIdx, 2)->text().contains("接收") && relatedToExe)
                 handleException({newFileLog.id, SaveExeContentFromNet},
@@ -965,6 +975,7 @@ bool hookAnalysis::addReadWriteFileRecord(fullLog newFileLog, char* binBuf, bool
                                                     new QStandardItem(ull2a(actualBytes)) <<
                                                     new QStandardItem(memInstType[((int)type & 12) >> 2]) <<
                                                     new QStandardItem(fName));
+            setLineColor(memoryModel->item(memInsIdx), memoryModel->item(memInsIdx)->rowCount() - 1, 200, 200, 255);
         }
     }
     return true;
@@ -990,8 +1001,9 @@ bool hookAnalysis::closeFileHandle(fullLog newFileLog){
             fileViewModel->item(findHandleIdx)->appendRow(QList<QStandardItem*>() <<
                                                           new QStandardItem(to_string(newFileLog.id).c_str()) <<
                                                           new QStandardItem("CLOSE") <<
-                                                          new QStandardItem(fileName) << nullptr <<
+                                                          new QStandardItem(fileName) << new QStandardItem() <<
                                                           new QStandardItem("FAILED"));
+            setLineColor(fileViewModel->item(findHandleIdx), fileViewModel->item(findHandleIdx)->rowCount() - 1, 200, 200, 200);
         }else if(findHandleIdx >= 0 && fileViewModel->item(findHandleIdx, FILEHANDLESTATUS)->text() == "已被关闭"){
             QString fileName = fileViewModel->item(findHandleIdx, 1)->text();
             handleException({newFileLog.id, TryCloseClosedHandle},
@@ -999,8 +1011,9 @@ bool hookAnalysis::closeFileHandle(fullLog newFileLog){
             fileViewModel->item(findHandleIdx)->appendRow(QList<QStandardItem*>() <<
                                                           new QStandardItem(to_string(newFileLog.id).c_str()) <<
                                                           new QStandardItem("CLOSE") <<
-                                                          new QStandardItem(fileName) << nullptr <<
+                                                          new QStandardItem(fileName) << new QStandardItem() <<
                                                           new QStandardItem("FAILED"));
+            setLineColor(fileViewModel->item(findHandleIdx), fileViewModel->item(findHandleIdx)->rowCount() - 1, 200, 200, 200);
         }else
             handleException({newFileLog.id, InvalidFileHandleToClose},
                  new exceptionInfo{.addressWithException = handle});
@@ -1018,11 +1031,13 @@ bool hookAnalysis::closeFileHandle(fullLog newFileLog){
 
     QString fileName = fileViewModel->item(findHandleIdx, 1)->text();
     fileViewModel->item(findHandleIdx, FILEHANDLESTATUS)->setText("已被关闭");
+    setLineColor(fileViewModel, findHandleIdx, 255, 150, 150);
     fileViewModel->item(findHandleIdx)->appendRow(QList<QStandardItem*>() <<
                                                   new QStandardItem(to_string(newFileLog.id).c_str()) <<
                                                   new QStandardItem("CLOSE") <<
-                                                  new QStandardItem(fileName) << nullptr <<
+                                                  new QStandardItem(fileName) << new QStandardItem() <<
                                                   new QStandardItem("SUCCESS"));
+    setLineColor(fileViewModel->item(findHandleIdx), fileViewModel->item(findHandleIdx)->rowCount() - 1, 255, 200, 200);
     auto f = fileHandles.find(handle);
     assert(f != fileHandles.end());
     fileHandleAttr attr = f->second.rbegin()->second;
@@ -1115,6 +1130,7 @@ void hookAnalysis::insertNewFileHandle(fullLog log, int insPos){
 
     fileViewModel->insertRow(-insPos - 1, QList<QStandardItem*>() << new QStandardItem(ull2a(newHandleAttr.handleAddr))
                              << new QStandardItem(fileName) << new QStandardItem("正在使用"));
+    setLineColor(fileViewModel, -insPos - 1, 150, 255, 150);
 }
 
 void hookAnalysis::insertNewRegHandle(fullLog log){
@@ -1139,24 +1155,22 @@ void hookAnalysis::insertNewRegHandle(fullLog log){
                                               new QStandardItem("OPEN") <<
                                               new QStandardItem("打开此句柄（键值为" + directory + "）") <<
                                               new QStandardItem(ull2a(log.retVal.value.imm)));
+        setLineColor(regeditModel, insIdx, 200, 255, 200);
         // assert(regHandles.find(directory) != regHandles.end());
         regHandles.insert({directory, hKeyGot});
         // 判断是否是开机自启动注册表项
         if(getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str ==
             "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
             getOpenRegKeyName(log) + "\\" + *log.args["lpSubKey"].str ==
-            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
+            "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"){
             handleException({log.id, VisitingStartupReg},
                             new exceptionInfo{.fileName = new QString(directory)});
+            setLineColor(regeditModel, insIdx, 255, 0, 0);
+        }
         assert(f != regHandlesExpl.end());
         f->second.insert({log.id, {directory, true}});
     }else{
         // 没有找到这个句柄，则进行插入
-        // 判断是否是开机自启动注册表项
-        if(directory == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
-            directory == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
-            handleException({log.id, VisitingStartupReg},
-                            new exceptionInfo{.fileName = new QString(directory)});
         if(directory.startsWith("*"))   // 没有找到键值，无法进行插入
             return;
         // 正式插入这个键值
@@ -1164,6 +1178,14 @@ void hookAnalysis::insertNewRegHandle(fullLog log){
                                 new QStandardItem(ull2a(hKeyGot)) <<
                                 new QStandardItem(directory) <<
                                 new QStandardItem("正在使用"));
+        setLineColor(regeditModel, -insIdx - 1, 200, 255, 200);
+        // 判断是否是开机自启动注册表项
+        if(directory == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+            directory == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"){
+            handleException({log.id, VisitingStartupReg},
+                            new exceptionInfo{.fileName = new QString(directory)});
+            setLineColor(regeditModel, insIdx, 255, 0, 0);
+        }
         // assert(regHandles.find(directory) == regHandles.end());
         regHandles.insert({directory, hKeyGot});
         std::map<unsigned, pair<QString, bool>> a;
@@ -1204,6 +1226,7 @@ void hookAnalysis::appendNewRegSet(fullLog log, QStandardItem* father){
                       new QStandardItem("SET") <<
                       new QStandardItem(detail) <<
                       new QStandardItem(ull2a(log.retVal.value.imm)));
+    setLineColor(father, father->rowCount() - 1, 200, 255, 255);
 }
 
 std::list<int> hookAnalysis::getGenericAccess(unsigned access){
@@ -1693,13 +1716,16 @@ bool hookAnalysis::setRegVal(fullLog newRegLog){
 
     // 如果设置的是自启动项句柄中的键值
     QString fullPath = getOpenRegKeyName(newRegLog);
-    if(fullPath == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
-       fullPath == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
-        handleException({newRegLog.id, TrySetStartupRegVal},
-                        new exceptionInfo{.fileName = newRegLog.args["lpValueName"].str});
-
     // 找到了这个注册表项，插入子项
     appendNewRegSet(newRegLog, regeditModel->item(keyIdx));
+
+    if(fullPath == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+       fullPath == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"){
+        handleException({newRegLog.id, TrySetStartupRegVal},
+                        new exceptionInfo{.fileName = newRegLog.args["lpValueName"].str});
+        setLineColor(regeditModel->item(keyIdx), regeditModel->item(keyIdx)->rowCount() - 1, 255, 0, 0);
+    }
+
     return true;
 }
 
@@ -1726,12 +1752,14 @@ bool hookAnalysis::closeRegKey(fullLog newRegLog){
     }
     // 找到这个注册表项，关闭这个注册表项
     regeditModel->item(keyIdx, REGSTATUS)->setText("已被关闭");
+    setLineColor(regeditModel, keyIdx, 255, 200, 200);
     regeditModel->item(keyIdx)->insertRow(regeditModel->item(keyIdx)->rowCount(),
                                           QList<QStandardItem*>() <<
                                           new QStandardItem(to_string(newRegLog.id).c_str()) <<
                                           new QStandardItem("CLOSE") <<
                                           new QStandardItem("关闭该句柄（键值为" + regeditModel->item(keyIdx, 1)->text() + "）") <<
                                           new QStandardItem(ull2a(retVal)));
+    setLineColor(regeditModel->item(keyIdx), regeditModel->item(keyIdx)->rowCount() - 1, 255, 200, 200);
     auto f = regHandlesExpl.find(regHandle);
     assert(f != regHandlesExpl.end());
     f->second.insert({newRegLog.id, {regeditModel->item(keyIdx, 1)->text(), false}});
@@ -1781,10 +1809,6 @@ bool hookAnalysis::deleteRegValue(fullLog newRegLog){
 
     // 如果删除的是自启动项句柄中的键值
     QString fullPath = getOpenRegKeyName(newRegLog);
-    if(fullPath == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
-       fullPath == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
-        handleException({newRegLog.id, TryDeleteStartupRegVal},
-                        new exceptionInfo{.fileName = newRegLog.args["lpValueName"].str});
 
     regeditModel->item(keyIdx)->insertRow(regeditModel->item(keyIdx)->rowCount(),
                                           QList<QStandardItem*>() <<
@@ -1792,6 +1816,15 @@ bool hookAnalysis::deleteRegValue(fullLog newRegLog){
                                           new QStandardItem("DELETE VALUE") <<
                                           new QStandardItem("删除该句柄下的\"" + keyVal + "\"键值") <<
                                           new QStandardItem(ull2a(retVal)));
+
+    setLineColor(regeditModel->item(keyIdx), regeditModel->item(keyIdx)->rowCount() - 1, 200, 255, 200);
+
+    if(fullPath == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+       fullPath == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"){
+        handleException({newRegLog.id, TryDeleteStartupRegVal},
+                        new exceptionInfo{.fileName = newRegLog.args["lpValueName"].str});
+        setLineColor(regeditModel->item(keyIdx), regeditModel->item(keyIdx)->rowCount() - 1, 255, 0, 0);
+    }
 
     regHandles.insert({fullPath, regHandle});
 
@@ -1802,7 +1835,7 @@ bool hookAnalysis::deleteRegKey(fullLog newRegLog){
     // 首先获得操作的返回值
     long retVal = (long)newRegLog.retVal.value.imm;
     if(retVal != 0){        // 如果返回值不为0，说明操作没有正常完成。
-        handleException({newRegLog.id, RegOpenFail},
+        handleException({newRegLog.id, RegDeleteFail},
                         new exceptionInfo{.errorCode = retVal});
     }
 
@@ -1821,10 +1854,6 @@ bool hookAnalysis::deleteRegKey(fullLog newRegLog){
 
     // 如果删除的是自启动项句柄中的项值，则此操作会将所有自启动项全部删除
     QString fullPath = getOpenRegKeyName(newRegLog) + "\\" + *newRegLog.args["lpSubKey"].str;
-    if(fullPath == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
-       fullPath == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
-        handleException({newRegLog.id, TryDeleteStartupRegKey},
-                        new exceptionInfo{.fileName = new QString(fullPath)});
 
     regeditModel->item(keyIdx)->insertRow(regeditModel->item(keyIdx)->rowCount(),
                                           QList<QStandardItem*>() <<
@@ -1832,6 +1861,14 @@ bool hookAnalysis::deleteRegKey(fullLog newRegLog){
                                           new QStandardItem("DELETE KEY") <<
                                           new QStandardItem("删除该句柄下的\"" + keyVal + "\"项值") <<
                                           new QStandardItem(ull2a(retVal)));
+    setLineColor(regeditModel->item(keyIdx), regeditModel->item(keyIdx)->rowCount() - 1, 200, 255, 200);
+
+    if(fullPath == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+       fullPath == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"){
+        handleException({newRegLog.id, TryDeleteStartupRegKey},
+                        new exceptionInfo{.fileName = new QString(fullPath)});
+        setLineColor(regeditModel->item(keyIdx), regeditModel->item(keyIdx)->rowCount() - 1, 255, 0, 0);
+    }
 
     auto iter = regHandles.find(fullPath);
     while(iter != regHandles.end() && iter->first.startsWith(fullPath)){
@@ -1847,11 +1884,12 @@ bool hookAnalysis::deleteRegKey(fullLog newRegLog){
     }
 
     iter = regHandles.find(fullPath);
-    while(iter != regHandles.end() && iter->first == fullPath){
+    while(iter != regHandles.end() && iter->first.startsWith(fullPath)){
         uint64_t handle = iter->second;
         int idx = findRegKey(handle);
         if(idx >= 0){
             regeditModel->item(idx, REGSTATUS)->setText("已被删除");
+            setLineColor(regeditModel, idx, 255, 150, 255);
             iter = regHandles.erase(iter);
         }
         else
@@ -1929,9 +1967,16 @@ bool hookAnalysis::addLocalUnbindedSocket(fullLog newNetLog){
                             new QStandardItem(Af + "/" + type + "/" + proto) <<
                             new QStandardItem("-") <<
                             new QStandardItem("-"));
+        // 黄色表示服务器（绑定后），蓝色表示客户端（连接后），绿色为未绑定状态，浅粉色为服务器连接状态
+        setLineColor(netModel, -insIdx - 1, 200, 255, 200);
         netModel->item(-insIdx - 1)->appendRow(QList<QStandardItem*>() <<
                                           new QStandardItem(to_string(newNetLog.id).c_str()) <<
-                                          new QStandardItem("NEW SOCKET"));
+                                          new QStandardItem("NEW SOCKET") <<
+                                          new QStandardItem() <<
+                                          new QStandardItem() <<
+                                          new QStandardItem() <<
+                                          new QStandardItem());
+        setLineColor(netModel->item(-insIdx - 1), 0, 200, 255, 200);
         map<unsigned, pair<QString, QString>> a;
         a.insert({newNetLog.id, {"-:-", "-:-"}});
         universalSocketInfo.insert({newSocket, a});
@@ -1943,6 +1988,8 @@ bool hookAnalysis::addLocalUnbindedSocket(fullLog newNetLog){
         netModel->item(insIdx)->appendRow(QList<QStandardItem*>() <<
                                           new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                           new QStandardItem("NEW SOCKET"));
+        setLineColor(netModel->item(insIdx), netModel->item(insIdx)->rowCount(), 200, 255, 200);
+        setLineColor(netModel, insIdx, 200, 255, 200);
         auto f = universalSocketInfo.find(newSocket);
         assert(f != universalSocketInfo.end());
         f->second.insert({newNetLog.id, {"-:-", "-:-"}});
@@ -1968,8 +2015,12 @@ bool hookAnalysis::bindLocalSocket(fullLog newNetLog){
     if(ret){     // bind失败
         netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
                                         new QStandardItem(to_string(newNetLog.id).c_str()) <<
-                                        new QStandardItem("BIND") << nullptr <<
-                                        new QStandardItem(ipaddr + ":" + port + ":(失败)"));
+                                        new QStandardItem("BIND") << new QStandardItem() <<
+                                        new QStandardItem(ipaddr + ":" + port + ":(失败)") <<
+                                        new QStandardItem() <<
+                                        new QStandardItem() <<
+                                        new QStandardItem());
+        setLineColor(netModel, sidx, 200, 200, 200);
         return false;
     }
 
@@ -1977,8 +2028,13 @@ bool hookAnalysis::bindLocalSocket(fullLog newNetLog){
     netModel->item(sidx, 3)->setText(port);
     netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
                                     new QStandardItem(to_string(newNetLog.id).c_str()) <<
-                                    new QStandardItem("BIND") << nullptr <<
-                                    new QStandardItem(ipaddr + ":" + port));
+                                    new QStandardItem("BIND") << new QStandardItem() <<
+                                    new QStandardItem(ipaddr + ":" + port) <<
+                                    new QStandardItem() <<
+                                    new QStandardItem() <<
+                                    new QStandardItem());
+    setLineColor(netModel, sidx, 255, 255, 200);
+    setLineColor(netModel->item(sidx), netModel->item(sidx)->rowCount() - 1, 255, 255, 200);
     auto f = universalSocketInfo.find(socket);
     assert(f != universalSocketInfo.end());
     assert(!f->second.empty());
@@ -2008,7 +2064,10 @@ bool hookAnalysis::newAcception(fullLog newNetLog){
                                     new QStandardItem(remoteSocket) <<
                                     new QStandardItem(remoteip + ":" + remotePort) <<
                                     new QStandardItem(netModel->item(sidx, 2)->text() + ":" +
-                                                      netModel->item(sidx, 3)->text()));
+                                                      netModel->item(sidx, 3)->text()) <<
+                                    new QStandardItem());
+    setLineColor(netModel->item(sidx), netModel->item(sidx)->rowCount() - 1, 200, 150, 255);
+    setLineColor(netModel, sidx, 200, 150, 255);
     socketPairs.insert({remoteSocket, localSocket});
     remoteSockInfo.insert({remoteSocket, remoteip + ":" + remotePort});
     auto f = universalSocketInfo.find(localSocket);
@@ -2036,8 +2095,10 @@ bool hookAnalysis::newConnection(fullLog newNetLog){
 
     netModel->item(sidx)->appendRow(QList<QStandardItem*>() <<
                                     new QStandardItem(to_string(newNetLog.id).c_str()) <<
-                                    new QStandardItem("CONNECT") << nullptr << nullptr <<
-                                    new QStandardItem(ipaddr + ":" + port));
+                                    new QStandardItem("CONNECT") << new QStandardItem() << new QStandardItem() <<
+                                    new QStandardItem(ipaddr + ":" + port) << new QStandardItem());
+    setLineColor(netModel->item(sidx), netModel->item(sidx)->rowCount() - 1, 200, 255, 255);
+    setLineColor(netModel, sidx, 200, 255, 255);
     connectionInfo.insert({socket, ipaddr + ":" + port});
     auto f = universalSocketInfo.find(socket);
     assert(f != universalSocketInfo.end());
@@ -2083,6 +2144,8 @@ bool hookAnalysis::newSend(fullLog newNetLog, char* buf){
                                                            netModel->item(sfind, 3)->text()) <<
                                          new QStandardItem(remoteSockInfo[socket]) <<
                                          new QStandardItem(ull2a(ret)));
+        // 橙色代表发送
+        setLineColor(netModel->item(sfind), netModel->item(sfind)->rowCount() - 1, 255, 220, 0);
     }else{
         // 如果本地是客户端，那么socket就是本地的SOCKET
         sfind = findHandle(socket, netModel);
@@ -2090,11 +2153,12 @@ bool hookAnalysis::newSend(fullLog newNetLog, char* buf){
         netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
                                          new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                          new QStandardItem("SEND") <<
-                                         nullptr <<
+                                         new QStandardItem() <<
                                          new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
                                                            netModel->item(sfind, 3)->text()) <<
                                          new QStandardItem(connectionInfo[socket]) <<
                                          new QStandardItem(ull2a(ret)));
+        setLineColor(netModel->item(sfind), netModel->item(sfind)->rowCount() - 1, 255, 220, 0);
     }
     uint64_t victimBuf = newNetLog.args["buf"].value.imm;
     int memIdx = findHandle(victimBuf, memoryModel);
@@ -2110,6 +2174,7 @@ bool hookAnalysis::newSend(fullLog newNetLog, char* buf){
                                                 new QStandardItem("SEND TO NET") <<
                                                 new QStandardItem(isServer ?
                                                                       remoteSockInfo[socket] : connectionInfo[socket]));
+        setLineColor(memoryModel->item(-memIdx-1), memoryModel->item(-memIdx-1)->rowCount() - 1, 255, 220, 0);
     }else{
         addMemory(newNetLog.id, victimBuf, buf, ret, ToBeCatagorized_TONET);
         memoryModel->item(memIdx)->appendRow(QList<QStandardItem*>() <<
@@ -2118,6 +2183,7 @@ bool hookAnalysis::newSend(fullLog newNetLog, char* buf){
                                                 new QStandardItem("SEND TO NET") <<
                                                 new QStandardItem(isServer ?
                                                                       remoteSockInfo[socket] : connectionInfo[socket]));
+        setLineColor(memoryModel->item(memIdx), memoryModel->item(memIdx)->rowCount() - 1, 255, 220, 0);
         if(memoryModel->item(memIdx, 2)->text() == bufType[(int)ExeFileContent_FROMFILE])
             handleException({newNetLog.id, SendExeContentToNet},
                             new exceptionInfo{.addressWithException = socket});
@@ -2160,6 +2226,8 @@ bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
                                                            netModel->item(sfind, 3)->text()) <<
                                          new QStandardItem(remoteSockInfo[socket]) <<
                                          new QStandardItem(ull2a(ret)));
+        // 黄绿色代表接收
+        setLineColor(netModel->item(sfind), netModel->item(sfind)->rowCount() - 1, 220, 255, 0);
     }else{
         // 如果本地是客户端，那么socket就是本地的SOCKET
         sfind = findHandle(socket, netModel);
@@ -2167,11 +2235,12 @@ bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
         netModel->item(sfind)->appendRow(QList<QStandardItem*>() <<
                                          new QStandardItem(to_string(newNetLog.id).c_str()) <<
                                          new QStandardItem("RECV") <<
-                                         nullptr <<
+                                         new QStandardItem() <<
                                          new QStandardItem(netModel->item(sfind, 2)->text() + ":" +
                                                            netModel->item(sfind, 3)->text()) <<
                                          new QStandardItem(connectionInfo[socket]) <<
                                          new QStandardItem(ull2a(ret)));
+        setLineColor(netModel->item(sfind), netModel->item(sfind)->rowCount() - 1, 220, 255, 0);
     }
     uint64_t victimBuf = newNetLog.args["buf"].value.imm;
     int memIdx = findHandle(victimBuf, memoryModel);
@@ -2187,6 +2256,7 @@ bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
                                                 new QStandardItem("RECV FROM NET") <<
                                                 new QStandardItem(isServer ?
                                                                       remoteSockInfo[socket] : connectionInfo[socket]));
+        setLineColor(memoryModel->item(-memIdx-1), memoryModel->item(-memIdx-1)->rowCount() - 1, 220, 255, 0);
     }else{
         bufContent type = addMemory(newNetLog.id, victimBuf, buf, ret, ToBeCatagorized_TONET);
         if(ret > 0)
@@ -2197,6 +2267,7 @@ bool hookAnalysis::newRecv(fullLog newNetLog, char* buf){
                                                 new QStandardItem("RECV FROM NET") <<
                                                 new QStandardItem(isServer ?
                                                                       remoteSockInfo[socket] : connectionInfo[socket]));
+        setLineColor(memoryModel->item(memIdx), memoryModel->item(memIdx)->rowCount() - 1, 220, 255, 0);
     }
     return true;
 }
@@ -2242,6 +2313,12 @@ bool hookAnalysis::stepBack(fullLog rewindLog){
         revokeSocket(rewindLog);
     else if(rewindLog.funcName == "accept")
         revokeAccept(rewindLog);
+    logWidgetModel->item(rewindLog.id)->setBackground(QBrush(QColor(255, 150, 150)));
+    logWidgetModel->item(rewindLog.id, 1)->setBackground(QBrush(QColor(255, 150, 150)));
+    if(rewindLog.id != logWidgetModel->rowCount() - 1){
+        logWidgetModel->item(rewindLog.id + 1)->setBackground(QBrush(QColor(200, 200, 200)));
+        logWidgetModel->item(rewindLog.id + 1, 1)->setBackground(QBrush(QColor(200, 200, 200)));
+    }
     return true;
 }
 
@@ -2267,6 +2344,7 @@ bool hookAnalysis::revokeHeapDestroy(fullLog HeapDestroyLog){
         throw std::exception("HeapDestroy: 找不到要回溯的Handle。");
     auto item = heapViewModel->item(fi);
     heapViewModel->item(fi, HEAPSTATUS)->setText("正在使用");
+    setLineColor(heapViewModel, fi, 150, 255, 150);
     for(int i=0; i<item->rowCount(); i++){
         uint64_t addr = item->child(i)->text().toULongLong(nullptr, 16);
         auto f = chunksExpl->find(addr);
@@ -2276,10 +2354,14 @@ bool hookAnalysis::revokeHeapDestroy(fullLog HeapDestroyLog){
         if(isUsing == f->second.begin())
             throw std::exception("HeapDestroy: 找不到handle下chunk之前的申请记录。");
         isUsing--;
-        if(isUsing->second)
+        if(isUsing->second){
             item->child(i, HEAPSTATUS)->setText("正在使用");
-        else
+            setLineColor(item, i, 150, 255, 150);
+        }
+        else{
             item->child(i, HEAPSTATUS)->setText("已被释放");
+            setLineColor(item, i, 255, 150, 150);
+        }
     }
     return true;
 }
@@ -2324,8 +2406,10 @@ bool hookAnalysis::revokeHeapAlloc(fullLog HeapAllocLog){
         int lastChunkInstId = prevStatus->first;
         if(lastHandleInstId > lastChunkInstId)
             heapViewModel->item(fi)->removeRow(fin);
-        else if(lastHandleInstId < lastChunkInstId)
+        else if(lastHandleInstId < lastChunkInstId){
             heapViewModel->item(fi)->child(fin, HEAPSTATUS)->setText("已被释放");
+            setLineColor(heapViewModel->item(fi), fin, 255, 150, 150);
+        }
         else
             throw std::exception("HeapAlloc: 回溯时发现操作逻辑错误。");
     }
@@ -2355,8 +2439,10 @@ bool hookAnalysis::revokeHeapFree(fullLog HeapFreeLog){
         throw std::exception("HeapFree: 找不到chunk的申请记录。");
     else{
         prevStatus--;
-        if(prevStatus->second)     // 如果前一次修改该chunk是释放，说明这里是double free，无需修改其状态
+        if(prevStatus->second){     // 如果前一次修改该chunk是释放，说明这里是double free，无需修改其状态
             heapViewModel->item(fi)->child(fin, HEAPSTATUS)->setText("正在使用");
+            setLineColor(heapViewModel->item(fi), fin, 150, 255, 150);
+        }
     }
     return true;
 }
@@ -2392,6 +2478,7 @@ bool hookAnalysis::revokeCreateFile(fullLog CreateFileLog){
                     throw std::exception("CreateFile: 在列表中找不到该创建操作");
                 fileViewModel->item(idx)->removeRow(childIdx);
                 fileViewModel->item(idx, FILEHANDLESTATUS)->setText("已被关闭");
+                setLineColor(fileViewModel, idx, 255, 200, 200);
             }else
                 fileViewModel->removeRow(idx);
         }
@@ -2434,7 +2521,7 @@ bool hookAnalysis::revokeReadFile(fullLog ReadFileLog){
         throw std::exception("ReadFile: 内存map中找不到该操作");
     // 修改该内存的内容描述到API调用之前的状态
     if(mff == mf->second.begin())
-        memoryModel->item(memfi, 2)->setText("");
+        memoryModel->removeRow(memfi);
     else{
         mff--;
         memoryModel->item(memfi, 2)->setText(bufType[(int)mff->second.type]);
@@ -2477,7 +2564,7 @@ bool hookAnalysis::revokeWriteFile(fullLog WriteFileLog){
         throw std::exception("WriteFile: 内存map中找不到该操作");
     // 修改该内存的内容描述到API调用之前的状态
     if(mff == mf->second.begin())
-        memoryModel->item(memfi, 2)->setText("");
+        memoryModel->removeRow(memfi);
     else{
         mff--;
         memoryModel->item(memfi, 2)->setText(bufType[(int)mff->second.type]);
@@ -2509,8 +2596,10 @@ bool hookAnalysis::revokeCloseHandle(fullLog CloseHandleLog){
         throw std::exception("CloseHandle: map中找不到handle的创建记录。");
     ff--;
     // 修改状态
-    if(ff->second.isEnable)
+    if(ff->second.isEnable){
         fileViewModel->item(fi, FILEHANDLESTATUS)->setText("正在使用");
+        setLineColor(fileViewModel, fi, 200, 255, 200);
+    }
     return true;
 }
 
@@ -2816,4 +2905,16 @@ bool hookAnalysis::revokeAccept(fullLog acceptLog){
         throw std::exception("accept: 操作id不匹配。");
     father->removeRow(father->rowCount() - 1);
     return true;
+}
+
+void hookAnalysis::setLineColor(QStandardItemModel* model, int row, int r, int g, int b){
+    for(int i=0; i<model->columnCount(); i++)
+        if(model->item(row, i))
+            model->item(row, i)->setBackground(QBrush(QColor(r, g, b)));
+}
+
+void hookAnalysis::setLineColor(QStandardItem* model, int row, int r, int g, int b){
+    for(int i=0; i<model->columnCount(); i++)
+        if(model->child(row, i))
+            model->child(row, i)->setBackground(QBrush(QColor(r, g, b)));
 }

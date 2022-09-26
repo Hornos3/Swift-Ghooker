@@ -1,6 +1,8 @@
 ﻿#ifndef HOOKANALYSIS_H
 #define HOOKANALYSIS_H
 
+#define MAXIMUM_HOOK 5000
+
 #include <map>
 #include <set>
 #include <vector>
@@ -397,9 +399,7 @@ public:
     static std::list<int> getCreateDisp(unsigned disposition);
     static std::list<int> getFileAttr(unsigned fileAttr);
 
-    void setRow(int row, QStringList elements);
     void insertUnknownSizeChunk(uint64_t chunkAddr, QStandardItem* father, int insPos);
-    void setChildRow(QStandardItem* parent, int row, QStringList elements);
 
     void handleException(pair<int, APIException> latestException, exceptionInfo* info);
 
@@ -442,6 +442,9 @@ public:
     bool revokeConnect(fullLog connectLog);
     bool revokeBind(fullLog bindLog);
     bool revokeAccept(fullLog acceptLog);
+
+    void setLineColor(QStandardItemModel* model, int row, int r, int g, int b);
+    void setLineColor(QStandardItem* model, int row, int r, int g, int b);
 };
 
 #endif // HOOKANALYSIS_H

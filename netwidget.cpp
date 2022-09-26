@@ -10,6 +10,8 @@ netWidget::netWidget(QStandardItemModel* netModel, QWidget *parent) :
     ui->treeView->setModel(model);
     ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setWindowIcon(QIcon(":/background/icon.ico"));
+    Qt::WindowFlags m_flags = windowFlags();
+    setWindowFlags(m_flags | Qt::WindowStaysOnTopHint);
 }
 
 netWidget::~netWidget()

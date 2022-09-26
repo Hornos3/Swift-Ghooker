@@ -9,6 +9,8 @@ heapWidget::heapWidget(QStandardItemModel* heapModel, QWidget *parent) :
     ui->treeView->setModel(heapModel);
     ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setWindowIcon(QIcon(":/background/icon.ico"));
+    Qt::WindowFlags m_flags = windowFlags();
+    setWindowFlags(m_flags | Qt::WindowStaysOnTopHint);
 }
 
 heapWidget::~heapWidget()

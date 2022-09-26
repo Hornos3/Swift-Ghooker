@@ -14,6 +14,8 @@ memoryWidget::memoryWidget(std::map<uint64_t, std::map<int, memoryInfo>> *memori
     ui->memoryView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->memoryContent->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setWindowIcon(QIcon(":/background/icon.ico"));
+    Qt::WindowFlags m_flags = windowFlags();
+    setWindowFlags(m_flags | Qt::WindowStaysOnTopHint);
 }
 
 memoryWidget::~memoryWidget()

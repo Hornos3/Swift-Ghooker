@@ -184,6 +184,11 @@ void Output::updateLogCount(){
 void Output::updateLog(){
 //    lock->lockForWrite();
     // mutexLock.lock();
+    if(analyser->logList.size() >= MAXIMUM_HOOK){
+        if(injThread)
+            injThread->quit();
+        return;
+    }
     while(!getMutexSignal()){
         // QCoreApplication::processEvents();
         if(!injThread || injThread->isFinished())
@@ -241,10 +246,29 @@ void Output::updateLog(){
 }
 
 void Output::closeEvent(QCloseEvent * event){
+    QMessageBox::StandardButton userChoice = QMessageBox::question(this, "退出确认", "确认要退出吗？",
+                                                                   QMessageBox::Yes | QMessageBox::No);
+    if(userChoice != QMessageBox::Yes){
+        event->ignore();
+        return;
+    }
     if(loadHistory){
         event->accept();
         delete this->analyser;
-        delete this;
+        if(lWdg->isVisible())
+            lWdg->close();
+        if(mWdg->isVisible())
+            mWdg->close();
+        if(fWdg->isVisible())
+            fWdg->close();
+        if(rWdg->isVisible())
+            rWdg->close();
+        if(hWdg->isVisible())
+            hWdg->close();
+        if(eWdg->isVisible())
+            eWdg->close();
+        if(moWdg->isVisible())
+            moWdg->close();
         return;
     }
     if(injThread != nullptr && !injThread->isFinished()){
@@ -252,11 +276,27 @@ void Output::closeEvent(QCloseEvent * event){
         event->ignore();
         return;
     }
+
     QMessageBox::information(this, "退出", "本次分析结果会保存到文件系统中，但下一次分析可能会进行覆盖，请注意备份。");
+    if(lWdg->isVisible())
+        lWdg->close();
+    if(mWdg->isVisible())
+        mWdg->close();
+    if(fWdg->isVisible())
+        fWdg->close();
+    if(rWdg->isVisible())
+        rWdg->close();
+    if(hWdg->isVisible())
+        hWdg->close();
+    if(eWdg->isVisible())
+        eWdg->close();
+    if(moWdg->isVisible())
+        moWdg->close();
     saveFullLog();
-    event->accept();
     delete this->analyser;
     delete this;
+    this->uselessFlag = true;
+    event->accept();
 }
 
 void Output::saveFullLog(){
@@ -321,7 +361,8 @@ void Output::on_fileView_clicked(const QModelIndex &index)
     if(index.parent().isValid())
         return;
 
-    fileHandleAttr handle = analyser->fileHandles[fileViewModel->item(selectedRow)->text().toULongLong(nullptr, 16)].rbegin()->second;
+    fileHandleAttr handle = analyser->fileHandles
+            [fileViewModel->item(selectedRow)->text().toULongLong(nullptr, 16)].rbegin()->second;
     list<int> fileAccess = analyser->getGenericAccess(handle.access);
     auto iter = fileAccess.begin();
 
@@ -477,7 +518,13 @@ void Output::changeStep(int changedValue)
     if(originalStep < changedValue){
         while(originalStep < changedValue){
             tracer->stepFront();
+            logWidgetModel->item(originalStep)->setForeground(QBrush(QColor(0, 0, 0)));
+            logWidgetModel->item(originalStep, 1)->setForeground(QBrush(QColor(0, 0, 0)));
             originalStep++;
+            if(originalStep < tracer->totalStep){
+                logWidgetModel->item(originalStep)->setForeground(QBrush(QColor(255, 0, 0)));
+                logWidgetModel->item(originalStep, 1)->setForeground(QBrush(QColor(255, 0, 0)));
+            }
         }
     }else{
         if(originalStep - changedValue < changedValue){ // 如果回溯需要的步骤少，就回溯
@@ -486,8 +533,56 @@ void Output::changeStep(int changedValue)
                 originalStep--;
             }
         }else{
-            // TODO: 清空所有显示信息并从头开始推演
+            allClear();
+            tracer->currentStep = 0;
+            while(originalStep < changedValue){
+                tracer->stepFront();
+                originalStep++;
+            }
+            for(int i=changedValue+1; i<analyser->logList.size(); i++){
+                logWidgetModel->item(i)->setForeground(QBrush(QColor(200, 200, 200)));
+                logWidgetModel->item(i, 1)->setForeground(QBrush(QColor(200, 200, 200)));
+            }
+            if(changedValue != logWidgetModel->rowCount()){
+                logWidgetModel->item(changedValue)->setForeground(QBrush(QColor(255, 0, 0)));
+                logWidgetModel->item(changedValue, 1)->setForeground(QBrush(QColor(255, 0, 0)));
+            }
         }
     }
 }
 
+void Output::allClear(){
+    heapViewModel->clear();
+    fileViewModel->clear();
+    regeditModel->clear();
+    netModel->clear();
+    memoryModel->clear();
+
+    heapViewModel->setHorizontalHeaderLabels(QStringList() << "地址" << "类别" << "大小" << "状态");
+    fileViewModel->setHorizontalHeaderLabels(QStringList() << "句柄指针/操作编号" << "文件名/操作类型" << "状态/字节数" << "成功字节数" << "是否成功");
+    regeditModel->setHorizontalHeaderLabels(QStringList() << "句柄/操作编号" << "键值/操作类型" << "状态/操作细节" << "操作返回");
+    netModel->setHorizontalHeaderLabels(QStringList() << "SOCKET地址/操作编号" << "通信类型"
+                                        << "IP/目标SOCKET地址" << "端口号/该套接字对应IP与端口" << "目标套接字对应IP与端口" << "消息长度");
+    memoryModel->setHorizontalHeaderLabels(QStringList() << "地址/操作ID" << "长度" << "保存内容/操作类型" << "来源/去向");
+
+    regeditModel->insertRow(0, QList<QStandardItem*>() <<
+                            new QStandardItem(ull2a((uint64_t)HKEY_CLASSES_ROOT)) <<
+                            new QStandardItem("HKEY_CLASSES_ROOT") <<
+                            new QStandardItem("正在使用"));
+    regeditModel->insertRow(1, QList<QStandardItem*>() <<
+                            new QStandardItem(ull2a((uint64_t)HKEY_CURRENT_USER)) <<
+                            new QStandardItem("HKEY_CURRENT_USER") <<
+                            new QStandardItem("正在使用"));
+    regeditModel->insertRow(2, QList<QStandardItem*>() <<
+                            new QStandardItem(ull2a((uint64_t)HKEY_LOCAL_MACHINE)) <<
+                            new QStandardItem("HKEY_LOCAL_MACHINE") <<
+                            new QStandardItem("正在使用"));
+    regeditModel->insertRow(3, QList<QStandardItem*>() <<
+                            new QStandardItem(ull2a((uint64_t)HKEY_USERS)) <<
+                            new QStandardItem("HKEY_USERS") <<
+                            new QStandardItem("正在使用"));
+    regeditModel->insertRow(4, QList<QStandardItem*>() <<
+                            new QStandardItem(ull2a((uint64_t)HKEY_CURRENT_CONFIG)) <<
+                            new QStandardItem("HKEY_CURRENT_CONFIG") <<
+                            new QStandardItem("正在使用"));
+}

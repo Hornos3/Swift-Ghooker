@@ -20,7 +20,6 @@ public:
     ~logWidget();
 
     std::vector<fullLog>* allLog;
-    bool appendRecord();
 
 private:
     Ui::logWidget *ui;

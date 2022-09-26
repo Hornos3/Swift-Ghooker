@@ -9,6 +9,8 @@ regWidget::regWidget(QStandardItemModel *regModel, QWidget *parent) :
     ui->treeView->setModel(regModel);
     ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setWindowIcon(QIcon(":/background/icon.ico"));
+    Qt::WindowFlags m_flags = windowFlags();
+    setWindowFlags(m_flags | Qt::WindowStaysOnTopHint);
 }
 
 regWidget::~regWidget()

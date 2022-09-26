@@ -10,6 +10,8 @@ logWidget::logWidget(std::vector<fullLog> *allLog, QStandardItemModel *model, QW
     ui->treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->allLog = allLog;
     model->setHorizontalHeaderLabels(QStringList() << "操作序号/参数名" << "函数名/参数类型" << "参数值（整数）" << "参数值（字符串）");
+    Qt::WindowFlags m_flags = windowFlags();
+    setWindowFlags(m_flags | Qt::WindowStaysOnTopHint);
 }
 
 logWidget::~logWidget()

@@ -30,6 +30,8 @@ fileWidget::fileWidget(QStandardItemModel* fileModel,
     ui->createDisp->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->flagAttr->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setWindowIcon(QIcon(":/background/icon.ico"));
+    Qt::WindowFlags m_flags = windowFlags();
+    setWindowFlags(m_flags | Qt::WindowStaysOnTopHint);
 }
 
 fileWidget::~fileWidget()

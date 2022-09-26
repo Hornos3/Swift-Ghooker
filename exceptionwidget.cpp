@@ -9,6 +9,8 @@ exceptionWidget::exceptionWidget(QStandardItemModel *exceptionModel, QWidget *pa
     ui->tableView->setModel(exceptionModel);
     ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setWindowIcon(QIcon(":/background/icon.ico"));
+    Qt::WindowFlags m_flags = windowFlags();
+    setWindowFlags(m_flags | Qt::WindowStaysOnTopHint);
 }
 
 exceptionWidget::~exceptionWidget()

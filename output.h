@@ -64,6 +64,7 @@ public:
     void appendLog(QString log);
     void changeStep(int changedValue);
     void updateLogCount();
+    void allClear();
 
     QString getInjOptions();
     ~Output();
@@ -80,6 +81,7 @@ public:
     bool executing = true;
 
     injectThread* injThread;
+    bool uselessFlag = false;
 
 private slots:
     void on_fileView_clicked(const QModelIndex &index);
