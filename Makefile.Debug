@@ -4862,7 +4862,8 @@ debug\output.obj: output.cpp Util.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\QSpinBox \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\qspinbox.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\QReadWriteLock \
-		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qreadwritelock.h
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\qreadwritelock.h \
+		..\..\..\Qt\6.3.1\msvc2019_64\include\QtCore\QMutex
 
 debug\regwidget.obj: regwidget.cpp regwidget.h \
 		..\..\..\Qt\6.3.1\msvc2019_64\include\QtWidgets\QWidget \

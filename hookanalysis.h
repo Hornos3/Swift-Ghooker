@@ -243,7 +243,7 @@ typedef union exceptionInfo{
         uint64_t handle;
     }chunkAndHandle;
     // 文件名，用于CreateFileFailed、VisitingStartupReg
-    QString* fileName;
+    QString* fileName = nullptr;
     // 错误码，用于5个注册表函数错误
     long errorCode;
 }exceptionInfo;
@@ -324,14 +324,14 @@ public:
     bool analyseNet = true;
     bool modulesGot = false;
 
-    QStandardItemModel* heapViewModel;
-    QStandardItemModel* fileViewModel;
-    QStandardItemModel* exceptionModel;
-    QStandardItemModel* regeditModel;
-    QStandardItemModel* logWidgetModel;
-    QStandardItemModel* netModel;
-    QStandardItemModel* memoryModel;
-    QStandardItemModel* moduleModel;
+    QStandardItemModel* heapViewModel = nullptr;
+    QStandardItemModel* fileViewModel = nullptr;
+    QStandardItemModel* exceptionModel = nullptr;
+    QStandardItemModel* regeditModel = nullptr;
+    QStandardItemModel* logWidgetModel = nullptr;
+    QStandardItemModel* netModel = nullptr;
+    QStandardItemModel* memoryModel = nullptr;
+    QStandardItemModel* moduleModel = nullptr;
 
     int validAllocCount = 0, validFreeCount = 0;
 

@@ -92,6 +92,8 @@ Output::Output(std::vector<bool> choices, QWidget *parent) :
 
 void Output::initialize(std::vector<bool> choices){
     injectionOptions = choices;
+    if(regeditModel->rowCount() != 0)
+        regeditModel->setRowCount(0);
     regeditModel->insertRow(0, QList<QStandardItem*>() <<
                             new QStandardItem(ull2a((uint64_t)HKEY_CLASSES_ROOT)) <<
                             new QStandardItem("HKEY_CLASSES_ROOT") <<
@@ -190,7 +192,6 @@ void Output::updateLog(){
         return;
     }
     while(!getMutexSignal()){
-        // QCoreApplication::processEvents();
         if(!injThread || injThread->isFinished())
             return;
     }
@@ -231,12 +232,16 @@ void Output::updateLog(){
                                      "\n************************************************************\n");
     }
     if(!mayRepeat){
-        trimExeInfo(logQ);
+        if(analyser->logList.size() == 1)
+            trimExeInfo(logQ, true);
+        else
+            trimExeInfo(logQ);
         ui->logInfo->appendPlainText(logQ);
         ui->currentStep->setMaximum(ui->currentStep->maximum() + 1);
         ui->currentStep->setValue(ui->currentStep->value() + 1);
         ui->stepCount->setMaximum(ui->stepCount->maximum() + 1);
         ui->stepCount->setValue(ui->stepCount->value() + 1);
+        ui->lastHookTime->setText(analyser->logList.back().time);
         ++tracer->totalStep;
         ++tracer->currentStep;
     }else
@@ -327,14 +332,16 @@ void Output::saveFullLog(){
     memCapFile.close();
 }
 
-void Output::trimExeInfo(QString& fullInfo){
+void Output::trimExeInfo(QString& fullInfo, bool firstLog){
     auto lines = fullInfo.split("\n");
     size_t startRemPos = 4;
     while(lines.at(startRemPos).startsWith("\t"))
         startRemPos++;
     lines.remove(startRemPos, 1);
-    startRemPos++;
-    lines.remove(startRemPos, 10);
+    if(firstLog){
+        startRemPos++;
+        lines.remove(startRemPos, 10);
+    }
     fullInfo = lines.join("\n");
 }
 
@@ -491,6 +498,8 @@ void Output::on_prevStep_clicked()
     if(ui->currentStep != 0){
         tracer->stepBack();
         ui->currentStep->setValue(ui->currentStep->value() - 1);
+        if(ui->currentStep->value() != 0)
+            ui->lastHookTime->setText(analyser->logList[tracer->currentStep - 1].time);
     }
 }
 
@@ -499,6 +508,7 @@ void Output::on_nextStep_clicked()
     if(ui->currentStep != ui->stepCount){
         tracer->stepFront();
         ui->currentStep->setValue(ui->currentStep->value() + 1);
+        ui->lastHookTime->setText(analyser->logList[tracer->currentStep - 1].time);
     }
 }
 
@@ -549,6 +559,8 @@ void Output::changeStep(int changedValue)
             }
         }
     }
+    if(changedValue != 0)
+        ui->lastHookTime->setText(analyser->logList[changedValue - 1].time);
 }
 
 void Output::allClear(){

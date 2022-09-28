@@ -164,6 +164,8 @@ bool historyTracer::initialize(){
     pd.setLabelText("正在读取内存截获文件.\\hookLog\\memoryCaps.mcp\n已读取0字节");
     pd.setModal(true);
     pd.setRange(0, totalStep);
+    pd.setCancelButton(nullptr);
+    pd.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowMinimizeButtonHint);
     pd.showNormal();
 
     // 读取内存文件中的内容
@@ -206,13 +208,14 @@ bool historyTracer::initialize(){
         fullLog log;
         qline = QString::fromStdString(line);
         int id = qline.mid(4).toInt();
-        assert(id == i);
+        if(id != i)
+            assert(false);
         log.id = id;
 
         // 获取时间
         getline(logFile, line);
         qline = QString::fromStdString(line);
-        log.time = qline.mid(23);
+        log.time = qline.mid(16);
 
         // 获取函数名
         getline(logFile, line);

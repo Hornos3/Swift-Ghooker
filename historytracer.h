@@ -13,9 +13,9 @@ public:
                   QStandardItemModel* memoryModel, QStandardItemModel* moduleModel);
     historyTracer(hookAnalysis* analyser, QWidget* parent = nullptr);
 
-    QWidget* parent;
-    std::vector<fullLog>* logList;
-    hookAnalysis* mainAnalyser;
+    QWidget* parent = nullptr;
+    std::vector<fullLog>* logList = nullptr;
+    hookAnalysis* mainAnalyser = nullptr;
     int totalStep = 0;
     int currentStep = 0;
 

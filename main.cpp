@@ -88,8 +88,6 @@ int main(int argc, char *argv[])
     setMutexSignal = (void(*)(void))injectLib.resolve("setMutexSignal");
 
     getLastHookBeforeCall = (char*(*)(void))injectLib.resolve("getLastHookBeforeCall");
-//    MessageBoxAInjected = (bool(*)())injectLib.resolve("isInjectMessageBoxA");
-//    HeapCreateInjected = (bool(*)())injectLib.resolve("isInjectHeapCreate");
 
     Widget w;
     w.show();

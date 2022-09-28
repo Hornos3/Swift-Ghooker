@@ -60,6 +60,7 @@ public:
     QSpinBox *currentStep;
     QLabel *label_10;
     QSpinBox *stepCount;
+    QLabel *lastHookTime;
 
     void setupUi(QWidget *Output)
     {
@@ -383,6 +384,19 @@ public:
         stepCount->setFrame(false);
         stepCount->setKeyboardTracking(true);
         stepCount->setMaximum(0);
+        lastHookTime = new QLabel(Output);
+        lastHookTime->setObjectName(QString::fromUtf8("lastHookTime"));
+        lastHookTime->setGeometry(QRect(170, 10, 211, 41));
+        QPalette palette11;
+        palette11.setBrush(QPalette::Active, QPalette::WindowText, brush);
+        palette11.setBrush(QPalette::Inactive, QPalette::WindowText, brush3);
+        palette11.setBrush(QPalette::Disabled, QPalette::WindowText, brush5);
+        lastHookTime->setPalette(palette11);
+        QFont font6;
+        font6.setFamilies({QString::fromUtf8("Source Code Pro Black")});
+        font6.setPointSize(11);
+        font6.setBold(true);
+        lastHookTime->setFont(font6);
 
         retranslateUi(Output);
 
@@ -414,6 +428,7 @@ public:
         nextStep->setText(QString());
         label_9->setText(QString());
         label_10->setText(QCoreApplication::translate("Output", "/", nullptr));
+        lastHookTime->setText(QString());
     } // retranslateUi
 
 };

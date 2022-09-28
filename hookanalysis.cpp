@@ -169,81 +169,90 @@ bool hookAnalysis::appendRecord(QString newRecord, char *binBuf, int bufSize, bo
     // 获取钩子信息——堆栈调用链
     idxeptr = newRecord.indexOf("\n", idxptr);
     line = newRecord.mid(idxptr, idxeptr - idxptr);
-    // qDebug() << line;
     idxptr = idxeptr + 1;
     line = line.mid(19);
     dllList = line.split("->");
     latestLog.callChain = dllList;
 
     // 获取exe加载信息——stdin句柄的值
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
         exeInfo.STDIN = line.mid(14).toULongLong(nullptr, 16);
+    }
 
     // 获取exe加载信息——stdout句柄的值
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
         exeInfo.STDOUT = line.mid(15).toULongLong(nullptr, 16);
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
+    }
 
     // 获取exe加载信息——stderr句柄的值
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
         exeInfo.STDERR = line.mid(15).toULongLong(nullptr, 16);
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
+    }
 
     // 获取exe文件信息——文件描述
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
         exeInfo.fileDescription = line.mid(18);
+    }
 
     // 获取exe文件信息——文件版本
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
         exeInfo.fileVersion = line.mid(14);
+    }
 
     // 获取exe文件信息——内部名
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
         exeInfo.internalName = line.mid(15);
+    }
 
     // 获取exe文件信息——公司名
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
         exeInfo.companyName = line.mid(14);
+    }
 
     // 获取exe文件信息——版权
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
         exeInfo.legalCopyright = line.mid(17);
+    }
 
     // 获取exe文件信息——原始名
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
         exeInfo.originalFileName = line.mid(20);
+    }
 
     // 获取exe文件信息——产品版本
-    idxeptr = newRecord.indexOf("\n", idxptr);
-    line = newRecord.mid(idxptr, idxeptr - idxptr);
-    idxptr = idxeptr + 1;
-    if(!exeInfoGot)
+    if(!exeInfoGot){
+        idxeptr = newRecord.indexOf("\n", idxptr);
+        line = newRecord.mid(idxptr, idxeptr - idxptr);
+        idxptr = idxeptr + 1;
         exeInfo.productVersion = line.mid(17);
+    }
 
     // 获取函数返回值，如果该返回值是一个字符串指针，则会同时保存字符串的值，所有返回值都会保存其值（整数值或指针值）
     idxeptr = newRecord.indexOf("\n", idxptr);
@@ -372,12 +381,24 @@ bool hookAnalysis::updateRecordBeauty(fullLog latestLog, bool lastRecord){
                           new QStandardItem(latestLog.retVal.originalTypeName) <<
                           new QStandardItem(ull2a(latestLog.retVal.value.imm)) <<
                           new QStandardItem("<无法获取返回值，调用本API直接导致程序崩溃>"));
-    else
+    else{
         father->appendRow(QList<QStandardItem*>() <<
                           new QStandardItem("返回值") <<
                           new QStandardItem(latestLog.retVal.originalTypeName) <<
                           new QStandardItem(ull2a(latestLog.retVal.value.imm)) <<
                           (latestLog.retVal.str == nullptr ? nullptr : new QStandardItem(*latestLog.retVal.str)));
+        if(latestLog.argsAfterCall.size() != 0){
+            father->appendRow(QList<QStandardItem*>() << new QStandardItem("执行后部分参数解引用值"));
+            auto f = father->child(father->rowCount() - 1);
+            for(const auto &a : latestLog.argsAfterCall){
+                f->appendRow(QList<QStandardItem*>() <<
+                             new QStandardItem(a.first) <<
+                             new QStandardItem(a.second.originalTypeName) <<
+                             new QStandardItem(ull2a(a.second.value.imm)) <<
+                             (a.second.str ? new QStandardItem(*a.second.str) : nullptr));
+            }
+        }
+    }
     auto callLayers = new QStandardItem("模块调用层级");
     for(int i=0; i<latestLog.callChain.size(); i++)
         callLayers->appendRow(new QStandardItem(latestLog.callChain[i]));
@@ -654,12 +675,9 @@ bool hookAnalysis::freeChunk(fullLog newHeapLog){
         return false;
     }
 
-    if(findHandleIdx < 0){      // 没有找到这个HANDLE，在表中新增，同时增加这个CHUNK，新增异常
-        insertNewHeapHandle(handleAddr, -findHandleIdx - 1);
-        insertUnknownSizeChunk(victim, heapViewModel->item(-findHandleIdx - 1), 0);
+    if(findHandleIdx < 0){      // 没有找到这个HANDLE，不作处理
         handleException({newHeapLog.id, UntrackedChunkFreed},
                         new exceptionInfo{.addressWithException = victim});
-        validFreeCount++;
         return true;
     }
 
@@ -2678,8 +2696,17 @@ bool hookAnalysis::revokeRegCloseKey(fullLog RegCloseKeyLog){
     father->removeRow(fin);
     assert(ff != f->second.begin());
     ff--;
-    if(ff->second.second)
+    if(ff->second.second){
         regeditModel->item(fi, REGSTATUS)->setText("正在使用");
+        setLineColor(regeditModel, fi, 200, 255, 200);
+        QString directory = regeditModel->item(fi, 1)->text();
+        if(directory == "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run" ||
+           directory == "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"){
+            handleException({RegCloseKeyLog.id, VisitingStartupReg},
+                            new exceptionInfo{.fileName = new QString(directory)});
+            setLineColor(regeditModel, fi, 255, 0, 0);
+        }
+    }
     return true;
 }
 
@@ -2860,6 +2887,7 @@ bool hookAnalysis::revokeConnect(fullLog connectLog){
     if(father->child(father->rowCount()-1)->text().toInt() != connectLog.id)
         throw std::exception("connect: 操作id不匹配。");
     father->removeRow(father->rowCount() - 1);
+    setLineColor(netModel, insIdx, 200, 255, 200);
     return true;
 }
 
@@ -2890,6 +2918,7 @@ bool hookAnalysis::revokeBind(fullLog bindLog){
     QString port = sp[1];
     netModel->item(insIdx, 2)->setText(ipaddr);
     netModel->item(insIdx, 3)->setText(port);
+    setLineColor(netModel, insIdx, 200, 255, 200);
     return true;
 }
 
@@ -2904,6 +2933,7 @@ bool hookAnalysis::revokeAccept(fullLog acceptLog){
     if(father->child(father->rowCount()-1)->text().toInt() != acceptLog.id)
         throw std::exception("accept: 操作id不匹配。");
     father->removeRow(father->rowCount() - 1);
+    setLineColor(netModel, insIdx, 255, 255, 200);
     return true;
 }
 

@@ -31,6 +31,8 @@ extern void (*InjAcceptFunc)(bool);
 
 extern char* (*getLastHookBeforeCall)(void);
 
+bool first = true;
+
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
@@ -122,11 +124,12 @@ void Widget::on_startAnalysis_clicked(){
 
         if(output->analyser->logList.size() < MAXIMUM_HOOK){
             QString suspectedLastHook = getLastHookBeforeCall();
-            bool repeat = output->analyser->appendRecord(suspectedLastHook, nullptr, 0, true);
-            if(!repeat){
-                output->trimExeInfo(suspectedLastHook);
-                output->appendLog(suspectedLastHook + "Return Value: (UNKNOWN) 0xDEADBEEFCAFEBABE / <THIS_API_CAUSES_CRUSH>\n"
-                                                      "----------------------------------------------------\n");
+            if(suspectedLastHook.length() != 0){
+                bool repeat = output->analyser->appendRecord(suspectedLastHook, nullptr, 0, true);
+                if(!repeat){
+                    output->appendLog(suspectedLastHook + "Return Value: (UNKNOWN) 0xDEADBEEFCAFEBABE / <THIS_API_CAUSES_CRUSH>\n"
+                                                          "----------------------------------------------------\n");
+                }
             }
         }
 
@@ -167,13 +170,13 @@ void Widget::on_startAnalysis_clicked(){
 
 void Widget::on_startAnalyseHistory_clicked()
 {
-    if(output->uselessFlag)
-        output = new Output();
+    output = new Output();
     output->loadHistory = true;
     output->executing = false;
     output->tracer->initialize();
     output->updateLogCount();
     output->analyser->getModules();
+    output->showExeInfo();
 }
 
 std::vector<bool> Widget::getAllChoices(){

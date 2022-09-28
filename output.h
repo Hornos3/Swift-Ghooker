@@ -44,10 +44,10 @@ public:
     QStandardItemModel* logWidgetModel = new QStandardItemModel(this);
     QStandardItemModel* memoryModel = new QStandardItemModel(this);
     QStandardItemModel* moduleModel = new QStandardItemModel(this);
-    colorfulModel* fileAccessModel;
-    colorfulModel* fileShareModeModel;
-    colorfulModel* fileCreateDispModel;
-    colorfulModel* fileFlagAttrModel;
+    colorfulModel* fileAccessModel = nullptr;
+    colorfulModel* fileShareModeModel = nullptr;
+    colorfulModel* fileCreateDispModel = nullptr;
+    colorfulModel* fileFlagAttrModel = nullptr;
     hookAnalysis* analyser = new hookAnalysis(heapViewModel, fileViewModel, exceptionModel,
                                               regeditModel, logWidgetModel, netModel,
                                               memoryModel, moduleModel);
@@ -59,7 +59,7 @@ public:
     void updateLog();
     void showExeInfo();
     void closeEvent(QCloseEvent * event);
-    void trimExeInfo(QString& fullInfo);
+    void trimExeInfo(QString& fullInfo, bool firstLog = false);
     void saveFullLog();
     void appendLog(QString log);
     void changeStep(int changedValue);
